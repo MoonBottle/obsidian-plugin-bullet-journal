@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-hk-work-plugin",
+  "name": "obsidian-plugin-bullet-journal",
   "version": "1.0.0",
-  "description": "Obsidian plugin for visualizing HK-Work project tasks",
+  "description": "A Bullet Journal plugin for Obsidian with calendar and Gantt chart views",
   "main": "main.js",
   "scripts": {
     "dev": "node scripts/build-watch.js --watch",
