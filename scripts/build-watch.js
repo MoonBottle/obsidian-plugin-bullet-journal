@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const isWatch = process.argv.includes('--watch');
 
-const PLUGIN_DIR = process.env.OBSIDIAN_PLUGIN_DIR || '../.obsidian/plugins/obsidian-hk-work-plugin/';
+const PLUGIN_DIR = process.env.OBSIDIAN_PLUGIN_DIR || '../.obsidian/plugins/obsidian-plugin-bullet-journal/';
 
 const filesToSync = [
   { source: 'main.js', required: true },
