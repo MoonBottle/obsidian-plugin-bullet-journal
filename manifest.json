@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-hk-work-plugin",
+  "name": "HK-Work Visualizer",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Visualizes HK-Work project tasks with calendar and Gantt chart views",
+  "author": "",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}

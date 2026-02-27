@@ -1,0 +1,600 @@
+import { App, Plugin, PluginManifest, PluginSettingTab, Setting, WorkspaceLeaf, TFile, debounce } from 'obsidian';
+import { ProjectView, PROJECT_VIEW_TYPE } from './src/views/ProjectView.tsx';
+import { CalendarView, CALENDAR_VIEW_TYPE } from './src/views/CalendarView.tsx';
+import { GanttView, GANTT_VIEW_TYPE } from './src/views/GanttView.tsx';
+import { TodoSidebarView, TODO_SIDEBAR_VIEW_TYPE } from './src/views/TodoSidebarView.tsx';
+import { taskGutterPlugin } from './src/editor/TaskGutter';
+import { initI18n, t } from './src/i18n';
+
+interface ProjectGroup {
+  id: string;
+  name: string;
+}
+
+interface ProjectDirectory {
+  path: string;
+  enabled: boolean;
+  groupId?: string;
+}
+
+interface HKWorkPluginSettings {
+  projectDirectories: ProjectDirectory[];
+  projectGroups: ProjectGroup[];
+  defaultGroup: string;
+  defaultView: string;
+  lunchBreakStart: string;
+  lunchBreakEnd: string;
+}
+
+const DEFAULT_SETTINGS: HKWorkPluginSettings = {
+  projectDirectories: [],
+  projectGroups: [],
+  defaultGroup: '',
+  defaultView: 'calendar',
+  lunchBreakStart: '12:00',
+  lunchBreakEnd: '13:00'
+};
+
+export default class HKWorkPlugin extends Plugin {
+  settings: HKWorkPluginSettings;
+  private refreshCallbacks: Set<() => void> = new Set();
+  private debouncedRefresh: () => void;
+  private normalizedProjectDirectories: string[] = [];
+
+  constructor(app: App, manifest: PluginManifest) {
+    super(app, manifest);
+    this.settings = { ...DEFAULT_SETTINGS };
+    // Debounce refresh to avoid multiple re-renders during batch file operations
+    this.debouncedRefresh = debounce(this.triggerRefresh.bind(this), 500, true);
+  }
+
+  async onload() {
+    await this.loadSettings();
+    this.updateNormalizedDataDirectory();
+
+    // Store plugin instance globally for access from editor extensions
+    (window as any).hkWorkPlugin = this;
+
+    // Initialize i18n with Obsidian's language setting
+    // @ts-ignore
+    const obsidianLang = this.app.vault.getConfig?.('language') || 'zh-cn';
+    initI18n(obsidianLang);
+
+    // Register views
+    this.registerView(
+      PROJECT_VIEW_TYPE,
+      (leaf) => new ProjectView(leaf, this)
+    );
+
+    this.registerView(
+      CALENDAR_VIEW_TYPE,
+      (leaf) => new CalendarView(leaf, this)
+    );
+
+    this.registerView(
+      GANTT_VIEW_TYPE,
+      (leaf) => new GanttView(leaf, this)
+    );
+
+    this.registerView(
+      TODO_SIDEBAR_VIEW_TYPE,
+      (leaf) => new TodoSidebarView(leaf, this)
+    );
+
+    // Add commands
+    this.addCommand({
+      id: 'open-project-view',
+      name: 'Open Project View',
+      callback: () => this.openView(PROJECT_VIEW_TYPE)
+    });
+
+    this.addCommand({
+      id: 'open-calendar-view',
+      name: 'Open Calendar View',
+      callback: () => this.openView(CALENDAR_VIEW_TYPE)
+    });
+
+    this.addCommand({
+      id: 'open-gantt-view',
+      name: 'Open Gantt Chart View',
+      callback: () => this.openView(GANTT_VIEW_TYPE)
+    });
+
+    this.addCommand({
+      id: 'refresh-hk-work-data',
+      name: 'Refresh HK-Work Data',
+      callback: () => this.debouncedRefresh()
+    });
+
+    this.addCommand({
+      id: 'open-todo-sidebar',
+      name: 'Open Todo Sidebar',
+      callback: () => this.openTodoSidebar()
+    });
+
+    // Add setting tab
+    this.addSettingTab(new HKWorkSettingTab(this.app, this));
+
+    // Add ribbon icon
+    this.addRibbonIcon('calendar', 'HK-Work Visualizer', (evt) => {
+      this.openView(this.settings.defaultView === 'calendar' ? CALENDAR_VIEW_TYPE : PROJECT_VIEW_TYPE);
+    });
+
+    // Register file change listener
+    this.registerFileWatcher();
+
+    // Register editor extension
+    this.registerEditorExtension(taskGutterPlugin);
+  }
+
+  onunload() {
+    this.refreshCallbacks.clear();
+  }
+
+  async loadSettings() {
+    this.settings = { ...DEFAULT_SETTINGS, ...await this.loadData() };
+    this.updateNormalizedDataDirectory();
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings);
+    this.updateNormalizedDataDirectory();
+    // Trigger refresh when settings change
+    this.debouncedRefresh();
+  }
+
+  private updateNormalizedDataDirectory() {
+    this.normalizedProjectDirectories = this.settings.projectDirectories
+      .filter(dir => dir.enabled && dir.path)
+      .map(dir => dir.path.replace(/\\/g, '/'));
+  }
+
+  /**
+   * Register a callback to be called when data should be refreshed
+   */
+  onRefresh(callback: () => void): () => void {
+    this.refreshCallbacks.add(callback);
+    return () => {
+      this.refreshCallbacks.delete(callback);
+    };
+  }
+
+  /**
+   * Trigger refresh for all registered views
+   */
+  triggerRefresh(): void {
+    this.refreshCallbacks.forEach(callback => {
+      try {
+        callback();
+      } catch (error) {
+        console.error('Error during refresh:', error);
+      }
+    });
+  }
+
+  /**
+   * Register file system watcher for data directory
+   */
+  private registerFileWatcher(): void {
+    const requestRefresh = () => this.debouncedRefresh();
+    // Watch for file modifications
+    this.registerEvent(
+      this.app.vault.on('modify', (file) => {
+        if (this.isDataFile(file)) {
+          requestRefresh();
+        }
+      })
+    );
+
+    // Watch for file creations
+    this.registerEvent(
+      this.app.vault.on('create', (file) => {
+        if (this.isDataFile(file)) {
+          requestRefresh();
+        }
+      })
+    );
+
+    // Watch for file deletions
+    this.registerEvent(
+      this.app.vault.on('delete', (file) => {
+        if (this.isDataFile(file)) {
+          requestRefresh();
+        }
+      })
+    );
+
+    // Watch for file renames
+    this.registerEvent(
+      this.app.vault.on('rename', (file, oldPath) => {
+        if (this.isDataFile(file) || this.isPathInDataDirectory(oldPath)) {
+          requestRefresh();
+        }
+      })
+    );
+  }
+
+  /**
+   * Check if a file is in any of the project directories
+   */
+  private isDataFile(file: TFile): boolean {
+    if (this.normalizedProjectDirectories.length === 0) {
+      return false;
+    }
+    return this.isPathInDataDirectory(file.path);
+  }
+
+  /**
+   * Check if a path is within any of the project directories
+   */
+  private isPathInDataDirectory(filePath: string): boolean {
+    if (this.normalizedProjectDirectories.length === 0) {
+      return false;
+    }
+    // Convert both paths to forward slash format for comparison
+    const normalizedFilePath = filePath.replace(/\\/g, '/');
+
+    // Check if the file path starts with any of the enabled project directories
+    return this.normalizedProjectDirectories.some(dir => {
+      // Extract the relevant part from project directory (e.g., "工作安排/2026/项目" from "c:/.../工作安排/2026/项目")
+      const workIndex = dir.indexOf('工作安排/');
+      if (workIndex !== -1) {
+        const dirRelative = dir.substring(workIndex);
+        return normalizedFilePath.startsWith(dirRelative);
+      }
+
+      // Fallback: check if file path contains the last part of directory
+      const dirParts = dir.split('/');
+      const lastTwoParts = dirParts.slice(-2).join('/');
+      return normalizedFilePath.includes(lastTwoParts);
+    });
+  }
+
+  /**
+   * Get group ID for a project file path
+   * Uses the configured directory paths from settings to determine the group
+   */
+  getGroupIdForPath(filePath: string): string | undefined {
+    const normalizedFilePath = filePath.replace(/\\/g, '/');
+
+    // Find the longest matching directory path
+    let matchedDir: ProjectDirectory | null = null;
+    let matchedLength = 0;
+
+    for (const dir of this.settings.projectDirectories) {
+      if (!dir.enabled || !dir.path) continue;
+
+      const normalizedDirPath = dir.path.replace(/\\/g, '/');
+
+      // Check if file path starts with directory path
+      if (normalizedFilePath.startsWith(normalizedDirPath)) {
+        // Use the longest match (most specific)
+        if (normalizedDirPath.length > matchedLength) {
+          matchedLength = normalizedDirPath.length;
+          matchedDir = dir;
+        }
+      }
+    }
+
+    return matchedDir?.groupId;
+  }
+
+  /**
+   * Get all available groups
+   */
+  getProjectGroups(): ProjectGroup[] {
+    return this.settings.projectGroups;
+  }
+
+  /**
+   * Get default group ID
+   */
+  getDefaultGroup(): string {
+    return this.settings.defaultGroup;
+  }
+
+  private async openView(viewType: string) {
+    const { workspace } = this.app;
+
+    let leaf: WorkspaceLeaf | null = null;
+    const existingLeaf = workspace.getLeavesOfType(viewType)[0];
+
+    if (existingLeaf) {
+      leaf = existingLeaf;
+    } else {
+      // Try to get a main area leaf first
+      leaf = workspace.getLeaf(false);
+      if (!leaf) {
+        // If no main area leaf, create one by splitting the active leaf
+        const activeLeaf = workspace.activeLeaf;
+        if (activeLeaf) {
+          leaf = workspace.createLeafBySplit(activeLeaf, 'horizontal');
+        }
+      }
+      if (leaf) {
+        await leaf.setViewState({
+          type: viewType,
+          active: true
+        });
+      }
+    }
+
+    if (leaf) {
+      workspace.revealLeaf(leaf);
+    }
+  }
+
+  private async openTodoSidebar() {
+    const { workspace } = this.app;
+
+    // 尝试在右侧边栏找到已存在的待办侧栏
+    let leaf = workspace.getRightLeaf(false);
+    const existingLeaves = workspace.getLeavesOfType(TODO_SIDEBAR_VIEW_TYPE);
+
+    if (existingLeaves.length > 0) {
+      // 如果已存在，直接显示
+      workspace.revealLeaf(existingLeaves[0]);
+      return;
+    }
+
+    // 在右侧边栏创建新的 leaf
+    leaf = workspace.getRightLeaf(true);
+    if (leaf) {
+      await leaf.setViewState({
+        type: TODO_SIDEBAR_VIEW_TYPE,
+        active: true
+      });
+      workspace.revealLeaf(leaf);
+    }
+  }
+}
+
+class HKWorkSettingTab extends PluginSettingTab {
+  plugin: HKWorkPlugin;
+
+  constructor(app: App, plugin: HKWorkPlugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
+
+  display(): void {
+    const { containerEl } = this;
+
+    containerEl.empty();
+
+    // Header
+    containerEl.createEl('h2', { text: t('settings').title });
+
+    // Default View Setting
+    new Setting(containerEl)
+      .setName(t('settings').defaultView.title)
+      .setDesc(t('settings').defaultView.description)
+      .addDropdown(dropdown => dropdown
+        .addOption('project', t('settings').defaultView.options.project)
+        .addOption('calendar', t('settings').defaultView.options.calendar)
+        .addOption('gantt', t('settings').defaultView.options.gantt)
+        .setValue(this.plugin.settings.defaultView)
+        .onChange(async (value) => {
+          this.plugin.settings.defaultView = value;
+          await this.plugin.saveSettings();
+        }));
+
+    // Lunch Break Setting
+    new Setting(containerEl)
+      .setName(t('settings').lunchBreak.title)
+      .setDesc(t('settings').lunchBreak.description)
+      .setHeading();
+
+    new Setting(containerEl)
+      .setName(t('settings').lunchBreak.start.title)
+      .setDesc(t('settings').lunchBreak.start.description)
+      .addText(text => text
+        .setPlaceholder('12:00')
+        .setValue(this.plugin.settings.lunchBreakStart)
+        .onChange(async (value) => {
+          // Validate time format HH:mm
+          if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
+            this.plugin.settings.lunchBreakStart = value;
+            await this.plugin.saveSettings();
+          }
+        }));
+
+    new Setting(containerEl)
+      .setName(t('settings').lunchBreak.end.title)
+      .setDesc(t('settings').lunchBreak.end.description)
+      .addText(text => text
+        .setPlaceholder('13:00')
+        .setValue(this.plugin.settings.lunchBreakEnd)
+        .onChange(async (value) => {
+          // Validate time format HH:mm
+          if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
+            this.plugin.settings.lunchBreakEnd = value;
+            await this.plugin.saveSettings();
+          }
+        }));
+
+    // Project Groups Section
+    new Setting(containerEl)
+      .setName(t('settings').projectGroups.title)
+      .setDesc(t('settings').projectGroups.description)
+      .setHeading()
+      .addButton(button => button
+        .setButtonText(t('settings').projectGroups.addButton)
+        .setCta()
+        .onClick(() => {
+          const newGroup: ProjectGroup = {
+            id: 'group-' + Date.now(),
+            name: ''
+          };
+          this.plugin.settings.projectGroups.push(newGroup);
+          this.plugin.saveSettings();
+          this.renderProjectGroups(groupsContainer, containerEl);
+          this.renderDefaultGroupDropdown(defaultGroupContainer);
+          this.renderProjectDirectories(containerEl);
+        }));
+
+    // Create a container for groups to ensure correct positioning
+    const groupsContainer = containerEl.createDiv({ cls: 'hk-work-groups-container' });
+    this.renderProjectGroups(groupsContainer, containerEl);
+
+    // Default Group Setting - use container for dynamic refresh
+    const defaultGroupContainer = containerEl.createDiv({ cls: 'hk-work-default-group-container' });
+    this.renderDefaultGroupDropdown(defaultGroupContainer);
+
+    // Project Directories Section
+    new Setting(containerEl)
+      .setName(t('settings').projectDirectories.title)
+      .setHeading()
+      .addButton(button => button
+        .setButtonText(t('settings').projectDirectories.addButton)
+        .setCta()
+        .onClick(() => {
+          this.plugin.settings.projectDirectories.push({ path: '', enabled: true });
+          this.plugin.saveSettings();
+          this.renderProjectDirectories(containerEl);
+        }));
+
+    this.renderProjectDirectories(containerEl);
+  }
+
+  private renderDefaultGroupDropdown(container: HTMLElement): void {
+    container.empty();
+
+    new Setting(container)
+      .setName(t('settings').projectGroups.defaultGroupTitle)
+      .setDesc(t('settings').projectGroups.defaultGroupDesc)
+      .addDropdown(dropdown => {
+        dropdown.addOption('', t('settings').projectGroups.allGroups);
+        this.plugin.settings.projectGroups.forEach(group => {
+          dropdown.addOption(group.id, group.name || t('settings').projectGroups.unnamed);
+        });
+        dropdown.setValue(this.plugin.settings.defaultGroup);
+        dropdown.onChange(async (value) => {
+          this.plugin.settings.defaultGroup = value;
+          await this.plugin.saveSettings();
+        });
+        return dropdown;
+      });
+  }
+
+  private renderProjectGroups(groupsContainer: HTMLElement, mainContainer: HTMLElement): void {
+    groupsContainer.empty();
+
+    if (this.plugin.settings.projectGroups.length === 0) {
+      new Setting(groupsContainer)
+        .setDesc(t('settings').projectGroups.emptyMessage)
+        .setClass('hk-work-group-setting');
+      return;
+    }
+
+    this.plugin.settings.projectGroups.forEach((group, index) => {
+      const setting = new Setting(groupsContainer)
+        .setClass('hk-work-group-setting')
+        .addText(text => text
+          .setPlaceholder(t('settings').projectGroups.namePlaceholder)
+          .setValue(group.name)
+          .onChange(async (value) => {
+            this.plugin.settings.projectGroups[index].name = value;
+            await this.plugin.saveSettings();
+            const defaultGroupContainer = mainContainer.querySelector('.hk-work-default-group-container') as HTMLElement;
+            if (defaultGroupContainer) {
+              this.renderDefaultGroupDropdown(defaultGroupContainer);
+            }
+            this.renderProjectDirectories(mainContainer);
+          }))
+        .addButton(button => button
+          .setButtonText(t('settings').projectGroups.deleteButton)
+          .setWarning()
+          .onClick(async () => {
+            this.plugin.settings.projectDirectories.forEach(dir => {
+              if (dir.groupId === group.id) {
+                dir.groupId = undefined;
+              }
+            });
+            this.plugin.settings.projectGroups.splice(index, 1);
+            if (this.plugin.settings.defaultGroup === group.id) {
+              this.plugin.settings.defaultGroup = '';
+            }
+            await this.plugin.saveSettings();
+            this.renderProjectGroups(groupsContainer, mainContainer);
+            this.renderProjectDirectories(mainContainer);
+            const defaultGroupContainer = mainContainer.querySelector('.hk-work-default-group-container') as HTMLElement;
+            if (defaultGroupContainer) {
+              this.renderDefaultGroupDropdown(defaultGroupContainer);
+            }
+          }));
+    });
+  }
+
+  private renderProjectDirectories(containerEl: HTMLElement): void {
+    // Remove existing directory settings
+    containerEl.querySelectorAll('.hk-work-dir-setting').forEach(el => el.remove());
+
+    if (this.plugin.settings.projectDirectories.length === 0) {
+      new Setting(containerEl)
+        .setDesc(t('settings').projectDirectories.emptyMessage)
+        .setClass('hk-work-dir-setting');
+      return;
+    }
+
+    this.plugin.settings.projectDirectories.forEach((dir, index) => {
+      const groupOptions: Record<string, string> = { '': t('settings').projectGroups.noGroup };
+      this.plugin.settings.projectGroups.forEach(group => {
+        groupOptions[group.id] = group.name || t('settings').projectGroups.unnamed;
+      });
+
+      const setting = new Setting(containerEl)
+        .setName(dir.path || t('settings').projectDirectories.noPath)
+        .setClass('hk-work-dir-setting');
+
+      // Add group dropdown if groups exist
+      if (this.plugin.settings.projectGroups.length > 0) {
+        setting.addDropdown(dropdown => dropdown
+          .addOptions(groupOptions)
+          .setValue(dir.groupId || '')
+          .onChange(async (value) => {
+            this.plugin.settings.projectDirectories[index].groupId = value || undefined;
+            await this.plugin.saveSettings();
+          }));
+      }
+
+      setting
+        .addToggle(toggle => toggle
+          .setValue(dir.enabled)
+          .onChange(async (value) => {
+            this.plugin.settings.projectDirectories[index].enabled = value;
+            await this.plugin.saveSettings();
+            this.renderProjectDirectories(containerEl);
+          }))
+        .addButton(button => button
+          .setButtonText(t('settings').projectDirectories.selectButton)
+          .onClick(async () => {
+            // @ts-ignore
+            const electron = require('electron');
+            const result = await electron.remote.dialog.showOpenDialog({
+              properties: ['openDirectory'],
+              title: t('settings').projectDirectories.dialogTitle
+            });
+
+            if (!result.canceled && result.filePaths.length > 0) {
+              this.plugin.settings.projectDirectories[index].path = result.filePaths[0];
+              await this.plugin.saveSettings();
+              this.renderProjectDirectories(containerEl);
+            }
+          }))
+        .addButton(button => button
+          .setButtonText(t('settings').projectDirectories.deleteButton)
+          .setWarning()
+          .onClick(async () => {
+            this.plugin.settings.projectDirectories.splice(index, 1);
+            await this.plugin.saveSettings();
+            this.renderProjectDirectories(containerEl);
+          }));
+
+      // Add disabled styling
+      if (!dir.enabled) {
+        setting.settingEl.style.opacity = '0.5';
+      }
+    });
+  }
+}
