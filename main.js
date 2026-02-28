@@ -36666,9 +36666,8 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
     if (this.details.project) {
       this.createInfoRow(infoGrid, "\u9879\u76EE", this.details.project);
     }
-    const ganttLink = this.details.projectLinks?.find((link) => link.name.includes("\u7518\u7279\u56FE"));
-    if (ganttLink) {
-      this.createLinkRow(infoGrid, "\u9879\u76EE\u7518\u7279\u56FE", ganttLink.url);
+    if (this.details.projectLinks && this.details.projectLinks.length > 0) {
+      this.createLinksRow(infoGrid, "\u9879\u76EE\u94FE\u63A5", this.details.projectLinks);
     }
     if (this.details.task) {
       const taskRow = infoGrid.createEl("div", { cls: "hk-work-modal-info-row" });
@@ -36677,11 +36676,8 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
       taskValueContainer.createEl("span", { text: this.details.task, cls: "hk-work-modal-info-value" });
       createCopyButton(taskValueContainer, this.details.task);
     }
-    const taskLinks = this.details.taskLinks?.filter((link) => !link.name.includes("\u7518\u7279\u56FE"));
-    if (taskLinks && taskLinks.length > 0) {
-      taskLinks.forEach((link) => {
-        this.createLinkRow(infoGrid, "\u4EFB\u52A1\u94FE\u63A5", link.url);
-      });
+    if (this.details.taskLinks && this.details.taskLinks.length > 0) {
+      this.createLinksRow(infoGrid, "\u4EFB\u52A1\u94FE\u63A5", this.details.taskLinks);
     }
     if (this.details.level) {
       this.createInfoRow(infoGrid, "\u7EA7\u522B", this.details.level);
@@ -36747,16 +36743,34 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
     row.createEl("span", { text: `${label}:`, cls: "hk-work-modal-info-label" });
     row.createEl("span", { text: value, cls: "hk-work-modal-info-value" });
   }
-  createLinkRow(container, label, url) {
+  createLinkRow(container, label, url, displayName) {
     const row = container.createEl("div", { cls: "hk-work-modal-info-row" });
     row.createEl("span", { text: `${label}:`, cls: "hk-work-modal-info-label" });
     const link = row.createEl("a", {
-      text: url,
+      text: displayName || url,
       cls: "hk-work-modal-link"
     });
     link.addEventListener("click", (e3) => {
       e3.preventDefault();
       window.open(url, "_blank");
+    });
+  }
+  createLinksRow(container, label, links) {
+    const row = container.createEl("div", { cls: "hk-work-modal-info-row" });
+    row.createEl("span", { text: `${label}:`, cls: "hk-work-modal-info-label" });
+    const valueContainer = row.createEl("div", { cls: "hk-work-modal-desc-value" });
+    links.forEach((link, index5) => {
+      const linkEl = valueContainer.createEl("a", {
+        text: link.name,
+        cls: "hk-work-modal-link"
+      });
+      linkEl.addEventListener("click", (e3) => {
+        e3.preventDefault();
+        window.open(link.url, "_blank");
+      });
+      if (index5 < links.length - 1) {
+        valueContainer.createEl("span", { text: " " });
+      }
     });
   }
   onClose() {

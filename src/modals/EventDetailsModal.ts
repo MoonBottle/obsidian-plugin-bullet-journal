@@ -113,10 +113,9 @@ export class EventDetailsModal extends Modal {
       this.createInfoRow(infoGrid, '项目', this.details.project);
     }
 
-    // Project Gantt Link
-    const ganttLink = this.details.projectLinks?.find(link => link.name.includes('甘特图'));
-    if (ganttLink) {
-      this.createLinkRow(infoGrid, '项目甘特图', ganttLink.url);
+    // Project Links
+    if (this.details.projectLinks && this.details.projectLinks.length > 0) {
+      this.createLinksRow(infoGrid, '项目链接', this.details.projectLinks);
     }
 
     // Task with copy button
@@ -129,11 +128,8 @@ export class EventDetailsModal extends Modal {
     }
 
     // Task Links
-    const taskLinks = this.details.taskLinks?.filter(link => !link.name.includes('甘特图'));
-    if (taskLinks && taskLinks.length > 0) {
-      taskLinks.forEach(link => {
-        this.createLinkRow(infoGrid, '任务链接', link.url);
-      });
+    if (this.details.taskLinks && this.details.taskLinks.length > 0) {
+      this.createLinksRow(infoGrid, '任务链接', this.details.taskLinks);
     }
 
     // Level
@@ -222,16 +218,36 @@ export class EventDetailsModal extends Modal {
     row.createEl('span', { text: value, cls: 'hk-work-modal-info-value' });
   }
 
-  private createLinkRow(container: HTMLElement, label: string, url: string) {
+  private createLinkRow(container: HTMLElement, label: string, url: string, displayName?: string) {
     const row = container.createEl('div', { cls: 'hk-work-modal-info-row' });
     row.createEl('span', { text: `${label}:`, cls: 'hk-work-modal-info-label' });
     const link = row.createEl('a', {
-      text: url,
+      text: displayName || url,
       cls: 'hk-work-modal-link'
     });
     link.addEventListener('click', (e) => {
       e.preventDefault();
       window.open(url, '_blank');
+    });
+  }
+
+  private createLinksRow(container: HTMLElement, label: string, links: Array<{ name: string; url: string }>) {
+    const row = container.createEl('div', { cls: 'hk-work-modal-info-row' });
+    row.createEl('span', { text: `${label}:`, cls: 'hk-work-modal-info-label' });
+    const valueContainer = row.createEl('div', { cls: 'hk-work-modal-desc-value' });
+
+    links.forEach((link, index) => {
+      const linkEl = valueContainer.createEl('a', {
+        text: link.name,
+        cls: 'hk-work-modal-link'
+      });
+      linkEl.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.open(link.url, '_blank');
+      });
+      if (index < links.length - 1) {
+        valueContainer.createEl('span', { text: ' ' });
+      }
     });
   }
 
