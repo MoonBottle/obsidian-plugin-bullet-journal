@@ -1,10 +1,10 @@
 {
-  "id": "obsidian-plugin-bullet-journal",
+  "id": "bullet-journal",
   "name": "Bullet Journal",
   "version": "0.1.0",
   "minAppVersion": "0.15.0",
   "description": "A Bullet Journal plugin for Obsidian with calendar and Gantt chart views",
-  "author": "",
-  "authorUrl": "",
+  "author": "MoonBottle",
+  "authorUrl": "https://github.com/MoonBottle",
   "isDesktopOnly": false
 }
