@@ -51,8 +51,16 @@ export const en: Translations = {
     title: 'Todo Items',
     today: 'Today',
     tomorrow: 'Tomorrow',
+    future: 'Future',
+    expired: 'Expired',
+    completed: 'Completed',
+    abandoned: 'Abandoned',
     allDay: 'All Day',
     noTodos: 'No todo items',
+    done: 'Done',
+    migrate: 'Migrate to Tomorrow',
+    migrateToday: 'Migrate to Today',
+    abandon: 'Abandon',
   },
 
   // Buttons and common text

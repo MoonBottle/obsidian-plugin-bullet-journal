@@ -1,4 +1,4 @@
-import { Project, Task, Item } from '../models/types';
+import { Project, Task, Item, ItemStatus } from '../models/types';
 import { LineParser } from '../utils/lineParser';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -6,6 +6,20 @@ import * as path from 'path';
 interface ProjectDirectoryConfig {
   path: string;
   groupId?: string;
+}
+
+function generateItemId(): string {
+  return Math.random().toString(36).substring(2, 11);
+}
+
+function detectItemStatus(line: string): ItemStatus {
+  if (line.includes('#done') || line.includes('#已完成')) {
+    return 'completed';
+  }
+  if (line.includes('#abandoned') || line.includes('#已放弃')) {
+    return 'abandoned';
+  }
+  return 'pending';
 }
 
 export class MarkdownParser {
@@ -157,6 +171,8 @@ export class MarkdownParser {
       if (currentTask && trimmedLine.includes('@') && !trimmedLine.includes('#任务')) {
         const item = LineParser.parseItemLine(trimmedLine, lineNumber);
         if (item) {
+          item.id = generateItemId();
+          item.status = detectItemStatus(trimmedLine);
           currentTask.items.push(item);
         }
       }
@@ -272,13 +288,15 @@ export class MarkdownParser {
         if (task.date && task.items.length === 0) {
           // If task has a date but no sub-items, treat the task itself as an item
           const taskItem: Item = {
+            id: generateItemId(),
             content: task.name,
             date: task.date,
             startDateTime: task.startDateTime,
             endDateTime: task.endDateTime,
             task: task,
             project: project,
-            lineNumber: task.lineNumber
+            lineNumber: task.lineNumber,
+            status: 'pending'
           };
           items.push(taskItem);
         }
@@ -296,5 +314,17 @@ export class MarkdownParser {
     return allItems.filter(item => {
       return item.date >= startDate && item.date <= endDate;
     });
+  }
+
+  public getPendingItems(): Item[] {
+    return this.getAllItems().filter(item => item.status === 'pending');
+  }
+
+  public getCompletedItems(): Item[] {
+    return this.getAllItems().filter(item => item.status === 'completed');
+  }
+
+  public getAbandonedItems(): Item[] {
+    return this.getAllItems().filter(item => item.status === 'abandoned');
   }
 }

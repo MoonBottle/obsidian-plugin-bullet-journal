@@ -21801,8 +21801,16 @@ var zhCN = {
     title: "\u5F85\u529E\u4E8B\u9879",
     today: "\u4ECA\u5929",
     tomorrow: "\u660E\u5929",
+    future: "\u672A\u6765",
+    expired: "\u5DF2\u8FC7\u671F",
+    completed: "\u5DF2\u5B8C\u6210",
+    abandoned: "\u5DF2\u653E\u5F03",
     allDay: "\u5168\u5929",
-    noTodos: "\u6682\u65E0\u5F85\u529E\u4E8B\u9879"
+    noTodos: "\u6682\u65E0\u5F85\u529E\u4E8B\u9879",
+    done: "\u5B8C\u6210",
+    migrate: "\u8FC1\u79FB\u5230\u660E\u5929",
+    migrateToday: "\u8FC1\u79FB\u5230\u4ECA\u5929",
+    abandon: "\u653E\u5F03"
   },
   // 按钮和通用文本
   common: {
@@ -21945,8 +21953,16 @@ var en = {
     title: "Todo Items",
     today: "Today",
     tomorrow: "Tomorrow",
+    future: "Future",
+    expired: "Expired",
+    completed: "Completed",
+    abandoned: "Abandoned",
     allDay: "All Day",
-    noTodos: "No todo items"
+    noTodos: "No todo items",
+    done: "Done",
+    migrate: "Migrate to Tomorrow",
+    migrateToday: "Migrate to Today",
+    abandon: "Abandon"
   },
   // Buttons and common text
   common: {
@@ -22182,6 +22198,18 @@ var LineParser = class {
 // src/parser/markdownParser.ts
 var fs = __toESM(require("fs"));
 var path = __toESM(require("path"));
+function generateItemId() {
+  return Math.random().toString(36).substring(2, 11);
+}
+function detectItemStatus(line) {
+  if (line.includes("#done") || line.includes("#\u5DF2\u5B8C\u6210")) {
+    return "completed";
+  }
+  if (line.includes("#abandoned") || line.includes("#\u5DF2\u653E\u5F03")) {
+    return "abandoned";
+  }
+  return "pending";
+}
 var MarkdownParser = class {
   projectDirectories;
   directoryConfigs;
@@ -22295,6 +22323,8 @@ var MarkdownParser = class {
       if (currentTask && trimmedLine.includes("@") && !trimmedLine.includes("#\u4EFB\u52A1")) {
         const item = LineParser.parseItemLine(trimmedLine, lineNumber);
         if (item) {
+          item.id = generateItemId();
+          item.status = detectItemStatus(trimmedLine);
           currentTask.items.push(item);
         }
       }
@@ -22373,13 +22403,15 @@ var MarkdownParser = class {
         }
         if (task.date && task.items.length === 0) {
           const taskItem = {
+            id: generateItemId(),
             content: task.name,
             date: task.date,
             startDateTime: task.startDateTime,
             endDateTime: task.endDateTime,
             task,
             project,
-            lineNumber: task.lineNumber
+            lineNumber: task.lineNumber,
+            status: "pending"
           };
           items.push(taskItem);
         }
@@ -22395,6 +22427,15 @@ var MarkdownParser = class {
     return allItems.filter((item) => {
       return item.date >= startDate && item.date <= endDate;
     });
+  }
+  getPendingItems() {
+    return this.getAllItems().filter((item) => item.status === "pending");
+  }
+  getCompletedItems() {
+    return this.getAllItems().filter((item) => item.status === "completed");
+  }
+  getAbandonedItems() {
+    return this.getAllItems().filter((item) => item.status === "abandoned");
   }
 };
 
@@ -36469,6 +36510,94 @@ async function openFileAtLine(app, filePath, lineNumber) {
   }
   return true;
 }
+async function updateItemDate(app, filePath, lineNumber, newDate, newTime) {
+  try {
+    const file = app.vault.getAbstractFileByPath(filePath);
+    if (!(file instanceof import_obsidian3.TFile)) {
+      console.error("[Bullet Journal] File not found:", filePath);
+      return false;
+    }
+    const content = await app.vault.read(file);
+    const lines = content.split("\n");
+    if (lineNumber < 1 || lineNumber > lines.length) {
+      console.error("[Bullet Journal] Line number out of range:", lineNumber);
+      return false;
+    }
+    const currentLine = lines[lineNumber - 1];
+    const dateMatch = currentLine.match(/@(\d{4}-\d{2}-\d{2})/);
+    const timeMatch = currentLine.match(/@(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})/);
+    let newLine;
+    if (timeMatch && newTime) {
+      newLine = currentLine.replace(
+        /@\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2}/,
+        `@${newDate} ${newTime}`
+      );
+    } else if (timeMatch) {
+      newLine = currentLine.replace(
+        /@\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2}/,
+        `@${newDate} ${timeMatch[2]}`
+      );
+    } else if (dateMatch) {
+      if (newTime) {
+        newLine = currentLine.replace(
+          /@\d{4}-\d{2}-\d{2}/,
+          `@${newDate} ${newTime}`
+        );
+      } else {
+        newLine = currentLine.replace(/@\d{4}-\d{2}-\d{2}/, `@${newDate}`);
+      }
+    } else {
+      newLine = currentLine.replace(/@(\d{4}-\d{2}-\d{2})?/, `@${newDate}${newTime ? " " + newTime : ""}`);
+    }
+    lines[lineNumber - 1] = newLine;
+    await app.vault.modify(file, lines.join("\n"));
+    return true;
+  } catch (error) {
+    console.error("[Bullet Journal] Failed to update item date:", error);
+    return false;
+  }
+}
+async function updateItemStatus(app, filePath, lineNumber, status) {
+  try {
+    const file = app.vault.getAbstractFileByPath(filePath);
+    if (!(file instanceof import_obsidian3.TFile)) {
+      console.error("[Bullet Journal] File not found:", filePath);
+      return false;
+    }
+    const content = await app.vault.read(file);
+    const lines = content.split("\n");
+    if (lineNumber < 1 || lineNumber > lines.length) {
+      console.error("[Bullet Journal] Line number out of range:", lineNumber);
+      return false;
+    }
+    let currentLine = lines[lineNumber - 1];
+    const statusTag = status === "completed" ? "#done" : "#abandoned";
+    const zhStatusTag = status === "completed" ? "#\u5DF2\u5B8C\u6210" : "#\u5DF2\u653E\u5F03";
+    if (currentLine.includes(statusTag) || currentLine.includes(zhStatusTag)) {
+      return true;
+    }
+    const existingStatusMatch = currentLine.match(/(#done|#abandoned|#已完成|#已放弃)/);
+    if (existingStatusMatch) {
+      currentLine = currentLine.replace(existingStatusMatch[1], statusTag);
+    } else {
+      currentLine = currentLine.trim() + " " + statusTag;
+    }
+    lines[lineNumber - 1] = currentLine;
+    await app.vault.modify(file, lines.join("\n"));
+    return true;
+  } catch (error) {
+    console.error("[Bullet Journal] Failed to update item status:", error);
+    return false;
+  }
+}
+function getTomorrowDate() {
+  const tomorrow = (0, import_obsidian3.moment)();
+  tomorrow.add(1, "days");
+  return tomorrow.format("YYYY-MM-DD");
+}
+function getTodayDate() {
+  return (0, import_obsidian3.moment)().format("YYYY-MM-DD");
+}
 
 // src/utils/dateUtils.ts
 var DATE_TIME_RANGE_PATTERN = /@\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}~\d{2}:\d{2}:\d{2}/;
@@ -50471,27 +50600,55 @@ var TodoSidebar = ({ onItemClick }) => {
   const setSelectedGroup = pluginContext?.setSelectedGroup;
   const availableGroups = pluginContext?.availableGroups ?? [];
   const [groupedItems, setGroupedItems] = (0, import_react12.useState)({});
+  const [todayItems, setTodayItems] = (0, import_react12.useState)([]);
+  const [tomorrowItems, setTomorrowItems] = (0, import_react12.useState)([]);
+  const [completedItems, setCompletedItems] = (0, import_react12.useState)([]);
+  const [abandonedItems, setAbandonedItems] = (0, import_react12.useState)([]);
+  const [expiredItems, setExpiredItems] = (0, import_react12.useState)([]);
   const [loading, setLoading] = (0, import_react12.useState)(true);
+  const [collapsedSections, setCollapsedSections] = (0, import_react12.useState)({
+    expired: false,
+    today: false,
+    tomorrow: false,
+    future: false,
+    completed: false,
+    abandoned: false
+  });
   const loadItems = (0, import_react12.useCallback)(() => {
     if (!pluginContext?.plugin?.settings) {
       setGroupedItems({});
+      setTodayItems([]);
+      setTomorrowItems([]);
+      setCompletedItems([]);
+      setAbandonedItems([]);
+      setExpiredItems([]);
       setLoading(false);
       return;
     }
     const projectDirectories = pluginContext.plugin.settings.projectDirectories.filter((dir) => dir.enabled && dir.path).map((dir) => dir.path);
     if (projectDirectories.length === 0) {
       setGroupedItems({});
+      setTodayItems([]);
+      setTomorrowItems([]);
+      setCompletedItems([]);
+      setAbandonedItems([]);
+      setExpiredItems([]);
       setLoading(false);
       return;
     }
     const dirConfigs = pluginContext.plugin.settings.projectDirectories.filter((dir) => dir.enabled && dir.path).map((dir) => ({ path: dir.path, groupId: dir.groupId }));
     const parser = new MarkdownParser(projectDirectories, dirConfigs);
     const allItems = parser.getAllItems();
-    const filteredItems = selectedGroup ? allItems.filter((item) => {
-      return item.project?.groupId === selectedGroup;
-    }) : allItems;
+    const filteredItems = selectedGroup ? allItems.filter((item) => item.project?.groupId === selectedGroup) : allItems;
+    const pendingItems = filteredItems.filter((item) => item.status === "pending");
+    const completed = filteredItems.filter((item) => item.status === "completed");
+    const abandoned = filteredItems.filter((item) => item.status === "abandoned");
     const todayStr = getTodayISO();
-    const futureItems = filteredItems.filter((item) => item.date >= todayStr);
+    const tomorrowDate = getTomorrowDate();
+    const expired = pendingItems.filter((item) => item.date < todayStr);
+    const today = pendingItems.filter((item) => item.date === todayStr);
+    const tomorrow = pendingItems.filter((item) => item.date === tomorrowDate);
+    const futureItems = pendingItems.filter((item) => item.date > tomorrowDate);
     const grouped = /* @__PURE__ */ new Map();
     futureItems.forEach((item) => {
       const items = grouped.get(item.date);
@@ -50508,8 +50665,13 @@ var TodoSidebar = ({ onItemClick }) => {
     });
     const groupedObj = Object.fromEntries(grouped);
     setGroupedItems(groupedObj);
+    setTodayItems(today);
+    setTomorrowItems(tomorrow);
+    setCompletedItems(completed);
+    setAbandonedItems(abandoned);
+    setExpiredItems(expired);
     setLoading(false);
-  }, [pluginContext, selectedGroup, plugin]);
+  }, [pluginContext, selectedGroup]);
   (0, import_react12.useEffect)(() => {
     loadItems();
     if (!pluginContext?.plugin) {
@@ -50523,6 +50685,9 @@ var TodoSidebar = ({ onItemClick }) => {
     };
   }, [loadItems, pluginContext]);
   const handleItemClick = async (item) => {
+    console.log("[HK-Work TodoSidebar] Debug - item:", item);
+    console.log("[HK-Work TodoSidebar] Debug - item.project?.filePath:", item.project?.filePath);
+    console.log("[HK-Work TodoSidebar] Debug - item.lineNumber:", item.lineNumber);
     if (!app || !item.project?.filePath) return;
     await openFileAtLine(app, item.project.filePath, item.lineNumber);
     if (onItemClick) {
@@ -50569,18 +50734,171 @@ var TodoSidebar = ({ onItemClick }) => {
       }
     }
   };
+  const handleDone = async (item, e3) => {
+    e3.stopPropagation();
+    if (!app || !item.project?.filePath || !item.lineNumber) return;
+    const success = await updateItemStatus(app, item.project.filePath, item.lineNumber, "completed");
+    if (success) {
+      loadItems();
+    }
+  };
+  const handleMigrate = async (item, e3) => {
+    e3.stopPropagation();
+    if (!app || !item.project?.filePath || !item.lineNumber) return;
+    const tomorrowDate = getTomorrowDate();
+    const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
+    const newTime = timeMatch ? timeMatch[1] : void 0;
+    const success = await updateItemDate(app, item.project.filePath, item.lineNumber, tomorrowDate, newTime);
+    if (success) {
+      loadItems();
+    }
+  };
+  const handleMigrateToday = async (item, e3) => {
+    e3.stopPropagation();
+    if (!app || !item.project?.filePath || !item.lineNumber) return;
+    const todayDate = getTodayDate();
+    const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
+    const newTime = timeMatch ? timeMatch[1] : void 0;
+    const success = await updateItemDate(app, item.project.filePath, item.lineNumber, todayDate, newTime);
+    if (success) {
+      loadItems();
+    }
+  };
+  const handleAbandon = async (item, e3) => {
+    e3.stopPropagation();
+    if (!app || !item.project?.filePath || !item.lineNumber) return;
+    const success = await updateItemStatus(app, item.project.filePath, item.lineNumber, "abandoned");
+    if (success) {
+      loadItems();
+    }
+  };
+  const toggleSection = (section) => {
+    setCollapsedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
   const sortedDates = Object.keys(groupedItems).sort();
+  const todoTexts = t("todoSidebar");
   const handleGroupChange = (0, import_react12.useCallback)((e3) => {
     if (setSelectedGroup) {
       setSelectedGroup(e3.target.value);
     }
   }, [setSelectedGroup]);
-  const todoTexts = t("todoSidebar");
+  const renderItem = (item, showActions = true) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(
+    "div",
+    {
+      className: `hk-work-todo-item ${item.status === "completed" ? "status-completed" : ""} ${item.status === "abandoned" ? "status-abandoned" : ""}`,
+      onClick: () => handleItemClick(item),
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-item-content", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-item-header", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "hk-work-todo-item-time", children: formatTimeRange(item.startDateTime, item.endDateTime) || todoTexts.allDay }),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "hk-work-todo-item-project", children: item.project?.name })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-item-task", children: item.task?.name }),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-item-text", children: item.content })
+        ] }),
+        showActions && item.status !== "completed" && item.status !== "abandoned" && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-item-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+            "button",
+            {
+              className: "hk-work-todo-action-btn",
+              onClick: (e3) => handleDone(item, e3),
+              title: todoTexts.done,
+              children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "20 6 9 17 4 12" }) })
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+            "button",
+            {
+              className: "hk-work-todo-action-btn",
+              onClick: (e3) => handleMigrate(item, e3),
+              title: todoTexts.migrate,
+              children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "5", y1: "12", x2: "19", y2: "12" }),
+                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "12 5 19 12 12 19" })
+              ] })
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+            "button",
+            {
+              className: "hk-work-todo-action-btn",
+              onClick: (e3) => handleAbandon(item, e3),
+              title: todoTexts.abandon,
+              children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
+                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
+              ] })
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+            "button",
+            {
+              className: "hk-work-todo-action-btn",
+              onClick: (e3) => handleOpenModal(item, e3),
+              title: "\u67E5\u770B\u8BE6\u60C5",
+              children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("circle", { cx: "12", cy: "12", r: "10" }),
+                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "12", y1: "16", x2: "12", y2: "12" }),
+                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "12", y1: "8", x2: "12.01", y2: "8" })
+              ] })
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+            "button",
+            {
+              className: "hk-work-todo-action-btn",
+              onClick: (e3) => handleOpenCalendar(item, e3),
+              title: "\u6253\u5F00\u65E5\u5386",
+              children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("rect", { x: "3", y: "4", width: "18", height: "18", rx: "2", ry: "2" }),
+                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "16", y1: "2", x2: "16", y2: "6" }),
+                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "8", y1: "2", x2: "8", y2: "6" }),
+                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "3", y1: "10", x2: "21", y2: "10" })
+              ] })
+            }
+          )
+        ] })
+      ]
+    },
+    item.id
+  );
+  const renderSection = (title, items, sectionKey, showActions = true) => {
+    if (items.length === 0) return null;
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-section", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-section-label clickable", onClick: () => toggleSection(sectionKey), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "hk-work-todo-collapse-icon", children: collapsedSections[sectionKey] ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "9 18 15 12 9 6" }) }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "6 9 12 15 18 9" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("span", { children: [
+          title,
+          " (",
+          items.length,
+          ")"
+        ] })
+      ] }),
+      !collapsedSections[sectionKey] && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-items", children: items.map((item) => renderItem(item, showActions)) })
+    ] }, sectionKey);
+  };
   if (loading) {
     return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-sidebar", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-loading", children: t("common").loading }) });
   }
-  if (sortedDates.length === 0) {
-    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-sidebar", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-empty", children: todoTexts.noTodos }) });
+  const hasNoItems = sortedDates.length === 0 && expiredItems.length === 0 && completedItems.length === 0 && abandonedItems.length === 0;
+  if (hasNoItems) {
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-sidebar", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h3", { children: todoTexts.title }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+          GroupSelect,
+          {
+            groups: availableGroups,
+            value: selectedGroup,
+            onChange: handleGroupChange
+          }
+        )
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-empty", children: todoTexts.noTodos })
+    ] });
   }
   return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-sidebar", children: [
     /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-header", children: [
@@ -50594,62 +50912,16 @@ var TodoSidebar = ({ onItemClick }) => {
         }
       )
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-content", children: sortedDates.map((date) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-date-group", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-timeline", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-timeline-line" }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-timeline-dot" })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-date-content", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-date-header", children: formatDateLabel(date, todoTexts.today, todoTexts.tomorrow) }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-items", children: groupedItems[date].map((item, index5) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(
-          "div",
-          {
-            className: "hk-work-todo-item",
-            onClick: () => handleItemClick(item),
-            children: [
-              /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-item-content", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-item-header", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "hk-work-todo-item-time", children: formatTimeRange(item.startDateTime, item.endDateTime) || todoTexts.allDay }),
-                  /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "hk-work-todo-item-project", children: item.project?.name })
-                ] }),
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-item-task", children: item.task?.name }),
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-item-text", children: item.content })
-              ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-item-actions", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
-                  "button",
-                  {
-                    className: "hk-work-todo-action-btn",
-                    onClick: (e3) => handleOpenModal(item, e3),
-                    title: "\u67E5\u770B\u8BE6\u60C5",
-                    children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("circle", { cx: "12", cy: "12", r: "10" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "12", y1: "16", x2: "12", y2: "12" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "12", y1: "8", x2: "12.01", y2: "8" })
-                    ] })
-                  }
-                ),
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
-                  "button",
-                  {
-                    className: "hk-work-todo-action-btn",
-                    onClick: (e3) => handleOpenCalendar(item, e3),
-                    title: "\u6253\u5F00\u65E5\u5386",
-                    children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("rect", { x: "3", y: "4", width: "18", height: "18", rx: "2", ry: "2" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "16", y1: "2", x2: "16", y2: "6" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "8", y1: "2", x2: "8", y2: "6" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "3", y1: "10", x2: "21", y2: "10" })
-                    ] })
-                  }
-                )
-              ] })
-            ]
-          },
-          `${date}-${index5}`
-        )) })
-      ] })
-    ] }, date)) })
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-content", children: [
+      renderSection(todoTexts.expired || "\u5DF2\u8FC7\u671F", expiredItems, "expired"),
+      renderSection(todoTexts.today || "\u4ECA\u5929", todayItems, "today"),
+      renderSection(todoTexts.tomorrow || "\u660E\u5929", tomorrowItems, "tomorrow"),
+      sortedDates.filter((d2) => d2 !== getTodayISO() && d2 !== getTomorrowDate()).map(
+        (date) => renderSection(formatDateLabel(date, todoTexts.today, todoTexts.tomorrow), groupedItems[date], date, true)
+      ),
+      renderSection(todoTexts.completed || "\u5DF2\u5B8C\u6210", completedItems, "completed", false),
+      renderSection(todoTexts.abandoned || "\u5DF2\u653E\u5F03", abandonedItems, "abandoned", false)
+    ] })
   ] });
 };
 

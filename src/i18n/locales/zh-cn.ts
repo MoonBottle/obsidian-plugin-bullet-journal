@@ -61,8 +61,16 @@ export const zhCN = {
     title: '待办事项',
     today: '今天',
     tomorrow: '明天',
+    future: '未来',
+    expired: '已过期',
+    completed: '已完成',
+    abandoned: '已放弃',
     allDay: '全天',
     noTodos: '暂无待办事项',
+    done: '完成',
+    migrate: '迁移到明天',
+    migrateToday: '迁移到今天',
+    abandon: '放弃',
   },
 
   // 按钮和通用文本

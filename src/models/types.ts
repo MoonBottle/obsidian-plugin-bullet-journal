@@ -1,3 +1,5 @@
+export type ItemStatus = 'pending' | 'completed' | 'abandoned';
+
 export interface Project {
   name: string;
   description: string;
@@ -6,6 +8,8 @@ export interface Project {
   directoryPath?: string;
   groupId?: string;
   links?: Array<{ name: string; url: string }>;
+  getCompletedItems(): Item[];
+  getAbandonedItems(): Item[];
 }
 
 export interface Task {
@@ -20,6 +24,7 @@ export interface Task {
 }
 
 export interface Item {
+  id: string;
   content: string;
   date: string;
   startDateTime?: string;
@@ -27,6 +32,7 @@ export interface Item {
   task?: Task;
   project?: Project;
   lineNumber?: number;
+  status?: ItemStatus;
 }
 
 export interface CalendarEvent {
