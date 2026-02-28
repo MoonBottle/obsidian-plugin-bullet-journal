@@ -157,4 +157,17 @@ export const en: Translations = {
   config: {
     setDirectory: 'Please set at least one project directory in plugin settings',
   },
+
+  // Context menu
+  contextMenu: {
+    complete: 'Complete',
+    abandon: 'Abandon',
+    migrate: 'Migrate',
+    migrateToday: 'Today',
+    migrateTomorrow: 'Tomorrow',
+    migrateCustom: 'Choose date...',
+    openDoc: 'Open Document',
+    showDetail: 'View Detail',
+    showCalendar: 'View Calendar',
+  },
 };

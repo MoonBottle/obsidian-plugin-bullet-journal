@@ -73,7 +73,10 @@ export class LineParser {
     }
 
     // Remove all datetime patterns from content
-    const content = line.replace(timeRangeRegex, '').replace(/@(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2})?)/, '').trim();
+    let content = line.replace(timeRangeRegex, '').replace(/@(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2})?)/, '').trim();
+
+    // Remove status tags from content
+    content = content.replace(/#done|#已完成|#abandoned|#已放弃/g, '').trim();
 
     return {
       content,

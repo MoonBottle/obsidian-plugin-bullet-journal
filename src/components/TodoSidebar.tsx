@@ -5,10 +5,12 @@ import { usePlugin } from '../context/PluginContext';
 import { useApp } from '../context/AppContext';
 import { t } from '../i18n';
 import { EventDetailsModal } from '../modals/EventDetailsModal';
+import { DatePickerModal } from '../modals/DatePickerModal';
 import { CALENDAR_VIEW_TYPE } from '../views/CalendarView';
 import { openFileAtLine, updateItemDate, updateItemStatus, getTomorrowDate, getTodayDate } from '../utils/fileUtils';
 import { GroupSelect } from './shared';
 import { formatDateLabel, formatTimeRange, getTodayISO } from '../utils/dateUtils';
+import { showItemContextMenu } from '../utils/contextMenu';
 
 interface GroupedItems {
   [date: string]: Item[];
@@ -240,6 +242,94 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     }
   };
 
+  const handleMigrateCustom = (item: Item) => {
+    if (!app) return;
+    
+    const modal = new DatePickerModal(app, '选择迁移日期', item.date, async (newDate: string) => {
+      if (!item.project?.filePath || !item.lineNumber) return;
+      
+      const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
+      const newTime = timeMatch ? timeMatch[1] : undefined;
+      
+      const success = await updateItemDate(app, item.project.filePath, item.lineNumber, newDate, newTime);
+      if (success) {
+        loadItems();
+      }
+    });
+    modal.open();
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, item: Item) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    showItemContextMenu(e, item, {
+      onComplete: async () => {
+        if (!app || !item.project?.filePath || !item.lineNumber) return;
+        const success = await updateItemStatus(app, item.project.filePath, item.lineNumber, 'completed');
+        if (success) loadItems();
+      },
+      onMigrateToday: async () => {
+        if (!app || !item.project?.filePath || !item.lineNumber) return;
+        const todayDate = getTodayDate();
+        const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
+        const newTime = timeMatch ? timeMatch[1] : undefined;
+        const success = await updateItemDate(app, item.project.filePath, item.lineNumber, todayDate, newTime);
+        if (success) loadItems();
+      },
+      onMigrateTomorrow: async () => {
+        if (!app || !item.project?.filePath || !item.lineNumber) return;
+        const tomorrowDate = getTomorrowDate();
+        const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
+        const newTime = timeMatch ? timeMatch[1] : undefined;
+        const success = await updateItemDate(app, item.project.filePath, item.lineNumber, tomorrowDate, newTime);
+        if (success) loadItems();
+      },
+      onMigrateCustom: () => handleMigrateCustom(item),
+      onAbandon: async () => {
+        if (!app || !item.project?.filePath || !item.lineNumber) return;
+        const success = await updateItemStatus(app, item.project.filePath, item.lineNumber, 'abandoned');
+        if (success) loadItems();
+      },
+      onOpenDoc: () => handleItemClick(item),
+      onShowDetail: () => {
+        if (app && pluginContext?.plugin) {
+          const modal = new EventDetailsModal(app, {
+            title: item.task?.name || item.content,
+            start: item.startDateTime || item.date,
+            end: item.endDateTime,
+            allDay: !item.startDateTime,
+            project: item.project?.name,
+            projectLinks: item.project?.links,
+            task: item.task?.name,
+            taskLinks: item.task?.links,
+            level: item.task?.level,
+            item: item.content,
+            hasItems: true,
+            filePath: item.project?.filePath,
+            lineNumber: item.lineNumber,
+          }, pluginContext.plugin);
+          modal.open();
+        }
+      },
+      onShowCalendar: () => {
+        if (!app) return;
+        const dateStr = item.date;
+        app.workspace.getLeavesOfType(CALENDAR_VIEW_TYPE).forEach(async (leaf) => {
+          app.workspace.revealLeaf(leaf);
+          const view = leaf.view as any;
+          if (view?.componentRef?.current) {
+            const calendarInstance = view.componentRef.current.getCalendarInstance();
+            if (calendarInstance) {
+              calendarInstance.gotoDate(dateStr);
+              calendarInstance.changeView('timeGridDay');
+            }
+          }
+        });
+      }
+    });
+  };
+
   const toggleSection = (section: keyof typeof collapsedSections) => {
     setCollapsedSections(prev => ({
       ...prev,
@@ -261,6 +351,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
       key={item.id}
       className={`hk-work-todo-item ${item.status === 'completed' ? 'status-completed' : ''} ${item.status === 'abandoned' ? 'status-abandoned' : ''}`}
       onClick={() => handleItemClick(item)}
+      onContextMenu={(e) => handleContextMenu(e, item)}
     >
       <div className="hk-work-todo-item-content">
         <div className="hk-work-todo-item-header">

@@ -5,6 +5,9 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __esm = (fn2, res) => function __init() {
+  return fn2 && (res = (0, fn2[__getOwnPropNames(fn2)[0]])(fn2 = 0)), res;
+};
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
@@ -21723,13 +21726,140 @@ var require_jsx_runtime = __commonJS({
   }
 });
 
+// src/utils/fileUtils.ts
+var fileUtils_exports = {};
+__export(fileUtils_exports, {
+  getTodayDate: () => getTodayDate,
+  getTomorrowDate: () => getTomorrowDate,
+  openFileAtLine: () => openFileAtLine,
+  updateItemDate: () => updateItemDate,
+  updateItemStatus: () => updateItemStatus
+});
+async function openFileAtLine(app, filePath, lineNumber) {
+  const file = app.vault.getAbstractFileByPath(filePath);
+  if (!(file instanceof import_obsidian3.TFile)) {
+    return false;
+  }
+  const leaves = app.workspace.getLeavesOfType("markdown");
+  let targetLeaf = leaves.find((leaf) => {
+    const viewState = leaf.getViewState();
+    return viewState.state?.file === file.path;
+  });
+  if (targetLeaf) {
+    await targetLeaf.openFile(file, {
+      active: true,
+      eState: lineNumber ? { line: lineNumber - 1 } : void 0
+    });
+  } else {
+    await app.workspace.openLinkText(file.path, "", false, {
+      eState: lineNumber ? { line: lineNumber - 1 } : void 0
+    });
+  }
+  return true;
+}
+async function updateItemDate(app, filePath, lineNumber, newDate, newTime) {
+  try {
+    const file = app.vault.getAbstractFileByPath(filePath);
+    if (!(file instanceof import_obsidian3.TFile)) {
+      console.error("[Bullet Journal] File not found:", filePath);
+      return false;
+    }
+    const content = await app.vault.read(file);
+    const lines = content.split("\n");
+    if (lineNumber < 1 || lineNumber > lines.length) {
+      console.error("[Bullet Journal] Line number out of range:", lineNumber);
+      return false;
+    }
+    const currentLine = lines[lineNumber - 1];
+    const dateMatch = currentLine.match(/@(\d{4}-\d{2}-\d{2})/);
+    const timeMatch = currentLine.match(/@(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})/);
+    let newLine;
+    if (timeMatch && newTime) {
+      newLine = currentLine.replace(
+        /@\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2}/,
+        `@${newDate} ${newTime}`
+      );
+    } else if (timeMatch) {
+      newLine = currentLine.replace(
+        /@\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2}/,
+        `@${newDate} ${timeMatch[2]}`
+      );
+    } else if (dateMatch) {
+      if (newTime) {
+        newLine = currentLine.replace(
+          /@\d{4}-\d{2}-\d{2}/,
+          `@${newDate} ${newTime}`
+        );
+      } else {
+        newLine = currentLine.replace(/@\d{4}-\d{2}-\d{2}/, `@${newDate}`);
+      }
+    } else {
+      newLine = currentLine.replace(/@(\d{4}-\d{2}-\d{2})?/, `@${newDate}${newTime ? " " + newTime : ""}`);
+    }
+    lines[lineNumber - 1] = newLine;
+    await app.vault.modify(file, lines.join("\n"));
+    return true;
+  } catch (error) {
+    console.error("[Bullet Journal] Failed to update item date:", error);
+    return false;
+  }
+}
+async function updateItemStatus(app, filePath, lineNumber, status) {
+  try {
+    const file = app.vault.getAbstractFileByPath(filePath);
+    if (!(file instanceof import_obsidian3.TFile)) {
+      console.error("[Bullet Journal] File not found:", filePath);
+      return false;
+    }
+    const content = await app.vault.read(file);
+    const lines = content.split("\n");
+    if (lineNumber < 1 || lineNumber > lines.length) {
+      console.error("[Bullet Journal] Line number out of range:", lineNumber);
+      return false;
+    }
+    let currentLine = lines[lineNumber - 1];
+    const statusTag = status === "completed" ? "#done" : "#abandoned";
+    const zhStatusTag = status === "completed" ? "#\u5DF2\u5B8C\u6210" : "#\u5DF2\u653E\u5F03";
+    if (currentLine.includes(statusTag) || currentLine.includes(zhStatusTag)) {
+      return true;
+    }
+    const existingStatusMatch = currentLine.match(/(#done|#abandoned|#已完成|#已放弃)/);
+    if (existingStatusMatch) {
+      currentLine = currentLine.replace(existingStatusMatch[1], statusTag);
+    } else {
+      currentLine = currentLine.trim() + " " + statusTag;
+    }
+    lines[lineNumber - 1] = currentLine;
+    await app.vault.modify(file, lines.join("\n"));
+    return true;
+  } catch (error) {
+    console.error("[Bullet Journal] Failed to update item status:", error);
+    return false;
+  }
+}
+function getTomorrowDate() {
+  const tomorrow = (0, import_obsidian3.moment)();
+  tomorrow.add(1, "days");
+  return tomorrow.format("YYYY-MM-DD");
+}
+function getTodayDate() {
+  return (0, import_obsidian3.moment)().format("YYYY-MM-DD");
+}
+var import_obsidian3;
+var init_fileUtils = __esm({
+  "src/utils/fileUtils.ts"() {
+    "use strict";
+    import_obsidian3 = require("obsidian");
+  }
+});
+
 // main.ts
 var main_exports = {};
 __export(main_exports, {
   default: () => HKWorkPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian11 = require("obsidian");
+var import_obsidian13 = require("obsidian");
 
 // src/views/ProjectView.tsx
 var import_react8 = __toESM(require_react());
@@ -21900,6 +22030,18 @@ var zhCN = {
   // 配置提示
   config: {
     setDirectory: "\u8BF7\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u81F3\u5C11\u4E00\u4E2A\u9879\u76EE\u76EE\u5F55"
+  },
+  // 右键菜单
+  contextMenu: {
+    complete: "\u5B8C\u6210",
+    abandon: "\u653E\u5F03",
+    migrate: "\u8FC1\u79FB",
+    migrateToday: "\u4ECA\u5929",
+    migrateTomorrow: "\u660E\u5929",
+    migrateCustom: "\u9009\u62E9\u65E5\u671F...",
+    openDoc: "\u6253\u5F00\u6587\u6863",
+    showDetail: "\u67E5\u770B\u8BE6\u60C5",
+    showCalendar: "\u67E5\u770B\u65E5\u5386"
   }
 };
 
@@ -22052,6 +22194,18 @@ var en = {
   // Config hints
   config: {
     setDirectory: "Please set at least one project directory in plugin settings"
+  },
+  // Context menu
+  contextMenu: {
+    complete: "Complete",
+    abandon: "Abandon",
+    migrate: "Migrate",
+    migrateToday: "Today",
+    migrateTomorrow: "Tomorrow",
+    migrateCustom: "Choose date...",
+    openDoc: "Open Document",
+    showDetail: "View Detail",
+    showCalendar: "View Calendar"
   }
 };
 
@@ -22129,7 +22283,8 @@ var LineParser = class {
         endDateTime = match;
       }
     }
-    const content = line.replace(timeRangeRegex, "").replace(/@(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2})?)/, "").trim();
+    let content = line.replace(timeRangeRegex, "").replace(/@(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2})?)/, "").trim();
+    content = content.replace(/#done|#已完成|#abandoned|#已放弃/g, "").trim();
     return {
       content,
       date,
@@ -22782,12 +22937,12 @@ var ProjectView = class extends import_obsidian2.ItemView {
 
 // src/views/CalendarView.tsx
 var import_react10 = __toESM(require_react());
-var import_obsidian6 = require("obsidian");
+var import_obsidian8 = require("obsidian");
 var import_client2 = __toESM(require_client());
 
 // src/components/CalendarView.tsx
 var import_react9 = __toESM(require_react());
-var import_obsidian5 = require("obsidian");
+var import_obsidian7 = require("obsidian");
 
 // node_modules/.pnpm/preact@10.12.1/node_modules/preact/dist/preact.mjs
 var n;
@@ -36373,119 +36528,7 @@ var DataConverter = class {
 
 // src/modals/EventDetailsModal.ts
 var import_obsidian4 = require("obsidian");
-
-// src/utils/fileUtils.ts
-var import_obsidian3 = require("obsidian");
-async function openFileAtLine(app, filePath, lineNumber) {
-  const file = app.vault.getAbstractFileByPath(filePath);
-  if (!(file instanceof import_obsidian3.TFile)) {
-    return false;
-  }
-  const leaves = app.workspace.getLeavesOfType("markdown");
-  let targetLeaf = leaves.find((leaf) => {
-    const viewState = leaf.getViewState();
-    return viewState.state?.file === file.path;
-  });
-  if (targetLeaf) {
-    await targetLeaf.openFile(file, {
-      active: true,
-      eState: lineNumber ? { line: lineNumber - 1 } : void 0
-    });
-  } else {
-    await app.workspace.openLinkText(file.path, "", false, {
-      eState: lineNumber ? { line: lineNumber - 1 } : void 0
-    });
-  }
-  return true;
-}
-async function updateItemDate(app, filePath, lineNumber, newDate, newTime) {
-  try {
-    const file = app.vault.getAbstractFileByPath(filePath);
-    if (!(file instanceof import_obsidian3.TFile)) {
-      console.error("[Bullet Journal] File not found:", filePath);
-      return false;
-    }
-    const content = await app.vault.read(file);
-    const lines = content.split("\n");
-    if (lineNumber < 1 || lineNumber > lines.length) {
-      console.error("[Bullet Journal] Line number out of range:", lineNumber);
-      return false;
-    }
-    const currentLine = lines[lineNumber - 1];
-    const dateMatch = currentLine.match(/@(\d{4}-\d{2}-\d{2})/);
-    const timeMatch = currentLine.match(/@(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})/);
-    let newLine;
-    if (timeMatch && newTime) {
-      newLine = currentLine.replace(
-        /@\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2}/,
-        `@${newDate} ${newTime}`
-      );
-    } else if (timeMatch) {
-      newLine = currentLine.replace(
-        /@\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2}/,
-        `@${newDate} ${timeMatch[2]}`
-      );
-    } else if (dateMatch) {
-      if (newTime) {
-        newLine = currentLine.replace(
-          /@\d{4}-\d{2}-\d{2}/,
-          `@${newDate} ${newTime}`
-        );
-      } else {
-        newLine = currentLine.replace(/@\d{4}-\d{2}-\d{2}/, `@${newDate}`);
-      }
-    } else {
-      newLine = currentLine.replace(/@(\d{4}-\d{2}-\d{2})?/, `@${newDate}${newTime ? " " + newTime : ""}`);
-    }
-    lines[lineNumber - 1] = newLine;
-    await app.vault.modify(file, lines.join("\n"));
-    return true;
-  } catch (error) {
-    console.error("[Bullet Journal] Failed to update item date:", error);
-    return false;
-  }
-}
-async function updateItemStatus(app, filePath, lineNumber, status) {
-  try {
-    const file = app.vault.getAbstractFileByPath(filePath);
-    if (!(file instanceof import_obsidian3.TFile)) {
-      console.error("[Bullet Journal] File not found:", filePath);
-      return false;
-    }
-    const content = await app.vault.read(file);
-    const lines = content.split("\n");
-    if (lineNumber < 1 || lineNumber > lines.length) {
-      console.error("[Bullet Journal] Line number out of range:", lineNumber);
-      return false;
-    }
-    let currentLine = lines[lineNumber - 1];
-    const statusTag = status === "completed" ? "#done" : "#abandoned";
-    const zhStatusTag = status === "completed" ? "#\u5DF2\u5B8C\u6210" : "#\u5DF2\u653E\u5F03";
-    if (currentLine.includes(statusTag) || currentLine.includes(zhStatusTag)) {
-      return true;
-    }
-    const existingStatusMatch = currentLine.match(/(#done|#abandoned|#已完成|#已放弃)/);
-    if (existingStatusMatch) {
-      currentLine = currentLine.replace(existingStatusMatch[1], statusTag);
-    } else {
-      currentLine = currentLine.trim() + " " + statusTag;
-    }
-    lines[lineNumber - 1] = currentLine;
-    await app.vault.modify(file, lines.join("\n"));
-    return true;
-  } catch (error) {
-    console.error("[Bullet Journal] Failed to update item status:", error);
-    return false;
-  }
-}
-function getTomorrowDate() {
-  const tomorrow = (0, import_obsidian3.moment)();
-  tomorrow.add(1, "days");
-  return tomorrow.format("YYYY-MM-DD");
-}
-function getTodayDate() {
-  return (0, import_obsidian3.moment)().format("YYYY-MM-DD");
-}
+init_fileUtils();
 
 // src/utils/dateUtils.ts
 var DATE_TIME_RANGE_PATTERN = /@\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}~\d{2}:\d{2}:\d{2}/;
@@ -36823,11 +36866,198 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
   }
 };
 
+// src/modals/DatePickerModal.ts
+var import_obsidian5 = require("obsidian");
+var DatePickerModal = class extends import_obsidian5.Modal {
+  selectedDate;
+  onConfirm;
+  title;
+  constructor(app, title, initialDate, onConfirm) {
+    super(app);
+    this.title = title;
+    this.selectedDate = initialDate;
+    this.onConfirm = onConfirm;
+  }
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.addClass("hk-work-date-picker-modal");
+    contentEl.createEl("h2", { text: this.title });
+    const dateContainer = contentEl.createEl("div", { cls: "hk-work-date-picker-container" });
+    const dateInput = dateContainer.createEl("input", {
+      attr: {
+        type: "date",
+        value: this.selectedDate
+      }
+    });
+    dateInput.addEventListener("change", () => {
+      this.selectedDate = dateInput.value;
+    });
+    const buttonsContainer = contentEl.createEl("div", { cls: "hk-work-modal-buttons" });
+    const cancelButton = buttonsContainer.createEl("button", { text: "\u53D6\u6D88" });
+    cancelButton.addEventListener("click", () => {
+      this.close();
+    });
+    const confirmButton = buttonsContainer.createEl("button", {
+      text: "\u786E\u8BA4",
+      cls: "mod-cta"
+    });
+    confirmButton.addEventListener("click", () => {
+      this.onConfirm(this.selectedDate);
+      this.close();
+    });
+  }
+  onClose() {
+    const { contentEl } = this;
+    contentEl.empty();
+  }
+};
+
+// src/utils/contextMenu.ts
+var import_obsidian6 = require("obsidian");
+function showItemContextMenu(event, item, options) {
+  const menu = new import_obsidian6.Menu();
+  const isPending = item.status !== "completed" && item.status !== "abandoned";
+  const contextMenuTexts = t("contextMenu");
+  if (isPending) {
+    menu.addItem((menuItem) => {
+      menuItem.setTitle(contextMenuTexts.complete).setIcon("check").onClick(() => {
+        if (options.onComplete) {
+          options.onComplete();
+        }
+      });
+    });
+    menu.addItem((menuItem) => {
+      menuItem.setTitle(contextMenuTexts.migrate).setIcon("arrow-right").onClick(() => {
+        const submenu = new import_obsidian6.Menu();
+        submenu.addItem((subItem) => {
+          subItem.setTitle(contextMenuTexts.migrateToday).setIcon("calendar").onClick(() => {
+            if (options.onMigrateToday) {
+              options.onMigrateToday();
+            }
+          });
+        });
+        submenu.addItem((subItem) => {
+          subItem.setTitle(contextMenuTexts.migrateTomorrow).setIcon("calendar").onClick(() => {
+            if (options.onMigrateTomorrow) {
+              options.onMigrateTomorrow();
+            }
+          });
+        });
+        submenu.addItem((subItem) => {
+          subItem.setTitle(contextMenuTexts.migrateCustom).setIcon("calendar").onClick(() => {
+            if (options.onMigrateCustom) {
+              options.onMigrateCustom();
+            }
+          });
+        });
+        submenu.showAtMouseEvent(event);
+      });
+    });
+    menu.addItem((menuItem) => {
+      menuItem.setTitle(contextMenuTexts.abandon).setIcon("x").onClick(() => {
+        if (options.onAbandon) {
+          options.onAbandon();
+        }
+      });
+    });
+    menu.addSeparator();
+  }
+  menu.addItem((menuItem) => {
+    menuItem.setTitle(contextMenuTexts.openDoc).setIcon("file").onClick(() => {
+      if (options.onOpenDoc) {
+        options.onOpenDoc();
+      }
+    });
+  });
+  menu.addItem((menuItem) => {
+    menuItem.setTitle(contextMenuTexts.showDetail).setIcon("info").onClick(() => {
+      if (options.onShowDetail) {
+        options.onShowDetail();
+      }
+    });
+  });
+  if (options.onShowCalendar) {
+    menu.addItem((menuItem) => {
+      menuItem.setTitle(contextMenuTexts.showCalendar).setIcon("calendar").onClick(() => {
+        if (options.onShowCalendar) {
+          options.onShowCalendar();
+        }
+      });
+    });
+  }
+  menu.showAtMouseEvent(event);
+}
+function showCalendarEventContextMenu(event, eventData, options) {
+  const menu = new import_obsidian6.Menu();
+  const isPending = eventData.extendedProps.status !== "completed" && eventData.extendedProps.status !== "abandoned";
+  const contextMenuTexts = t("contextMenu");
+  if (isPending) {
+    menu.addItem((menuItem) => {
+      menuItem.setTitle(contextMenuTexts.complete).setIcon("check").onClick(() => {
+        if (options.onComplete) {
+          options.onComplete();
+        }
+      });
+    });
+    menu.addItem((menuItem) => {
+      menuItem.setTitle(contextMenuTexts.migrate).setIcon("arrow-right").onClick(() => {
+        const submenu = new import_obsidian6.Menu();
+        submenu.addItem((subItem) => {
+          subItem.setTitle(contextMenuTexts.migrateToday).setIcon("calendar").onClick(() => {
+            if (options.onMigrateToday) {
+              options.onMigrateToday();
+            }
+          });
+        });
+        submenu.addItem((subItem) => {
+          subItem.setTitle(contextMenuTexts.migrateTomorrow).setIcon("calendar").onClick(() => {
+            if (options.onMigrateTomorrow) {
+              options.onMigrateTomorrow();
+            }
+          });
+        });
+        submenu.addItem((subItem) => {
+          subItem.setTitle(contextMenuTexts.migrateCustom).setIcon("calendar").onClick(() => {
+            if (options.onMigrateCustom) {
+              options.onMigrateCustom();
+            }
+          });
+        });
+        submenu.showAtMouseEvent(event);
+      });
+    });
+    menu.addItem((menuItem) => {
+      menuItem.setTitle(contextMenuTexts.abandon).setIcon("x").onClick(() => {
+        if (options.onAbandon) {
+          options.onAbandon();
+        }
+      });
+    });
+    menu.addSeparator();
+  }
+  menu.addItem((menuItem) => {
+    menuItem.setTitle(contextMenuTexts.openDoc).setIcon("file").onClick(() => {
+      if (options.onOpenDoc) {
+        options.onOpenDoc();
+      }
+    });
+  });
+  menu.addItem((menuItem) => {
+    menuItem.setTitle(contextMenuTexts.showDetail).setIcon("info").onClick(() => {
+      if (options.onShowDetail) {
+        options.onShowDetail();
+      }
+    });
+  });
+  menu.showAtMouseEvent(event);
+}
+
 // src/components/CalendarView.tsx
+init_fileUtils();
 var import_jsx_runtime7 = __toESM(require_jsx_runtime());
 var LIST_VIEW_TYPES = /* @__PURE__ */ new Set(["listWeek", "listDay", "listMonth", "listYear"]);
 var isListView = (viewType) => LIST_VIEW_TYPES.has(viewType);
-var DateDetailsModal = class extends import_obsidian5.Modal {
+var DateDetailsModal = class extends import_obsidian7.Modal {
   constructor(app, dateStr, dateItems) {
     super(app);
     this.dateStr = dateStr;
@@ -36977,7 +37207,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
     const allDay = info.event.allDay;
     const { filePath, lineNumber } = info.event.extendedProps;
     if (!filePath || !lineNumber || !start) {
-      new import_obsidian5.Notice(t("calendar").cannotUpdate);
+      new import_obsidian7.Notice(t("calendar").cannotUpdate);
       return;
     }
     start = snapTo15Minutes(start);
@@ -36990,7 +37220,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
     try {
       const file = app.vault.getAbstractFileByPath(filePath);
       if (!file) {
-        new import_obsidian5.Notice(t("calendar").fileNotFound);
+        new import_obsidian7.Notice(t("calendar").fileNotFound);
         return;
       }
       const startDateTime = formatDateTimeForMarkdown(start);
@@ -37007,7 +37237,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       await app.vault.process(file, (content) => {
         const lines = content.split("\n");
         if (lineNumber <= 0 || lineNumber > lines.length) {
-          new import_obsidian5.Notice(t("calendar").lineOutOfRange);
+          new import_obsidian7.Notice(t("calendar").lineOutOfRange);
           return content;
         }
         const lineIndex = lineNumber - 1;
@@ -37022,15 +37252,15 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
         }
         if (updatedLine !== originalLine) {
           lines[lineIndex] = updatedLine;
-          new import_obsidian5.Notice(t("calendar").timeUpdated);
+          new import_obsidian7.Notice(t("calendar").timeUpdated);
           return lines.join("\n");
         }
-        new import_obsidian5.Notice(t("calendar").timeFormatNotFound);
+        new import_obsidian7.Notice(t("calendar").timeFormatNotFound);
         return content;
       });
     } catch (error) {
       console.error("[HK-Work] Error updating event time:", error);
-      new import_obsidian5.Notice(t("calendar").updateTimeFailed);
+      new import_obsidian7.Notice(t("calendar").updateTimeFailed);
     }
   }, [plugin, app, snapTo15Minutes]);
   const handleEventDrop = (0, import_react9.useCallback)((info) => {
@@ -37039,6 +37269,88 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
   const handleEventResize = (0, import_react9.useCallback)((info) => {
     updateEventTimeInMarkdown(info);
   }, [updateEventTimeInMarkdown]);
+  const handleCalendarEventContextMenu = (0, import_react9.useCallback)((info, mouseEvent) => {
+    mouseEvent.preventDefault();
+    mouseEvent.stopPropagation();
+    const extendedProps = info.event.extendedProps;
+    const eventData = {
+      id: info.event.id,
+      title: info.event.title,
+      start: info.event.startStr,
+      end: info.event.endStr,
+      allDay: info.event.allDay,
+      extendedProps: {
+        filePath: extendedProps.filePath,
+        lineNumber: extendedProps.lineNumber,
+        status: extendedProps.status,
+        task: extendedProps.task,
+        item: extendedProps.item,
+        project: extendedProps.project
+      }
+    };
+    showCalendarEventContextMenu(mouseEvent, eventData, {
+      onComplete: async () => {
+        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const success = await updateItemStatus(app, extendedProps.filePath, extendedProps.lineNumber, "completed");
+        if (success && refresh) refresh();
+      },
+      onMigrateToday: async () => {
+        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const todayDate = getTodayDate();
+        const success = await updateItemDate(app, extendedProps.filePath, extendedProps.lineNumber, todayDate);
+        if (success && refresh) refresh();
+      },
+      onMigrateTomorrow: async () => {
+        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const tomorrowDate = getTomorrowDate();
+        const success = await updateItemDate(app, extendedProps.filePath, extendedProps.lineNumber, tomorrowDate);
+        if (success && refresh) refresh();
+      },
+      onMigrateCustom: () => {
+        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const dateStr = info.event.startStr.split("T")[0];
+        const modal = new DatePickerModal(app, "\u9009\u62E9\u8FC1\u79FB\u65E5\u671F", dateStr, async (newDate) => {
+          const success = await updateItemDate(app, extendedProps.filePath, extendedProps.lineNumber, newDate);
+          if (success && refresh) refresh();
+        });
+        modal.open();
+      },
+      onAbandon: async () => {
+        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const success = await updateItemStatus(app, extendedProps.filePath, extendedProps.lineNumber, "abandoned");
+        if (success && refresh) refresh();
+      },
+      onOpenDoc: async () => {
+        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const { openFileAtLine: openFileAtLine2 } = await Promise.resolve().then(() => (init_fileUtils(), fileUtils_exports));
+        await openFileAtLine2(app, extendedProps.filePath, extendedProps.lineNumber);
+      },
+      onShowDetail: () => {
+        if (!app || !plugin) return;
+        const details = {
+          title: info.event.title,
+          start: info.event.startStr,
+          end: info.event.endStr,
+          allDay: info.event.allDay,
+          project: extendedProps.project,
+          projectLinks: extendedProps.projectLinks,
+          task: extendedProps.task,
+          taskLinks: extendedProps.taskLinks,
+          level: extendedProps.level,
+          item: extendedProps.item,
+          hasItems: extendedProps.hasItems,
+          filePath: extendedProps.filePath,
+          lineNumber: extendedProps.lineNumber
+        };
+        new EventDetailsModal(app, details, plugin).open();
+      }
+    });
+  }, [app, plugin, refresh]);
+  const handleEventDidMount = (0, import_react9.useCallback)((info) => {
+    info.el.addEventListener("contextmenu", (e3) => {
+      handleCalendarEventContextMenu(info, e3);
+    }, true);
+  }, [handleCalendarEventContextMenu]);
   const calendarTexts = t("calendar");
   const calendarOptions = (0, import_react9.useMemo)(() => ({
     plugins: [index, index2, index3, index4],
@@ -37076,8 +37388,9 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
     dateClick: handleDateClick,
     eventContent: handleEventContent,
     eventDrop: handleEventDrop,
-    eventResize: handleEventResize
-  }), [handleEventClick, handleDateClick, handleEventContent, handleEventDrop, handleEventResize, calendarTexts]);
+    eventResize: handleEventResize,
+    eventDidMount: handleEventDidMount
+  }), [handleEventClick, handleDateClick, handleEventContent, handleEventDrop, handleEventResize, handleEventDidMount, calendarTexts]);
   calendarOptionsRef.current = calendarOptions;
   const isLoadingRef = (0, import_react9.useRef)(false);
   const instanceIdRef = (0, import_react9.useRef)(Math.random().toString(36).substr(2, 9));
@@ -37099,7 +37412,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       const enabledDirs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => d2.path);
       if (enabledDirs.length === 0) {
         setMissingConfig(true);
-        new import_obsidian5.Notice(t("config").setDirectory);
+        new import_obsidian7.Notice(t("config").setDirectory);
         setIsLoading(false);
         return;
       }
@@ -37129,7 +37442,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       }
     } catch (error) {
       console.error("Error loading calendar data:", error);
-      new import_obsidian5.Notice("Error loading calendar data");
+      new import_obsidian7.Notice("Error loading calendar data");
     } finally {
       isLoadingRef.current = false;
       setIsLoading(false);
@@ -37182,7 +37495,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
   const handleRefresh = (0, import_react9.useCallback)(() => {
     if (refresh) {
       refresh();
-      new import_obsidian5.Notice(t("calendar").dataRefreshed);
+      new import_obsidian7.Notice(t("calendar").dataRefreshed);
     }
   }, [refresh]);
   const handleGroupChange = (0, import_react9.useCallback)((e3) => {
@@ -37239,7 +37552,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
 // src/views/CalendarView.tsx
 var import_jsx_runtime8 = __toESM(require_jsx_runtime());
 var CALENDAR_VIEW_TYPE = "hk-work-calendar-view";
-var CalendarView = class extends import_obsidian6.ItemView {
+var CalendarView = class extends import_obsidian8.ItemView {
   plugin;
   root = null;
   unsubscribeRefresh = null;
@@ -37282,12 +37595,12 @@ var CalendarView = class extends import_obsidian6.ItemView {
 };
 
 // src/views/GanttView.tsx
-var import_obsidian8 = require("obsidian");
+var import_obsidian10 = require("obsidian");
 var import_client3 = __toESM(require_client());
 
 // src/components/GanttView.tsx
 var import_react11 = __toESM(require_react());
-var import_obsidian7 = require("obsidian");
+var import_obsidian9 = require("obsidian");
 
 // node_modules/.pnpm/dhtmlx-gantt@9.1.2/node_modules/dhtmlx-gantt/codebase/dhtmlxgantt.es.js
 function Y(t4) {
@@ -50235,7 +50548,7 @@ var GanttViewComponent = () => {
     try {
       const enabledDirs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => d2.path);
       if (enabledDirs.length === 0) {
-        new import_obsidian7.Notice(t("config").setDirectory);
+        new import_obsidian9.Notice(t("config").setDirectory);
         return;
       }
       const dirConfigs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => ({ path: d2.path, groupId: d2.groupId }));
@@ -50244,7 +50557,7 @@ var GanttViewComponent = () => {
       setProjectsData(projects);
     } catch (error) {
       console.error("Error loading data:", error);
-      new import_obsidian7.Notice("Error loading data");
+      new import_obsidian9.Notice("Error loading data");
     } finally {
       setIsLoading(false);
     }
@@ -50327,7 +50640,7 @@ var GanttViewComponent = () => {
   const handleRefresh = (0, import_react11.useCallback)(() => {
     if (refresh) {
       refresh();
-      new import_obsidian7.Notice(t("gantt").dataRefreshed);
+      new import_obsidian9.Notice(t("gantt").dataRefreshed);
     }
   }, [refresh]);
   const handleGroupChange = (0, import_react11.useCallback)((e3) => {
@@ -50443,7 +50756,7 @@ var GanttViewComponent = () => {
 // src/views/GanttView.tsx
 var import_jsx_runtime10 = __toESM(require_jsx_runtime());
 var GANTT_VIEW_TYPE = "hk-work-gantt-view";
-var GanttView = class extends import_obsidian8.ItemView {
+var GanttView = class extends import_obsidian10.ItemView {
   plugin;
   root = null;
   constructor(leaf, plugin) {
@@ -50476,11 +50789,12 @@ var GanttView = class extends import_obsidian8.ItemView {
 
 // src/views/TodoSidebarView.tsx
 var import_react13 = __toESM(require_react());
-var import_obsidian9 = require("obsidian");
+var import_obsidian11 = require("obsidian");
 var import_client4 = __toESM(require_client());
 
 // src/components/TodoSidebar.tsx
 var import_react12 = __toESM(require_react());
+init_fileUtils();
 var import_jsx_runtime11 = __toESM(require_jsx_runtime());
 var TodoSidebar = ({ onItemClick }) => {
   const pluginContext = usePlugin();
@@ -50663,6 +50977,88 @@ var TodoSidebar = ({ onItemClick }) => {
       loadItems();
     }
   };
+  const handleMigrateCustom = (item) => {
+    if (!app) return;
+    const modal = new DatePickerModal(app, "\u9009\u62E9\u8FC1\u79FB\u65E5\u671F", item.date, async (newDate) => {
+      if (!item.project?.filePath || !item.lineNumber) return;
+      const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
+      const newTime = timeMatch ? timeMatch[1] : void 0;
+      const success = await updateItemDate(app, item.project.filePath, item.lineNumber, newDate, newTime);
+      if (success) {
+        loadItems();
+      }
+    });
+    modal.open();
+  };
+  const handleContextMenu = (e3, item) => {
+    e3.preventDefault();
+    e3.stopPropagation();
+    showItemContextMenu(e3, item, {
+      onComplete: async () => {
+        if (!app || !item.project?.filePath || !item.lineNumber) return;
+        const success = await updateItemStatus(app, item.project.filePath, item.lineNumber, "completed");
+        if (success) loadItems();
+      },
+      onMigrateToday: async () => {
+        if (!app || !item.project?.filePath || !item.lineNumber) return;
+        const todayDate = getTodayDate();
+        const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
+        const newTime = timeMatch ? timeMatch[1] : void 0;
+        const success = await updateItemDate(app, item.project.filePath, item.lineNumber, todayDate, newTime);
+        if (success) loadItems();
+      },
+      onMigrateTomorrow: async () => {
+        if (!app || !item.project?.filePath || !item.lineNumber) return;
+        const tomorrowDate = getTomorrowDate();
+        const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
+        const newTime = timeMatch ? timeMatch[1] : void 0;
+        const success = await updateItemDate(app, item.project.filePath, item.lineNumber, tomorrowDate, newTime);
+        if (success) loadItems();
+      },
+      onMigrateCustom: () => handleMigrateCustom(item),
+      onAbandon: async () => {
+        if (!app || !item.project?.filePath || !item.lineNumber) return;
+        const success = await updateItemStatus(app, item.project.filePath, item.lineNumber, "abandoned");
+        if (success) loadItems();
+      },
+      onOpenDoc: () => handleItemClick(item),
+      onShowDetail: () => {
+        if (app && pluginContext?.plugin) {
+          const modal = new EventDetailsModal(app, {
+            title: item.task?.name || item.content,
+            start: item.startDateTime || item.date,
+            end: item.endDateTime,
+            allDay: !item.startDateTime,
+            project: item.project?.name,
+            projectLinks: item.project?.links,
+            task: item.task?.name,
+            taskLinks: item.task?.links,
+            level: item.task?.level,
+            item: item.content,
+            hasItems: true,
+            filePath: item.project?.filePath,
+            lineNumber: item.lineNumber
+          }, pluginContext.plugin);
+          modal.open();
+        }
+      },
+      onShowCalendar: () => {
+        if (!app) return;
+        const dateStr = item.date;
+        app.workspace.getLeavesOfType(CALENDAR_VIEW_TYPE).forEach(async (leaf) => {
+          app.workspace.revealLeaf(leaf);
+          const view = leaf.view;
+          if (view?.componentRef?.current) {
+            const calendarInstance = view.componentRef.current.getCalendarInstance();
+            if (calendarInstance) {
+              calendarInstance.gotoDate(dateStr);
+              calendarInstance.changeView("timeGridDay");
+            }
+          }
+        });
+      }
+    });
+  };
   const toggleSection = (section) => {
     setCollapsedSections((prev) => ({
       ...prev,
@@ -50681,6 +51077,7 @@ var TodoSidebar = ({ onItemClick }) => {
     {
       className: `hk-work-todo-item ${item.status === "completed" ? "status-completed" : ""} ${item.status === "abandoned" ? "status-abandoned" : ""}`,
       onClick: () => handleItemClick(item),
+      onContextMenu: (e3) => handleContextMenu(e3, item),
       children: [
         /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-item-content", children: [
           /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-item-header", children: [
@@ -50817,9 +51214,10 @@ var TodoSidebar = ({ onItemClick }) => {
 };
 
 // src/views/TodoSidebarView.tsx
+init_fileUtils();
 var import_jsx_runtime12 = __toESM(require_jsx_runtime());
 var TODO_SIDEBAR_VIEW_TYPE = "hk-work-todo-sidebar";
-var TodoSidebarView = class extends import_obsidian9.ItemView {
+var TodoSidebarView = class extends import_obsidian11.ItemView {
   plugin;
   root = null;
   unsubscribeRefresh = null;
@@ -50861,7 +51259,7 @@ var TodoSidebarView = class extends import_obsidian9.ItemView {
 };
 
 // src/editor/TaskGutter.ts
-var import_obsidian10 = require("obsidian");
+var import_obsidian12 = require("obsidian");
 var import_view = require("@codemirror/view");
 var import_state = require("@codemirror/state");
 function getApp() {
@@ -50888,7 +51286,7 @@ var TaskButtonWidget = class extends import_view.WidgetType {
     const app = getApp();
     const activeLeaf = app.workspace.getLeaf(false);
     let file = null;
-    if (activeLeaf.view instanceof import_obsidian10.MarkdownView) {
+    if (activeLeaf.view instanceof import_obsidian12.MarkdownView) {
       file = activeLeaf.view.file;
     } else {
       file = app.workspace.getActiveFile();
@@ -51015,7 +51413,7 @@ var DEFAULT_SETTINGS = {
   lunchBreakStart: "12:00",
   lunchBreakEnd: "13:00"
 };
-var HKWorkPlugin = class extends import_obsidian11.Plugin {
+var HKWorkPlugin = class extends import_obsidian13.Plugin {
   settings;
   refreshCallbacks = /* @__PURE__ */ new Set();
   debouncedRefresh;
@@ -51023,7 +51421,7 @@ var HKWorkPlugin = class extends import_obsidian11.Plugin {
   constructor(app, manifest) {
     super(app, manifest);
     this.settings = { ...DEFAULT_SETTINGS };
-    this.debouncedRefresh = (0, import_obsidian11.debounce)(this.triggerRefresh.bind(this), 500, true);
+    this.debouncedRefresh = (0, import_obsidian13.debounce)(this.triggerRefresh.bind(this), 500, true);
   }
   async onload() {
     await this.loadSettings();
@@ -51252,7 +51650,7 @@ var HKWorkPlugin = class extends import_obsidian11.Plugin {
     }
   }
 };
-var HKWorkSettingTab = class extends import_obsidian11.PluginSettingTab {
+var HKWorkSettingTab = class extends import_obsidian13.PluginSettingTab {
   plugin;
   constructor(app, plugin) {
     super(app, plugin);
@@ -51262,24 +51660,24 @@ var HKWorkSettingTab = class extends import_obsidian11.PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
     containerEl.createEl("h2", { text: t("settings").title });
-    new import_obsidian11.Setting(containerEl).setName(t("settings").defaultView.title).setDesc(t("settings").defaultView.description).addDropdown((dropdown) => dropdown.addOption("project", t("settings").defaultView.options.project).addOption("calendar", t("settings").defaultView.options.calendar).addOption("gantt", t("settings").defaultView.options.gantt).setValue(this.plugin.settings.defaultView).onChange(async (value) => {
+    new import_obsidian13.Setting(containerEl).setName(t("settings").defaultView.title).setDesc(t("settings").defaultView.description).addDropdown((dropdown) => dropdown.addOption("project", t("settings").defaultView.options.project).addOption("calendar", t("settings").defaultView.options.calendar).addOption("gantt", t("settings").defaultView.options.gantt).setValue(this.plugin.settings.defaultView).onChange(async (value) => {
       this.plugin.settings.defaultView = value;
       await this.plugin.saveSettings();
     }));
-    new import_obsidian11.Setting(containerEl).setName(t("settings").lunchBreak.title).setDesc(t("settings").lunchBreak.description).setHeading();
-    new import_obsidian11.Setting(containerEl).setName(t("settings").lunchBreak.start.title).setDesc(t("settings").lunchBreak.start.description).addText((text) => text.setPlaceholder("12:00").setValue(this.plugin.settings.lunchBreakStart).onChange(async (value) => {
+    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.title).setDesc(t("settings").lunchBreak.description).setHeading();
+    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.start.title).setDesc(t("settings").lunchBreak.start.description).addText((text) => text.setPlaceholder("12:00").setValue(this.plugin.settings.lunchBreakStart).onChange(async (value) => {
       if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
         this.plugin.settings.lunchBreakStart = value;
         await this.plugin.saveSettings();
       }
     }));
-    new import_obsidian11.Setting(containerEl).setName(t("settings").lunchBreak.end.title).setDesc(t("settings").lunchBreak.end.description).addText((text) => text.setPlaceholder("13:00").setValue(this.plugin.settings.lunchBreakEnd).onChange(async (value) => {
+    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.end.title).setDesc(t("settings").lunchBreak.end.description).addText((text) => text.setPlaceholder("13:00").setValue(this.plugin.settings.lunchBreakEnd).onChange(async (value) => {
       if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
         this.plugin.settings.lunchBreakEnd = value;
         await this.plugin.saveSettings();
       }
     }));
-    new import_obsidian11.Setting(containerEl).setName(t("settings").projectGroups.title).setDesc(t("settings").projectGroups.description).setHeading().addButton((button) => button.setButtonText(t("settings").projectGroups.addButton).setCta().onClick(() => {
+    new import_obsidian13.Setting(containerEl).setName(t("settings").projectGroups.title).setDesc(t("settings").projectGroups.description).setHeading().addButton((button) => button.setButtonText(t("settings").projectGroups.addButton).setCta().onClick(() => {
       const newGroup = {
         id: "group-" + Date.now(),
         name: ""
@@ -51294,7 +51692,7 @@ var HKWorkSettingTab = class extends import_obsidian11.PluginSettingTab {
     this.renderProjectGroups(groupsContainer, containerEl);
     const defaultGroupContainer = containerEl.createDiv({ cls: "hk-work-default-group-container" });
     this.renderDefaultGroupDropdown(defaultGroupContainer);
-    new import_obsidian11.Setting(containerEl).setName(t("settings").projectDirectories.title).setHeading().addButton((button) => button.setButtonText(t("settings").projectDirectories.addButton).setCta().onClick(() => {
+    new import_obsidian13.Setting(containerEl).setName(t("settings").projectDirectories.title).setHeading().addButton((button) => button.setButtonText(t("settings").projectDirectories.addButton).setCta().onClick(() => {
       this.plugin.settings.projectDirectories.push({ path: "", enabled: true });
       this.plugin.saveSettings();
       this.renderProjectDirectories(containerEl);
@@ -51303,7 +51701,7 @@ var HKWorkSettingTab = class extends import_obsidian11.PluginSettingTab {
   }
   renderDefaultGroupDropdown(container) {
     container.empty();
-    new import_obsidian11.Setting(container).setName(t("settings").projectGroups.defaultGroupTitle).setDesc(t("settings").projectGroups.defaultGroupDesc).addDropdown((dropdown) => {
+    new import_obsidian13.Setting(container).setName(t("settings").projectGroups.defaultGroupTitle).setDesc(t("settings").projectGroups.defaultGroupDesc).addDropdown((dropdown) => {
       dropdown.addOption("", t("settings").projectGroups.allGroups);
       this.plugin.settings.projectGroups.forEach((group) => {
         dropdown.addOption(group.id, group.name || t("settings").projectGroups.unnamed);
@@ -51319,11 +51717,11 @@ var HKWorkSettingTab = class extends import_obsidian11.PluginSettingTab {
   renderProjectGroups(groupsContainer, mainContainer) {
     groupsContainer.empty();
     if (this.plugin.settings.projectGroups.length === 0) {
-      new import_obsidian11.Setting(groupsContainer).setDesc(t("settings").projectGroups.emptyMessage).setClass("hk-work-group-setting");
+      new import_obsidian13.Setting(groupsContainer).setDesc(t("settings").projectGroups.emptyMessage).setClass("hk-work-group-setting");
       return;
     }
     this.plugin.settings.projectGroups.forEach((group, index5) => {
-      const setting = new import_obsidian11.Setting(groupsContainer).setClass("hk-work-group-setting").addText((text) => text.setPlaceholder(t("settings").projectGroups.namePlaceholder).setValue(group.name).onChange(async (value) => {
+      const setting = new import_obsidian13.Setting(groupsContainer).setClass("hk-work-group-setting").addText((text) => text.setPlaceholder(t("settings").projectGroups.namePlaceholder).setValue(group.name).onChange(async (value) => {
         this.plugin.settings.projectGroups[index5].name = value;
         await this.plugin.saveSettings();
         const defaultGroupContainer = mainContainer.querySelector(".hk-work-default-group-container");
@@ -51354,7 +51752,7 @@ var HKWorkSettingTab = class extends import_obsidian11.PluginSettingTab {
   renderProjectDirectories(containerEl) {
     containerEl.querySelectorAll(".hk-work-dir-setting").forEach((el) => el.remove());
     if (this.plugin.settings.projectDirectories.length === 0) {
-      new import_obsidian11.Setting(containerEl).setDesc(t("settings").projectDirectories.emptyMessage).setClass("hk-work-dir-setting");
+      new import_obsidian13.Setting(containerEl).setDesc(t("settings").projectDirectories.emptyMessage).setClass("hk-work-dir-setting");
       return;
     }
     this.plugin.settings.projectDirectories.forEach((dir, index5) => {
@@ -51362,7 +51760,7 @@ var HKWorkSettingTab = class extends import_obsidian11.PluginSettingTab {
       this.plugin.settings.projectGroups.forEach((group) => {
         groupOptions[group.id] = group.name || t("settings").projectGroups.unnamed;
       });
-      const setting = new import_obsidian11.Setting(containerEl).setName(dir.path || t("settings").projectDirectories.noPath).setClass("hk-work-dir-setting");
+      const setting = new import_obsidian13.Setting(containerEl).setName(dir.path || t("settings").projectDirectories.noPath).setClass("hk-work-dir-setting");
       if (this.plugin.settings.projectGroups.length > 0) {
         setting.addDropdown((dropdown) => dropdown.addOptions(groupOptions).setValue(dir.groupId || "").onChange(async (value) => {
           this.plugin.settings.projectDirectories[index5].groupId = value || void 0;

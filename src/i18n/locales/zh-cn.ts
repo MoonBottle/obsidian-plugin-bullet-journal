@@ -167,6 +167,19 @@ export const zhCN = {
   config: {
     setDirectory: '请在插件设置中配置至少一个项目目录',
   },
+
+  // 右键菜单
+  contextMenu: {
+    complete: '完成',
+    abandon: '放弃',
+    migrate: '迁移',
+    migrateToday: '今天',
+    migrateTomorrow: '明天',
+    migrateCustom: '选择日期...',
+    openDoc: '打开文档',
+    showDetail: '查看详情',
+    showCalendar: '查看日历',
+  },
 };
 
 export type Translations = typeof zhCN;

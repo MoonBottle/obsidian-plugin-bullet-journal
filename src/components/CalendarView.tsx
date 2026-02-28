@@ -12,8 +12,11 @@ import { MarkdownParser } from '../parser/markdownParser';
 import { DataConverter } from '../utils/dataConverter';
 import { Item } from '../models/types';
 import { EventDetailsModal, EventDetails } from '../modals/EventDetailsModal';
+import { DatePickerModal } from '../modals/DatePickerModal';
 import { t } from '../i18n';
 import { GroupSelect, RefreshButton, ViewHeader } from './shared';
+import { showCalendarEventContextMenu } from '../utils/contextMenu';
+import { updateItemStatus, updateItemDate, getTomorrowDate, getTodayDate } from '../utils/fileUtils';
 import {
   DATE_TIME_RANGE_PATTERN,
   SINGLE_DATE_TIME_PATTERN,
@@ -290,6 +293,92 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
     updateEventTimeInMarkdown(info);
   }, [updateEventTimeInMarkdown]);
 
+  const handleCalendarEventContextMenu = useCallback((info: any, mouseEvent: MouseEvent) => {
+    mouseEvent.preventDefault();
+    mouseEvent.stopPropagation();
+    
+    const extendedProps = info.event.extendedProps;
+    const eventData = {
+      id: info.event.id,
+      title: info.event.title,
+      start: info.event.startStr,
+      end: info.event.endStr,
+      allDay: info.event.allDay,
+      extendedProps: {
+        filePath: extendedProps.filePath,
+        lineNumber: extendedProps.lineNumber,
+        status: extendedProps.status,
+        task: extendedProps.task,
+        item: extendedProps.item,
+        project: extendedProps.project
+      }
+    };
+
+    showCalendarEventContextMenu(mouseEvent, eventData, {
+      onComplete: async () => {
+        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const success = await updateItemStatus(app, extendedProps.filePath, extendedProps.lineNumber, 'completed');
+        if (success && refresh) refresh();
+      },
+      onMigrateToday: async () => {
+        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const todayDate = getTodayDate();
+        const success = await updateItemDate(app, extendedProps.filePath, extendedProps.lineNumber, todayDate);
+        if (success && refresh) refresh();
+      },
+      onMigrateTomorrow: async () => {
+        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const tomorrowDate = getTomorrowDate();
+        const success = await updateItemDate(app, extendedProps.filePath, extendedProps.lineNumber, tomorrowDate);
+        if (success && refresh) refresh();
+      },
+      onMigrateCustom: () => {
+        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const dateStr = info.event.startStr.split('T')[0];
+        const modal = new DatePickerModal(app, '选择迁移日期', dateStr, async (newDate: string) => {
+          const success = await updateItemDate(app, extendedProps.filePath!, extendedProps.lineNumber!, newDate);
+          if (success && refresh) refresh();
+        });
+        modal.open();
+      },
+      onAbandon: async () => {
+        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const success = await updateItemStatus(app, extendedProps.filePath, extendedProps.lineNumber, 'abandoned');
+        if (success && refresh) refresh();
+      },
+      onOpenDoc: async () => {
+        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const { openFileAtLine } = await import('../utils/fileUtils');
+        await openFileAtLine(app, extendedProps.filePath, extendedProps.lineNumber);
+      },
+      onShowDetail: () => {
+        if (!app || !plugin) return;
+        const details: EventDetails = {
+          title: info.event.title,
+          start: info.event.startStr,
+          end: info.event.endStr,
+          allDay: info.event.allDay,
+          project: extendedProps.project,
+          projectLinks: extendedProps.projectLinks,
+          task: extendedProps.task,
+          taskLinks: extendedProps.taskLinks,
+          level: extendedProps.level,
+          item: extendedProps.item,
+          hasItems: extendedProps.hasItems,
+          filePath: extendedProps.filePath,
+          lineNumber: extendedProps.lineNumber
+        };
+        new EventDetailsModal(app, details, plugin).open();
+      }
+    });
+  }, [app, plugin, refresh]);
+
+  const handleEventDidMount = useCallback((info: any) => {
+    info.el.addEventListener('contextmenu', (e: MouseEvent) => {
+      handleCalendarEventContextMenu(info, e);
+    }, true);
+  }, [handleCalendarEventContextMenu]);
+
   const calendarTexts = t('calendar');
   const calendarOptions = useMemo(() => ({
     plugins: [dayGridPlugin, timeGridPluginOriginal, listPlugin, interactionPlugin],
@@ -327,8 +416,9 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
     dateClick: handleDateClick,
     eventContent: handleEventContent,
     eventDrop: handleEventDrop,
-    eventResize: handleEventResize
-  }), [handleEventClick, handleDateClick, handleEventContent, handleEventDrop, handleEventResize, calendarTexts]);
+    eventResize: handleEventResize,
+    eventDidMount: handleEventDidMount
+  }), [handleEventClick, handleDateClick, handleEventContent, handleEventDrop, handleEventResize, handleEventDidMount, calendarTexts]);
 
   calendarOptionsRef.current = calendarOptions;
 
