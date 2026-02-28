@@ -36870,40 +36870,123 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
 var import_obsidian5 = require("obsidian");
 var DatePickerModal = class extends import_obsidian5.Modal {
   selectedDate;
+  currentYear;
+  currentMonth;
   onConfirm;
   title;
+  contentEl_div;
   constructor(app, title, initialDate, onConfirm) {
     super(app);
     this.title = title;
     this.selectedDate = initialDate;
     this.onConfirm = onConfirm;
+    const today = /* @__PURE__ */ new Date();
+    this.currentYear = today.getFullYear();
+    this.currentMonth = today.getMonth();
+    if (initialDate) {
+      const parts = initialDate.split("-");
+      if (parts.length === 3) {
+        this.currentYear = parseInt(parts[0]);
+        this.currentMonth = parseInt(parts[1]) - 1;
+      }
+    }
   }
   onOpen() {
     const { contentEl } = this;
     contentEl.addClass("hk-work-date-picker-modal");
     contentEl.createEl("h2", { text: this.title });
-    const dateContainer = contentEl.createEl("div", { cls: "hk-work-date-picker-container" });
-    const dateInput = dateContainer.createEl("input", {
-      attr: {
-        type: "date",
-        value: this.selectedDate
-      }
+    this.contentEl_div = contentEl.createDiv({ cls: "hk-work-date-picker-content" });
+    this.renderContent();
+  }
+  renderContent() {
+    this.contentEl_div.empty();
+    const navContainer = this.contentEl_div.createDiv({ cls: "hk-work-date-picker-nav" });
+    navContainer.createEl("button", { text: "\xAB", cls: "hk-work-date-picker-nav-btn" }, (btn) => {
+      btn.addEventListener("click", () => {
+        this.currentYear--;
+        this.renderContent();
+      });
     });
-    dateInput.addEventListener("change", () => {
-      this.selectedDate = dateInput.value;
+    navContainer.createEl("button", { text: "\u2039", cls: "hk-work-date-picker-nav-btn" }, (btn) => {
+      btn.addEventListener("click", () => {
+        this.currentMonth--;
+        if (this.currentMonth < 0) {
+          this.currentMonth = 11;
+          this.currentYear--;
+        }
+        this.renderContent();
+      });
     });
-    const buttonsContainer = contentEl.createEl("div", { cls: "hk-work-modal-buttons" });
-    const cancelButton = buttonsContainer.createEl("button", { text: "\u53D6\u6D88" });
-    cancelButton.addEventListener("click", () => {
-      this.close();
+    navContainer.createEl("span", {
+      text: `${this.currentYear}\u5E74${this.currentMonth + 1}\u6708`,
+      cls: "hk-work-date-picker-month-label"
     });
-    const confirmButton = buttonsContainer.createEl("button", {
-      text: "\u786E\u8BA4",
-      cls: "mod-cta"
+    navContainer.createEl("button", { text: "\u203A", cls: "hk-work-date-picker-nav-btn" }, (btn) => {
+      btn.addEventListener("click", () => {
+        this.currentMonth++;
+        if (this.currentMonth > 11) {
+          this.currentMonth = 0;
+          this.currentYear++;
+        }
+        this.renderContent();
+      });
     });
-    confirmButton.addEventListener("click", () => {
-      this.onConfirm(this.selectedDate);
-      this.close();
+    navContainer.createEl("button", { text: "\xBB", cls: "hk-work-date-picker-nav-btn" }, (btn) => {
+      btn.addEventListener("click", () => {
+        this.currentYear++;
+        this.renderContent();
+      });
+    });
+    const calendarContainer = this.contentEl_div.createDiv({ cls: "hk-work-date-picker-calendar" });
+    const headerRow = calendarContainer.createDiv({ cls: "hk-work-date-picker-header" });
+    const weekDays = ["\u65E5", "\u4E00", "\u4E8C", "\u4E09", "\u56DB", "\u4E94", "\u516D"];
+    weekDays.forEach((day) => {
+      headerRow.createEl("span", { text: day, cls: "hk-work-date-picker-weekday" });
+    });
+    const gridContainer = calendarContainer.createDiv({ cls: "hk-work-date-picker-grid" });
+    const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+    const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+    const startDayOfWeek = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+    const today = /* @__PURE__ */ new Date();
+    const todayStr = today.toISOString().split("T")[0];
+    for (let i3 = 0; i3 < startDayOfWeek; i3++) {
+      gridContainer.createEl("span", { cls: "hk-work-date-picker-day empty" });
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const isToday = dateStr === todayStr;
+      const isSelected = dateStr === this.selectedDate;
+      let classes = "hk-work-date-picker-day";
+      if (isToday) classes += " today";
+      if (isSelected) classes += " selected";
+      const dayEl = gridContainer.createEl("span", { text: String(day), cls: classes });
+      dayEl.dataset.date = dateStr;
+      dayEl.addEventListener("click", () => {
+        this.selectedDate = dateStr;
+        this.renderContent();
+      });
+    }
+    const buttonsContainer = this.contentEl_div.createDiv({ cls: "hk-work-date-picker-buttons" });
+    buttonsContainer.createEl("button", { text: "\u4ECA\u5929", cls: "hk-work-date-picker-btn" }, (btn) => {
+      btn.addEventListener("click", () => {
+        const todayDate = /* @__PURE__ */ new Date();
+        this.selectedDate = todayDate.toISOString().split("T")[0];
+        this.currentYear = todayDate.getFullYear();
+        this.currentMonth = todayDate.getMonth();
+        this.renderContent();
+      });
+    });
+    buttonsContainer.createEl("button", { text: "\u53D6\u6D88", cls: "hk-work-date-picker-btn hk-work-date-picker-btn-cancel" }, (btn) => {
+      btn.addEventListener("click", () => {
+        this.close();
+      });
+    });
+    buttonsContainer.createEl("button", { text: "\u786E\u8BA4", cls: "hk-work-date-picker-btn hk-work-date-picker-btn-confirm" }, (btn) => {
+      btn.addEventListener("click", () => {
+        this.onConfirm(this.selectedDate);
+        this.close();
+      });
     });
   }
   onClose() {
