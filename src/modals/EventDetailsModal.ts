@@ -152,17 +152,6 @@ export class EventDetailsModal extends Modal {
     // Buttons container
     const buttonsContainer = contentEl.createEl('div', { cls: 'hk-work-modal-buttons' });
 
-    // Postpone to tomorrow button
-    if (this.details.filePath && this.details.lineNumber) {
-      const postponeBtn = buttonsContainer.createEl('button', {
-        text: '明日再议',
-        cls: 'hk-work-open-file-btn'
-      });
-      postponeBtn.addEventListener('click', async () => {
-        await this.postponeToTomorrow();
-      });
-    }
-
     // If opened from editor, show "Open Calendar" button
     if (this.details.fromEditor) {
       const openCalendarBtn = buttonsContainer.createEl('button', {
@@ -198,7 +187,7 @@ export class EventDetailsModal extends Modal {
     } else if (this.details.filePath) {
       // Add open file button if file path is available (for non-editor context)
       const openButton = buttonsContainer.createEl('button', {
-        text: '打开文件',
+        text: '打开文档',
         cls: 'hk-work-open-file-btn'
       });
       openButton.addEventListener('click', async () => {

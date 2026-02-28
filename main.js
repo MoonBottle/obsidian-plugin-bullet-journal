@@ -36734,15 +36734,6 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
     }
     contentEl.createEl("hr", { cls: "hk-work-modal-divider" });
     const buttonsContainer = contentEl.createEl("div", { cls: "hk-work-modal-buttons" });
-    if (this.details.filePath && this.details.lineNumber) {
-      const postponeBtn = buttonsContainer.createEl("button", {
-        text: "\u660E\u65E5\u518D\u8BAE",
-        cls: "hk-work-open-file-btn"
-      });
-      postponeBtn.addEventListener("click", async () => {
-        await this.postponeToTomorrow();
-      });
-    }
     if (this.details.fromEditor) {
       const openCalendarBtn = buttonsContainer.createEl("button", {
         text: "\u6253\u5F00\u65E5\u5386",
@@ -36768,7 +36759,7 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
       });
     } else if (this.details.filePath) {
       const openButton = buttonsContainer.createEl("button", {
-        text: "\u6253\u5F00\u6587\u4EF6",
+        text: "\u6253\u5F00\u6587\u6863",
         cls: "hk-work-open-file-btn"
       });
       openButton.addEventListener("click", async () => {
