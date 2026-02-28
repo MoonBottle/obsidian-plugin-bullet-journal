@@ -1,7 +1,7 @@
 export const zhCN = {
   // 设置界面
   settings: {
-    title: 'HK-Work Visualizer 设置',
+    title: '子弹笔记设置',
     projectGroups: {
       title: '项目分组',
       description: '管理项目分组，用于区分不同类型的项目（如工作、生活）',
@@ -98,7 +98,7 @@ export const zhCN = {
     allDay: '全天',
     noEvents: '暂无事件',
     noDataDirectory: '未配置数据目录',
-    configureDirectory: '请在插件设置中配置 HK-Work 数据目录以启用日历视图。',
+    configureDirectory: '请在插件设置中配置子弹笔记数据目录以启用日历视图。',
     refreshData: '刷新数据',
     dataRefreshed: '数据已刷新',
     updateTimeFailed: '更新时间失败',

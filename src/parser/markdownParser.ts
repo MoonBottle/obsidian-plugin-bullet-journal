@@ -211,7 +211,7 @@ export class MarkdownParser {
 
     // Log parsed project data for debugging
     if (project.name) {
-      console.log('[HK-Work Parser] Parsed project:', project);
+      console.log('[BulletJournal Parser] Parsed project:', project);
     }
 
     return project.name ? project : null;

@@ -294,7 +294,7 @@ export class EventDetailsModal extends Modal {
         return content;
       });
     } catch (error) {
-      console.error('[HK-Work] Error postponing event:', error);
+      console.error('[BulletJournal] Error postponing event:', error);
       new Notice('推迟失败');
     }
   }

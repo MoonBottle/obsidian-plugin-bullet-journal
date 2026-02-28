@@ -136,9 +136,9 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
   }, [loadItems, pluginContext]);
 
   const handleItemClick = async (item: Item) => {
-    console.log('[HK-Work TodoSidebar] Debug - item:', item);
-    console.log('[HK-Work TodoSidebar] Debug - item.project?.filePath:', item.project?.filePath);
-    console.log('[HK-Work TodoSidebar] Debug - item.lineNumber:', item.lineNumber);
+    console.log('[BulletJournal TodoSidebar] Debug - item:', item);
+    console.log('[BulletJournal TodoSidebar] Debug - item.project?.filePath:', item.project?.filePath);
+    console.log('[BulletJournal TodoSidebar] Debug - item.lineNumber:', item.lineNumber);
     if (!app || !item.project?.filePath) return;
 
     await openFileAtLine(app, item.project.filePath, item.lineNumber);

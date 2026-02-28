@@ -198,7 +198,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
 
   const updateEventTimeInMarkdown = useCallback(async (info: any) => {
     if (!plugin || !app) {
-      console.log('[HK-Work] Plugin or app is null');
+      console.log('[BulletJournal] Plugin or app is null');
       return;
     }
 
@@ -280,7 +280,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
         return content;
       });
     } catch (error) {
-      console.error('[HK-Work] Error updating event time:', error);
+      console.error('[BulletJournal] Error updating event time:', error);
       new Notice(t('calendar').updateTimeFailed);
     }
   }, [plugin, app, snapTo15Minutes]);
@@ -424,23 +424,23 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
 
   const isLoadingRef = useRef(false);
   const instanceIdRef = useRef(Math.random().toString(36).substr(2, 9));
-  console.log('[HK-Work Debug] Component render, instanceId:', instanceIdRef.current, 'isLoadingRef:', isLoadingRef.current);
+  console.log('[BulletJournal Debug] Component render, instanceId:', instanceIdRef.current, 'isLoadingRef:', isLoadingRef.current);
 
   const loadCalendarData = useCallback(async () => {
-    console.log('[HK-Work Debug] loadCalendarData called, instanceId:', instanceIdRef.current, 'isLoadingRef:', isLoadingRef.current, 'plugin:', !!plugin);
+    console.log('[BulletJournal Debug] loadCalendarData called, instanceId:', instanceIdRef.current, 'isLoadingRef:', isLoadingRef.current, 'plugin:', !!plugin);
     if (!plugin || !calendarRef.current) {
-      console.log('[HK-Work Debug] Early return, plugin:', !!plugin, 'calendarRef:', !!calendarRef.current);
+      console.log('[BulletJournal Debug] Early return, plugin:', !!plugin, 'calendarRef:', !!calendarRef.current);
       return;
     }
 
     // Prevent concurrent loading
     if (isLoadingRef.current) {
-      console.log('[HK-Work Debug] Already loading, skipping');
+      console.log('[BulletJournal Debug] Already loading, skipping');
       return;
     }
 
     isLoadingRef.current = true;
-    console.log('[HK-Work Debug] Set isLoadingRef to true');
+    console.log('[BulletJournal Debug] Set isLoadingRef to true');
     setIsLoading(true);
 
     try {
@@ -520,7 +520,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
   // Log when component unmounts
   useEffect(() => {
     return () => {
-      console.log('[HK-Work Debug] Component unmount, instanceId:', instanceIdRef.current);
+      console.log('[BulletJournal Debug] Component unmount, instanceId:', instanceIdRef.current);
     };
   }, []);
 

@@ -3,7 +3,7 @@ import { Translations } from './zh-cn';
 export const en: Translations = {
   // Settings
   settings: {
-    title: 'HK-Work Visualizer Settings',
+    title: 'Bullet Journal Settings',
     projectGroups: {
       title: 'Project Groups',
       description: 'Manage project groups to categorize different types of projects (e.g., Work, Life)',
@@ -88,7 +88,7 @@ export const en: Translations = {
     allDay: 'All day',
     noEvents: 'No events',
     noDataDirectory: 'No Data Directory Configured',
-    configureDirectory: 'Please configure the HK-Work data directory in plugin settings to enable calendar view.',
+    configureDirectory: 'Please configure the Bullet Journal data directory in plugin settings to enable calendar view.',
     refreshData: 'Refresh Data',
     dataRefreshed: 'Data refreshed',
     updateTimeFailed: 'Failed to update time',

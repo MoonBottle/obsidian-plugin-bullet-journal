@@ -21873,7 +21873,7 @@ var import_react7 = __toESM(require_react());
 var zhCN = {
   // 设置界面
   settings: {
-    title: "HK-Work Visualizer \u8BBE\u7F6E",
+    title: "\u5B50\u5F39\u7B14\u8BB0\u8BBE\u7F6E",
     projectGroups: {
       title: "\u9879\u76EE\u5206\u7EC4",
       description: "\u7BA1\u7406\u9879\u76EE\u5206\u7EC4\uFF0C\u7528\u4E8E\u533A\u5206\u4E0D\u540C\u7C7B\u578B\u7684\u9879\u76EE\uFF08\u5982\u5DE5\u4F5C\u3001\u751F\u6D3B\uFF09",
@@ -21966,7 +21966,7 @@ var zhCN = {
     allDay: "\u5168\u5929",
     noEvents: "\u6682\u65E0\u4E8B\u4EF6",
     noDataDirectory: "\u672A\u914D\u7F6E\u6570\u636E\u76EE\u5F55",
-    configureDirectory: "\u8BF7\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E HK-Work \u6570\u636E\u76EE\u5F55\u4EE5\u542F\u7528\u65E5\u5386\u89C6\u56FE\u3002",
+    configureDirectory: "\u8BF7\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u5B50\u5F39\u7B14\u8BB0\u6570\u636E\u76EE\u5F55\u4EE5\u542F\u7528\u65E5\u5386\u89C6\u56FE\u3002",
     refreshData: "\u5237\u65B0\u6570\u636E",
     dataRefreshed: "\u6570\u636E\u5DF2\u5237\u65B0",
     updateTimeFailed: "\u66F4\u65B0\u65F6\u95F4\u5931\u8D25",
@@ -22049,7 +22049,7 @@ var zhCN = {
 var en = {
   // Settings
   settings: {
-    title: "HK-Work Visualizer Settings",
+    title: "Bullet Journal Settings",
     projectGroups: {
       title: "Project Groups",
       description: "Manage project groups to categorize different types of projects (e.g., Work, Life)",
@@ -22130,7 +22130,7 @@ var en = {
     allDay: "All day",
     noEvents: "No events",
     noDataDirectory: "No Data Directory Configured",
-    configureDirectory: "Please configure the HK-Work data directory in plugin settings to enable calendar view.",
+    configureDirectory: "Please configure the Bullet Journal data directory in plugin settings to enable calendar view.",
     refreshData: "Refresh Data",
     dataRefreshed: "Data refreshed",
     updateTimeFailed: "Failed to update time",
@@ -22461,7 +22461,7 @@ var MarkdownParser = class {
       project.name = fileName.replace(/\.md$/i, "");
     }
     if (project.name) {
-      console.log("[HK-Work Parser] Parsed project:", project);
+      console.log("[BulletJournal Parser] Parsed project:", project);
     }
     return project.name ? project : null;
   }
@@ -36851,7 +36851,7 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
         return content;
       });
     } catch (error) {
-      console.error("[HK-Work] Error postponing event:", error);
+      console.error("[BulletJournal] Error postponing event:", error);
       new import_obsidian4.Notice("\u63A8\u8FDF\u5931\u8D25");
     }
   }
@@ -37273,7 +37273,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
   }, []);
   const updateEventTimeInMarkdown = (0, import_react9.useCallback)(async (info) => {
     if (!plugin || !app) {
-      console.log("[HK-Work] Plugin or app is null");
+      console.log("[BulletJournal] Plugin or app is null");
       return;
     }
     let start = info.event.start;
@@ -37333,7 +37333,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
         return content;
       });
     } catch (error) {
-      console.error("[HK-Work] Error updating event time:", error);
+      console.error("[BulletJournal] Error updating event time:", error);
       new import_obsidian7.Notice(t("calendar").updateTimeFailed);
     }
   }, [plugin, app, snapTo15Minutes]);
@@ -37468,19 +37468,19 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
   calendarOptionsRef.current = calendarOptions;
   const isLoadingRef = (0, import_react9.useRef)(false);
   const instanceIdRef = (0, import_react9.useRef)(Math.random().toString(36).substr(2, 9));
-  console.log("[HK-Work Debug] Component render, instanceId:", instanceIdRef.current, "isLoadingRef:", isLoadingRef.current);
+  console.log("[BulletJournal Debug] Component render, instanceId:", instanceIdRef.current, "isLoadingRef:", isLoadingRef.current);
   const loadCalendarData = (0, import_react9.useCallback)(async () => {
-    console.log("[HK-Work Debug] loadCalendarData called, instanceId:", instanceIdRef.current, "isLoadingRef:", isLoadingRef.current, "plugin:", !!plugin);
+    console.log("[BulletJournal Debug] loadCalendarData called, instanceId:", instanceIdRef.current, "isLoadingRef:", isLoadingRef.current, "plugin:", !!plugin);
     if (!plugin || !calendarRef.current) {
-      console.log("[HK-Work Debug] Early return, plugin:", !!plugin, "calendarRef:", !!calendarRef.current);
+      console.log("[BulletJournal Debug] Early return, plugin:", !!plugin, "calendarRef:", !!calendarRef.current);
       return;
     }
     if (isLoadingRef.current) {
-      console.log("[HK-Work Debug] Already loading, skipping");
+      console.log("[BulletJournal Debug] Already loading, skipping");
       return;
     }
     isLoadingRef.current = true;
-    console.log("[HK-Work Debug] Set isLoadingRef to true");
+    console.log("[BulletJournal Debug] Set isLoadingRef to true");
     setIsLoading(true);
     try {
       const enabledDirs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => d2.path);
@@ -37541,7 +37541,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
   }, [loadCalendarData, refreshKey]);
   (0, import_react9.useEffect)(() => {
     return () => {
-      console.log("[HK-Work Debug] Component unmount, instanceId:", instanceIdRef.current);
+      console.log("[BulletJournal Debug] Component unmount, instanceId:", instanceIdRef.current);
     };
   }, []);
   (0, import_react9.useEffect)(() => {
@@ -50964,9 +50964,9 @@ var TodoSidebar = ({ onItemClick }) => {
     };
   }, [loadItems, pluginContext]);
   const handleItemClick = async (item) => {
-    console.log("[HK-Work TodoSidebar] Debug - item:", item);
-    console.log("[HK-Work TodoSidebar] Debug - item.project?.filePath:", item.project?.filePath);
-    console.log("[HK-Work TodoSidebar] Debug - item.lineNumber:", item.lineNumber);
+    console.log("[BulletJournal TodoSidebar] Debug - item:", item);
+    console.log("[BulletJournal TodoSidebar] Debug - item.project?.filePath:", item.project?.filePath);
+    console.log("[BulletJournal TodoSidebar] Debug - item.lineNumber:", item.lineNumber);
     if (!app || !item.project?.filePath) return;
     await openFileAtLine(app, item.project.filePath, item.lineNumber);
     if (onItemClick) {
