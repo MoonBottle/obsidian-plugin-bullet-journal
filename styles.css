@@ -1039,8 +1039,12 @@
   border: none;
 }
 
+.hk-work-todo-section-label {
+  margin-bottom: 8px;
+}
+
 .hk-work-todo-items {
-  padding: 0 12px 16px 0;
+  padding: 4px 12px 16px 0;
 }
 
 .hk-work-todo-item {
