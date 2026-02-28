@@ -1,6 +1,6 @@
 {
   "name": "obsidian-plugin-bullet-journal",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A Bullet Journal plugin for Obsidian with calendar and Gantt chart views",
   "main": "main.js",
   "scripts": {

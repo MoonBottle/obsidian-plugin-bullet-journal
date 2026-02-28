@@ -1,7 +1,7 @@
 {
   "id": "obsidian-plugin-bullet-journal",
   "name": "Bullet Journal",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "minAppVersion": "0.15.0",
   "description": "A Bullet Journal plugin for Obsidian with calendar and Gantt chart views",
   "author": "",
