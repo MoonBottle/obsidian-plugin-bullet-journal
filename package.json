@@ -18,7 +18,7 @@
   "license": "AGPL-3.0",
   "devDependencies": {
     "@codemirror/language": "^6.12.1",
-    "@codemirror/state": "^6.5.4",
+    "@codemirror/state": "6.5.0",
     "@codemirror/view": "^6.39.12",
     "@types/node": "^18.0.0",
     "builtin-modules": "^5.0.0",
