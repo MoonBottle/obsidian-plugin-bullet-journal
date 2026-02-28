@@ -33,9 +33,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// node_modules/.pnpm/react@19.2.4/node_modules/react/cjs/react.development.js
+// node_modules/react/cjs/react.development.js
 var require_react_development = __commonJS({
-  "node_modules/.pnpm/react@19.2.4/node_modules/react/cjs/react.development.js"(exports2, module2) {
+  "node_modules/react/cjs/react.development.js"(exports2, module2) {
     "use strict";
     (function() {
       function defineDeprecationWarning(methodName, info) {
@@ -1005,9 +1005,9 @@ var require_react_development = __commonJS({
   }
 });
 
-// node_modules/.pnpm/react@19.2.4/node_modules/react/index.js
+// node_modules/react/index.js
 var require_react = __commonJS({
-  "node_modules/.pnpm/react@19.2.4/node_modules/react/index.js"(exports2, module2) {
+  "node_modules/react/index.js"(exports2, module2) {
     "use strict";
     if (false) {
       module2.exports = null;
@@ -1017,9 +1017,9 @@ var require_react = __commonJS({
   }
 });
 
-// node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler/cjs/scheduler.development.js
+// node_modules/scheduler/cjs/scheduler.development.js
 var require_scheduler_development = __commonJS({
-  "node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler/cjs/scheduler.development.js"(exports2) {
+  "node_modules/scheduler/cjs/scheduler.development.js"(exports2) {
     "use strict";
     (function() {
       function performWorkUntilDeadline() {
@@ -1276,9 +1276,9 @@ var require_scheduler_development = __commonJS({
   }
 });
 
-// node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler/index.js
+// node_modules/scheduler/index.js
 var require_scheduler = __commonJS({
-  "node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler/index.js"(exports2, module2) {
+  "node_modules/scheduler/index.js"(exports2, module2) {
     "use strict";
     if (false) {
       module2.exports = null;
@@ -1288,9 +1288,9 @@ var require_scheduler = __commonJS({
   }
 });
 
-// node_modules/.pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom/cjs/react-dom.development.js
+// node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS({
-  "node_modules/.pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom/cjs/react-dom.development.js"(exports2) {
+  "node_modules/react-dom/cjs/react-dom.development.js"(exports2) {
     "use strict";
     (function() {
       function noop() {
@@ -1532,9 +1532,9 @@ var require_react_dom_development = __commonJS({
   }
 });
 
-// node_modules/.pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom/index.js
+// node_modules/react-dom/index.js
 var require_react_dom = __commonJS({
-  "node_modules/.pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom/index.js"(exports2, module2) {
+  "node_modules/react-dom/index.js"(exports2, module2) {
     "use strict";
     if (false) {
       checkDCE();
@@ -1545,9 +1545,9 @@ var require_react_dom = __commonJS({
   }
 });
 
-// node_modules/.pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom/cjs/react-dom-client.development.js
+// node_modules/react-dom/cjs/react-dom-client.development.js
 var require_react_dom_client_development = __commonJS({
-  "node_modules/.pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom/cjs/react-dom-client.development.js"(exports2) {
+  "node_modules/react-dom/cjs/react-dom-client.development.js"(exports2) {
     "use strict";
     (function() {
       function findHook(fiber, id) {
@@ -21444,9 +21444,9 @@ var require_react_dom_client_development = __commonJS({
   }
 });
 
-// node_modules/.pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom/client.js
+// node_modules/react-dom/client.js
 var require_client = __commonJS({
-  "node_modules/.pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom/client.js"(exports2, module2) {
+  "node_modules/react-dom/client.js"(exports2, module2) {
     "use strict";
     if (false) {
       checkDCE();
@@ -21457,9 +21457,9 @@ var require_client = __commonJS({
   }
 });
 
-// node_modules/.pnpm/react@19.2.4/node_modules/react/cjs/react-jsx-runtime.development.js
+// node_modules/react/cjs/react-jsx-runtime.development.js
 var require_react_jsx_runtime_development = __commonJS({
-  "node_modules/.pnpm/react@19.2.4/node_modules/react/cjs/react-jsx-runtime.development.js"(exports2) {
+  "node_modules/react/cjs/react-jsx-runtime.development.js"(exports2) {
     "use strict";
     (function() {
       function getComponentNameFromType(type) {
@@ -21714,9 +21714,9 @@ var require_react_jsx_runtime_development = __commonJS({
   }
 });
 
-// node_modules/.pnpm/react@19.2.4/node_modules/react/jsx-runtime.js
+// node_modules/react/jsx-runtime.js
 var require_jsx_runtime = __commonJS({
-  "node_modules/.pnpm/react@19.2.4/node_modules/react/jsx-runtime.js"(exports2, module2) {
+  "node_modules/react/jsx-runtime.js"(exports2, module2) {
     "use strict";
     if (false) {
       module2.exports = null;
@@ -22944,7 +22944,7 @@ var import_client2 = __toESM(require_client());
 var import_react9 = __toESM(require_react());
 var import_obsidian7 = require("obsidian");
 
-// node_modules/.pnpm/preact@10.12.1/node_modules/preact/dist/preact.mjs
+// node_modules/preact/dist/preact.mjs
 var n;
 var l;
 var u;
@@ -23230,7 +23230,7 @@ n = s.slice, l = { __e: function(n2, l3, u3, i3) {
   this.__v && (this.__e = true, n2 && this.__h.push(n2), T(this));
 }, x.prototype.render = _, r = [], f = "function" == typeof Promise ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout, $.__r = 0, e = 0;
 
-// node_modules/.pnpm/preact@10.12.1/node_modules/preact/hooks/dist/hooks.mjs
+// node_modules/preact/hooks/dist/hooks.mjs
 var t3;
 var r2;
 var u2;
@@ -23302,7 +23302,7 @@ function w2(n2) {
   n2.__c = n2.__(), r2 = t4;
 }
 
-// node_modules/.pnpm/preact@10.12.1/node_modules/preact/compat/dist/compat.mjs
+// node_modules/preact/compat/dist/compat.mjs
 function g3(n2, t4) {
   for (var e3 in t4) n2[e3] = t4[e3];
   return n2;
@@ -23486,7 +23486,7 @@ l.__r = function(n2) {
   en2 && en2(n2), X = n2.__c;
 };
 
-// node_modules/.pnpm/@fullcalendar+core@6.1.20/node_modules/@fullcalendar/core/internal-common.js
+// node_modules/@fullcalendar/core/internal-common.js
 var styleTexts = [];
 var styleEls = /* @__PURE__ */ new Map();
 function injectStyles(styleText) {
@@ -30266,7 +30266,7 @@ function pickLatestEnd(seg0, seg1) {
   return seg0.eventRange.range.end > seg1.eventRange.range.end ? seg0 : seg1;
 }
 
-// node_modules/.pnpm/@fullcalendar+core@6.1.20/node_modules/@fullcalendar/core/index.js
+// node_modules/@fullcalendar/core/index.js
 var globalLocales = [];
 var MINIMAL_RAW_EN_LOCALE = {
   code: "en",
@@ -32281,7 +32281,7 @@ var Calendar = class extends CalendarImpl {
   }
 };
 
-// node_modules/.pnpm/@fullcalendar+daygrid@6.1.20_@fullcalendar+core@6.1.20/node_modules/@fullcalendar/daygrid/internal.js
+// node_modules/@fullcalendar/daygrid/internal.js
 var TableView = class extends DateComponent {
   constructor() {
     super(...arguments);
@@ -33268,7 +33268,7 @@ function buildDayTableRenderRange(props) {
 var css_248z2 = ':root{--fc-daygrid-event-dot-width:8px}.fc-daygrid-day-events:after,.fc-daygrid-day-events:before,.fc-daygrid-day-frame:after,.fc-daygrid-day-frame:before,.fc-daygrid-event-harness:after,.fc-daygrid-event-harness:before{clear:both;content:"";display:table}.fc .fc-daygrid-body{position:relative;z-index:1}.fc .fc-daygrid-day.fc-day-today{background-color:var(--fc-today-bg-color)}.fc .fc-daygrid-day-frame{min-height:100%;position:relative}.fc .fc-daygrid-day-top{display:flex;flex-direction:row-reverse}.fc .fc-day-other .fc-daygrid-day-top{opacity:.3}.fc .fc-daygrid-day-number{padding:4px;position:relative;z-index:4}.fc .fc-daygrid-month-start{font-size:1.1em;font-weight:700}.fc .fc-daygrid-day-events{margin-top:1px}.fc .fc-daygrid-body-balanced .fc-daygrid-day-events{left:0;position:absolute;right:0}.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events{min-height:2em;position:relative}.fc .fc-daygrid-body-natural .fc-daygrid-day-events{margin-bottom:1em}.fc .fc-daygrid-event-harness{position:relative}.fc .fc-daygrid-event-harness-abs{left:0;position:absolute;right:0;top:0}.fc .fc-daygrid-bg-harness{bottom:0;position:absolute;top:0}.fc .fc-daygrid-day-bg .fc-non-business{z-index:1}.fc .fc-daygrid-day-bg .fc-bg-event{z-index:2}.fc .fc-daygrid-day-bg .fc-highlight{z-index:3}.fc .fc-daygrid-event{margin-top:1px;z-index:6}.fc .fc-daygrid-event.fc-event-mirror{z-index:7}.fc .fc-daygrid-day-bottom{font-size:.85em;margin:0 2px}.fc .fc-daygrid-day-bottom:after,.fc .fc-daygrid-day-bottom:before{clear:both;content:"";display:table}.fc .fc-daygrid-more-link{border-radius:3px;cursor:pointer;line-height:1;margin-top:1px;max-width:100%;overflow:hidden;padding:2px;position:relative;white-space:nowrap;z-index:4}.fc .fc-daygrid-more-link:hover{background-color:rgba(0,0,0,.1)}.fc .fc-daygrid-week-number{background-color:var(--fc-neutral-bg-color);color:var(--fc-neutral-text-color);min-width:1.5em;padding:2px;position:absolute;text-align:center;top:0;z-index:5}.fc .fc-more-popover .fc-popover-body{min-width:220px;padding:10px}.fc-direction-ltr .fc-daygrid-event.fc-event-start,.fc-direction-rtl .fc-daygrid-event.fc-event-end{margin-left:2px}.fc-direction-ltr .fc-daygrid-event.fc-event-end,.fc-direction-rtl .fc-daygrid-event.fc-event-start{margin-right:2px}.fc-direction-ltr .fc-daygrid-more-link{float:left}.fc-direction-ltr .fc-daygrid-week-number{border-radius:0 0 3px 0;left:0}.fc-direction-rtl .fc-daygrid-more-link{float:right}.fc-direction-rtl .fc-daygrid-week-number{border-radius:0 0 0 3px;right:0}.fc-liquid-hack .fc-daygrid-day-frame{position:static}.fc-daygrid-event{border-radius:3px;font-size:var(--fc-small-font-size);position:relative;white-space:nowrap}.fc-daygrid-block-event .fc-event-time{font-weight:700}.fc-daygrid-block-event .fc-event-time,.fc-daygrid-block-event .fc-event-title{padding:1px}.fc-daygrid-dot-event{align-items:center;display:flex;padding:2px 0}.fc-daygrid-dot-event .fc-event-title{flex-grow:1;flex-shrink:1;font-weight:700;min-width:0;overflow:hidden}.fc-daygrid-dot-event.fc-event-mirror,.fc-daygrid-dot-event:hover{background:rgba(0,0,0,.1)}.fc-daygrid-dot-event.fc-event-selected:before{bottom:-10px;top:-10px}.fc-daygrid-event-dot{border:calc(var(--fc-daygrid-event-dot-width)/2) solid var(--fc-event-border-color);border-radius:calc(var(--fc-daygrid-event-dot-width)/2);box-sizing:content-box;height:0;margin:0 4px;width:0}.fc-direction-ltr .fc-daygrid-event .fc-event-time{margin-right:3px}.fc-direction-rtl .fc-daygrid-event .fc-event-time{margin-left:3px}';
 injectStyles(css_248z2);
 
-// node_modules/.pnpm/@fullcalendar+daygrid@6.1.20_@fullcalendar+core@6.1.20/node_modules/@fullcalendar/daygrid/index.js
+// node_modules/@fullcalendar/daygrid/index.js
 var index = createPlugin({
   name: "@fullcalendar/daygrid",
   initialView: "dayGridMonth",
@@ -33297,7 +33297,7 @@ var index = createPlugin({
   }
 });
 
-// node_modules/.pnpm/@fullcalendar+timegrid@6.1.20_@fullcalendar+core@6.1.20/node_modules/@fullcalendar/timegrid/internal.js
+// node_modules/@fullcalendar/timegrid/internal.js
 var AllDaySplitter = class extends Splitter {
   getKeyInfo() {
     return {
@@ -34469,7 +34469,7 @@ function buildTimeColsModel(dateProfile, dateProfileGenerator) {
 var css_248z3 = '.fc-v-event{background-color:var(--fc-event-bg-color);border:1px solid var(--fc-event-border-color);display:block}.fc-v-event .fc-event-main{color:var(--fc-event-text-color);height:100%}.fc-v-event .fc-event-main-frame{display:flex;flex-direction:column;height:100%}.fc-v-event .fc-event-time{flex-grow:0;flex-shrink:0;max-height:100%;overflow:hidden}.fc-v-event .fc-event-title-container{flex-grow:1;flex-shrink:1;min-height:0}.fc-v-event .fc-event-title{bottom:0;max-height:100%;overflow:hidden;top:0}.fc-v-event:not(.fc-event-start){border-top-left-radius:0;border-top-right-radius:0;border-top-width:0}.fc-v-event:not(.fc-event-end){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-width:0}.fc-v-event.fc-event-selected:before{left:-10px;right:-10px}.fc-v-event .fc-event-resizer-start{cursor:n-resize}.fc-v-event .fc-event-resizer-end{cursor:s-resize}.fc-v-event:not(.fc-event-selected) .fc-event-resizer{height:var(--fc-event-resizer-thickness);left:0;right:0}.fc-v-event:not(.fc-event-selected) .fc-event-resizer-start{top:calc(var(--fc-event-resizer-thickness)/-2)}.fc-v-event:not(.fc-event-selected) .fc-event-resizer-end{bottom:calc(var(--fc-event-resizer-thickness)/-2)}.fc-v-event.fc-event-selected .fc-event-resizer{left:50%;margin-left:calc(var(--fc-event-resizer-dot-total-width)/-2)}.fc-v-event.fc-event-selected .fc-event-resizer-start{top:calc(var(--fc-event-resizer-dot-total-width)/-2)}.fc-v-event.fc-event-selected .fc-event-resizer-end{bottom:calc(var(--fc-event-resizer-dot-total-width)/-2)}.fc .fc-timegrid .fc-daygrid-body{z-index:2}.fc .fc-timegrid-divider{padding:0 0 2px}.fc .fc-timegrid-body{min-height:100%;position:relative;z-index:1}.fc .fc-timegrid-axis-chunk{position:relative}.fc .fc-timegrid-axis-chunk>table,.fc .fc-timegrid-slots{position:relative;z-index:1}.fc .fc-timegrid-slot{border-bottom:0;height:1.5em}.fc .fc-timegrid-slot:empty:before{content:"\\00a0"}.fc .fc-timegrid-slot-minor{border-top-style:dotted}.fc .fc-timegrid-slot-label-cushion{display:inline-block;white-space:nowrap}.fc .fc-timegrid-slot-label{vertical-align:middle}.fc .fc-timegrid-axis-cushion,.fc .fc-timegrid-slot-label-cushion{padding:0 4px}.fc .fc-timegrid-axis-frame-liquid{height:100%}.fc .fc-timegrid-axis-frame{align-items:center;display:flex;justify-content:flex-end;overflow:hidden}.fc .fc-timegrid-axis-cushion{flex-shrink:0;max-width:60px}.fc-direction-ltr .fc-timegrid-slot-label-frame{text-align:right}.fc-direction-rtl .fc-timegrid-slot-label-frame{text-align:left}.fc-liquid-hack .fc-timegrid-axis-frame-liquid{bottom:0;height:auto;left:0;position:absolute;right:0;top:0}.fc .fc-timegrid-col.fc-day-today{background-color:var(--fc-today-bg-color)}.fc .fc-timegrid-col-frame{min-height:100%;position:relative}.fc-media-screen.fc-liquid-hack .fc-timegrid-col-frame{bottom:0;height:auto;left:0;position:absolute;right:0;top:0}.fc-media-screen .fc-timegrid-cols{bottom:0;left:0;position:absolute;right:0;top:0}.fc-media-screen .fc-timegrid-cols>table{height:100%}.fc-media-screen .fc-timegrid-col-bg,.fc-media-screen .fc-timegrid-col-events,.fc-media-screen .fc-timegrid-now-indicator-container{left:0;position:absolute;right:0;top:0}.fc .fc-timegrid-col-bg{z-index:2}.fc .fc-timegrid-col-bg .fc-non-business{z-index:1}.fc .fc-timegrid-col-bg .fc-bg-event{z-index:2}.fc .fc-timegrid-col-bg .fc-highlight{z-index:3}.fc .fc-timegrid-bg-harness{left:0;position:absolute;right:0}.fc .fc-timegrid-col-events{z-index:3}.fc .fc-timegrid-now-indicator-container{bottom:0;overflow:hidden}.fc-direction-ltr .fc-timegrid-col-events{margin:0 2.5% 0 2px}.fc-direction-rtl .fc-timegrid-col-events{margin:0 2px 0 2.5%}.fc-timegrid-event-harness{position:absolute}.fc-timegrid-event-harness>.fc-timegrid-event{bottom:0;left:0;position:absolute;right:0;top:0}.fc-timegrid-event-harness-inset .fc-timegrid-event,.fc-timegrid-event.fc-event-mirror,.fc-timegrid-more-link{box-shadow:0 0 0 1px var(--fc-page-bg-color)}.fc-timegrid-event,.fc-timegrid-more-link{border-radius:3px;font-size:var(--fc-small-font-size)}.fc-timegrid-event{margin-bottom:1px}.fc-timegrid-event .fc-event-main{padding:1px 1px 0}.fc-timegrid-event .fc-event-time{font-size:var(--fc-small-font-size);margin-bottom:1px;white-space:nowrap}.fc-timegrid-event-short .fc-event-main-frame{flex-direction:row;overflow:hidden}.fc-timegrid-event-short .fc-event-time:after{content:"\\00a0-\\00a0"}.fc-timegrid-event-short .fc-event-title{font-size:var(--fc-small-font-size)}.fc-timegrid-more-link{background:var(--fc-more-link-bg-color);color:var(--fc-more-link-text-color);cursor:pointer;margin-bottom:1px;position:absolute;z-index:9999}.fc-timegrid-more-link-inner{padding:3px 2px;top:0}.fc-direction-ltr .fc-timegrid-more-link{right:0}.fc-direction-rtl .fc-timegrid-more-link{left:0}.fc .fc-timegrid-now-indicator-arrow,.fc .fc-timegrid-now-indicator-line{pointer-events:none}.fc .fc-timegrid-now-indicator-line{border-color:var(--fc-now-indicator-color);border-style:solid;border-width:1px 0 0;left:0;position:absolute;right:0;z-index:4}.fc .fc-timegrid-now-indicator-arrow{border-color:var(--fc-now-indicator-color);border-style:solid;margin-top:-5px;position:absolute;z-index:4}.fc-direction-ltr .fc-timegrid-now-indicator-arrow{border-bottom-color:transparent;border-top-color:transparent;border-width:5px 0 5px 6px;left:0}.fc-direction-rtl .fc-timegrid-now-indicator-arrow{border-bottom-color:transparent;border-top-color:transparent;border-width:5px 6px 5px 0;right:0}';
 injectStyles(css_248z3);
 
-// node_modules/.pnpm/@fullcalendar+timegrid@6.1.20_@fullcalendar+core@6.1.20/node_modules/@fullcalendar/timegrid/index.js
+// node_modules/@fullcalendar/timegrid/index.js
 var OPTION_REFINERS = {
   allDaySlot: Boolean
 };
@@ -34497,7 +34497,7 @@ var index2 = createPlugin({
   }
 });
 
-// node_modules/.pnpm/@fullcalendar+list@6.1.20_@fullcalendar+core@6.1.20/node_modules/@fullcalendar/list/internal.js
+// node_modules/@fullcalendar/list/internal.js
 var ListViewHeaderRow = class extends BaseComponent {
   constructor() {
     super(...arguments);
@@ -34768,7 +34768,7 @@ function groupSegsByDay(segs) {
 var css_248z4 = ':root{--fc-list-event-dot-width:10px;--fc-list-event-hover-bg-color:#f5f5f5}.fc-theme-standard .fc-list{border:1px solid var(--fc-border-color)}.fc .fc-list-empty{align-items:center;background-color:var(--fc-neutral-bg-color);display:flex;height:100%;justify-content:center}.fc .fc-list-empty-cushion{margin:5em 0}.fc .fc-list-table{border-style:hidden;width:100%}.fc .fc-list-table tr>*{border-left:0;border-right:0}.fc .fc-list-sticky .fc-list-day>*{background:var(--fc-page-bg-color);position:sticky;top:0}.fc .fc-list-table thead{left:-10000px;position:absolute}.fc .fc-list-table tbody>tr:first-child th{border-top:0}.fc .fc-list-table th{padding:0}.fc .fc-list-day-cushion,.fc .fc-list-table td{padding:8px 14px}.fc .fc-list-day-cushion:after{clear:both;content:"";display:table}.fc-theme-standard .fc-list-day-cushion{background-color:var(--fc-neutral-bg-color)}.fc-direction-ltr .fc-list-day-text,.fc-direction-rtl .fc-list-day-side-text{float:left}.fc-direction-ltr .fc-list-day-side-text,.fc-direction-rtl .fc-list-day-text{float:right}.fc-direction-ltr .fc-list-table .fc-list-event-graphic{padding-right:0}.fc-direction-rtl .fc-list-table .fc-list-event-graphic{padding-left:0}.fc .fc-list-event.fc-event-forced-url{cursor:pointer}.fc .fc-list-event:hover td{background-color:var(--fc-list-event-hover-bg-color)}.fc .fc-list-event-graphic,.fc .fc-list-event-time{white-space:nowrap;width:1px}.fc .fc-list-event-dot{border:calc(var(--fc-list-event-dot-width)/2) solid var(--fc-event-border-color);border-radius:calc(var(--fc-list-event-dot-width)/2);box-sizing:content-box;display:inline-block;height:0;width:0}.fc .fc-list-event-title a{color:inherit;text-decoration:none}.fc .fc-list-event.fc-event-forced-url:hover a{text-decoration:underline}';
 injectStyles(css_248z4);
 
-// node_modules/.pnpm/@fullcalendar+list@6.1.20_@fullcalendar+core@6.1.20/node_modules/@fullcalendar/list/index.js
+// node_modules/@fullcalendar/list/index.js
 var OPTION_REFINERS2 = {
   listDayFormat: createFalsableFormatter,
   listDaySideFormat: createFalsableFormatter,
@@ -34818,7 +34818,7 @@ var index3 = createPlugin({
   }
 });
 
-// node_modules/.pnpm/@fullcalendar+interaction@6.1.20_@fullcalendar+core@6.1.20/node_modules/@fullcalendar/interaction/index.js
+// node_modules/@fullcalendar/interaction/index.js
 config.touchMouseIgnoreWait = 500;
 var ignoreMouseDepth = 0;
 var listenerCnt = 0;
@@ -37676,7 +37676,7 @@ var import_client3 = __toESM(require_client());
 var import_react11 = __toESM(require_react());
 var import_obsidian9 = require("obsidian");
 
-// node_modules/.pnpm/dhtmlx-gantt@9.1.2/node_modules/dhtmlx-gantt/codebase/dhtmlxgantt.es.js
+// node_modules/dhtmlx-gantt/codebase/dhtmlxgantt.es.js
 function Y(t4) {
   var n2 = 0, e3 = 0, i3 = 0, a3 = 0;
   if (t4.getBoundingClientRect) {
