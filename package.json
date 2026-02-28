@@ -15,7 +15,7 @@
     "task-tracking"
   ],
   "author": "",
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "devDependencies": {
     "@codemirror/language": "^6.12.1",
     "@codemirror/state": "^6.5.4",

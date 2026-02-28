@@ -1,8 +1,8 @@
-# HK-Work Visualizer Obsidian Plugin
+# Bullet Journal Obsidian Plugin
 
 [中文](README.zh.md) | English
 
-An Obsidian plugin for visualizing HK-Work project tasks with calendar and Gantt chart views.
+An Obsidian plugin for visualizing Bullet Journal project tasks with calendar and Gantt chart views.
 
 ## Features
 
@@ -43,12 +43,12 @@ An Obsidian plugin for visualizing HK-Work project tasks with calendar and Gantt
 2. **From Obsidian Plugin Market**:
    - Open Obsidian settings
    - Navigate to "Community Plugins"
-   - Search for "HK-Work Visualizer"
+   - Search for "Bullet Journal"
    - Click "Install" and then "Enable"
 
 ## Configuration
 
-1. **Data Directory**: Set the path to your HK-Work data directory
+1. **Data Directory**: Set the path to your Bullet Journal data directory
 2. **Default Year**: Set the default year to display
 3. **Default View**: Set the default view to open
 
@@ -71,7 +71,7 @@ An Obsidian plugin for visualizing HK-Work project tasks with calendar and Gantt
 
 ## Data Format
 
-The plugin expects HK-Work data to be in the following format:
+The plugin expects Bullet Journal data to be in the following format:
 
 ```markdown
 ## [Project Name]
@@ -79,13 +79,17 @@ The plugin expects HK-Work data to be in the following format:
 > [Material Name]: [Link]
 
 ### 工作任务
-[Task Name] #任务 [Task Link]
+[Task Name] #任务
+[Task Link](https://example.com)
 [Item 1] @[Date]
 [Item 2] @[Date]
 
-[Task Name 2] #任务 @[Date]
+[Task Name 2] #任务
+[Task Link](https://example.com)
+[Item 1] @[Date]
 
 [Task Name 3] #任务 @L1
+[Item 1] @[Date]
 ```
 
 ### Task Hierarchy Markers
@@ -115,4 +119,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT
+AGPL-3.0
