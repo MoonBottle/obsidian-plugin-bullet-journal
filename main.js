@@ -22352,19 +22352,14 @@ var MarkdownParser = class {
     if (this.vaultRoot && normalizedPath.startsWith(this.vaultRoot)) {
       return normalizedPath.substring(this.vaultRoot.length).replace(/^\//, "");
     }
-    const workIndex = normalizedDataDir.indexOf("\u5DE5\u4F5C\u5B89\u6392/");
-    if (workIndex !== -1) {
-      const relativeDataDir = normalizedDataDir.substring(workIndex);
-      const fileName = normalizedPath.split("/").pop() || "";
-      return relativeDataDir + "/" + fileName;
+    if (this.vaultRoot && normalizedDataDir.startsWith(this.vaultRoot)) {
+      const relativeDataDir = normalizedDataDir.substring(this.vaultRoot.length).replace(/^\//, "");
+      const fileName2 = normalizedPath.split("/").pop() || "";
+      return relativeDataDir + "/" + fileName2;
     }
-    const dataDirParts = normalizedDataDir.split("/");
-    const lastTwoParts = dataDirParts.slice(-2).join("/");
-    const lastTwoIndex = normalizedPath.indexOf(lastTwoParts);
-    if (lastTwoIndex !== -1) {
-      return normalizedPath.substring(lastTwoIndex);
-    }
-    return normalizedPath.split("/").pop() || normalizedPath;
+    const fileName = normalizedPath.split("/").pop() || "";
+    const dataDirName = normalizedDataDir.split("/").pop() || "";
+    return dataDirName + "/" + fileName;
   }
   /**
    * Get all items from all projects

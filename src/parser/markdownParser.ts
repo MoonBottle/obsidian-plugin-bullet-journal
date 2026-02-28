@@ -210,21 +210,15 @@ export class MarkdownParser {
       return normalizedPath.substring(this.vaultRoot.length).replace(/^\//, '');
     }
 
-    const workIndex = normalizedDataDir.indexOf('工作安排/');
-    if (workIndex !== -1) {
-      const relativeDataDir = normalizedDataDir.substring(workIndex);
+    if (this.vaultRoot && normalizedDataDir.startsWith(this.vaultRoot)) {
+      const relativeDataDir = normalizedDataDir.substring(this.vaultRoot.length).replace(/^\//, '');
       const fileName = normalizedPath.split('/').pop() || '';
       return relativeDataDir + '/' + fileName;
     }
 
-    const dataDirParts = normalizedDataDir.split('/');
-    const lastTwoParts = dataDirParts.slice(-2).join('/');
-    const lastTwoIndex = normalizedPath.indexOf(lastTwoParts);
-    if (lastTwoIndex !== -1) {
-      return normalizedPath.substring(lastTwoIndex);
-    }
-
-    return normalizedPath.split('/').pop() || normalizedPath;
+    const fileName = normalizedPath.split('/').pop() || '';
+    const dataDirName = normalizedDataDir.split('/').pop() || '';
+    return dataDirName + '/' + fileName;
   }
 
   /**
