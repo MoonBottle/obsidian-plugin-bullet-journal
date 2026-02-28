@@ -25,10 +25,12 @@ function detectItemStatus(line: string): ItemStatus {
 export class MarkdownParser {
   private projectDirectories: string[];
   private directoryConfigs: Map<string, ProjectDirectoryConfig>;
+  private vaultRoot: string | null;
 
-  constructor(projectDirectories: string[], directoryConfigs?: ProjectDirectoryConfig[]) {
+  constructor(projectDirectories: string[], directoryConfigs?: ProjectDirectoryConfig[], vaultRoot?: string) {
     this.projectDirectories = projectDirectories;
     this.directoryConfigs = new Map();
+    this.vaultRoot = vaultRoot ? vaultRoot.replace(/\\/g, '/') : null;
     if (directoryConfigs) {
       directoryConfigs.forEach(config => {
         this.directoryConfigs.set(config.path.replace(/\\/g, '/'), config);
@@ -199,73 +201,30 @@ export class MarkdownParser {
 
   /**
    * Convert absolute file path to relative path from vault root
-   * The vault root is detected by looking for common parent directories
    */
   private toRelativePath(absolutePath: string, dataDirectory: string): string {
-    // Normalize path separators to forward slashes
     const normalizedPath = absolutePath.replace(/\\/g, '/');
+    const normalizedDataDir = dataDirectory.replace(/\\/g, '/');
 
-    // Find vault root by looking for the deepest common parent of all project directories
-    let vaultRoot = this.findVaultRoot();
-
-    if (vaultRoot && normalizedPath.startsWith(vaultRoot)) {
-      // Return path relative to vault root
-      return normalizedPath.substring(vaultRoot.length).replace(/^\//, '');
+    if (this.vaultRoot && normalizedPath.startsWith(this.vaultRoot)) {
+      return normalizedPath.substring(this.vaultRoot.length).replace(/^\//, '');
     }
 
-    // Fallback: try to extract relative path by finding a meaningful root
-    // Look for common patterns like 'hk-work' or similar vault folder names
-    const pathParts = normalizedPath.split('/');
-    for (let i = 0; i < pathParts.length; i++) {
-      // If we find a directory that looks like a vault root (contains common folders)
-      const potentialRoot = pathParts.slice(0, i + 1).join('/');
-      if (this.isPotentialVaultRoot(potentialRoot)) {
-        return pathParts.slice(i + 1).join('/');
-      }
+    const workIndex = normalizedDataDir.indexOf('工作安排/');
+    if (workIndex !== -1) {
+      const relativeDataDir = normalizedDataDir.substring(workIndex);
+      const fileName = normalizedPath.split('/').pop() || '';
+      return relativeDataDir + '/' + fileName;
     }
 
-    // Last resort: return the full path without drive letter
-    const withoutDrive = normalizedPath.replace(/^[a-zA-Z]:\//, '');
-    return withoutDrive || normalizedPath.split('/').pop() || normalizedPath;
-  }
-
-  /**
-   * Find the vault root directory by analyzing project directories
-   */
-  private findVaultRoot(): string | null {
-    if (this.projectDirectories.length === 0) {
-      return null;
+    const dataDirParts = normalizedDataDir.split('/');
+    const lastTwoParts = dataDirParts.slice(-2).join('/');
+    const lastTwoIndex = normalizedPath.indexOf(lastTwoParts);
+    if (lastTwoIndex !== -1) {
+      return normalizedPath.substring(lastTwoIndex);
     }
 
-    // Normalize all paths
-    const normalizedDirs = this.projectDirectories.map(dir => dir.replace(/\\/g, '/'));
-
-    // Find common prefix
-    const firstDir = normalizedDirs[0];
-    const parts = firstDir.split('/');
-
-    for (let i = parts.length; i > 0; i--) {
-      const prefix = parts.slice(0, i).join('/');
-      const allMatch = normalizedDirs.every(dir => dir.startsWith(prefix));
-      if (allMatch) {
-        // Check if this looks like a vault root (contains .obsidian or common folders)
-        if (this.isPotentialVaultRoot(prefix)) {
-          return prefix;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Check if a path looks like a vault root
-   */
-  private isPotentialVaultRoot(path: string): boolean {
-    // For now, we assume the vault root is the common parent
-    // In a real Obsidian plugin, we could check for .obsidian folder
-    // But here we'll use a simpler heuristic: look for the deepest common parent
-    return true;
+    return normalizedPath.split('/').pop() || normalizedPath;
   }
 
   /**

@@ -72,7 +72,8 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
       .filter(dir => dir.enabled && dir.path)
       .map(dir => ({ path: dir.path, groupId: dir.groupId }));
 
-    const parser = new MarkdownParser(projectDirectories, dirConfigs);
+    const vaultRoot = app ? (app.vault as any).adapter?.basePath : undefined;
+    const parser = new MarkdownParser(projectDirectories, dirConfigs, vaultRoot);
     const allItems = parser.getAllItems();
 
     const filteredItems = selectedGroup

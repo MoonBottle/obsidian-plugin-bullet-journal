@@ -21737,7 +21737,7 @@ var import_obsidian2 = require("obsidian");
 var import_client = __toESM(require_client());
 
 // src/components/ProjectView.tsx
-var import_react6 = __toESM(require_react());
+var import_react7 = __toESM(require_react());
 
 // src/i18n/locales/zh-cn.ts
 var zhCN = {
@@ -22071,7 +22071,7 @@ function t(key) {
 }
 
 // src/hooks/useProjectData.ts
-var import_react2 = __toESM(require_react());
+var import_react3 = __toESM(require_react());
 var import_obsidian = require("obsidian");
 
 // src/utils/lineParser.ts
@@ -22213,9 +22213,11 @@ function detectItemStatus(line) {
 var MarkdownParser = class {
   projectDirectories;
   directoryConfigs;
-  constructor(projectDirectories, directoryConfigs) {
+  vaultRoot;
+  constructor(projectDirectories, directoryConfigs, vaultRoot) {
     this.projectDirectories = projectDirectories;
     this.directoryConfigs = /* @__PURE__ */ new Map();
+    this.vaultRoot = vaultRoot ? vaultRoot.replace(/\\/g, "/") : null;
     if (directoryConfigs) {
       directoryConfigs.forEach((config2) => {
         this.directoryConfigs.set(config2.path.replace(/\\/g, "/"), config2);
@@ -22343,50 +22345,26 @@ var MarkdownParser = class {
   }
   /**
    * Convert absolute file path to relative path from vault root
-   * The vault root is detected by looking for common parent directories
    */
   toRelativePath(absolutePath, dataDirectory) {
     const normalizedPath = absolutePath.replace(/\\/g, "/");
-    let vaultRoot = this.findVaultRoot();
-    if (vaultRoot && normalizedPath.startsWith(vaultRoot)) {
-      return normalizedPath.substring(vaultRoot.length).replace(/^\//, "");
+    const normalizedDataDir = dataDirectory.replace(/\\/g, "/");
+    if (this.vaultRoot && normalizedPath.startsWith(this.vaultRoot)) {
+      return normalizedPath.substring(this.vaultRoot.length).replace(/^\//, "");
     }
-    const pathParts = normalizedPath.split("/");
-    for (let i3 = 0; i3 < pathParts.length; i3++) {
-      const potentialRoot = pathParts.slice(0, i3 + 1).join("/");
-      if (this.isPotentialVaultRoot(potentialRoot)) {
-        return pathParts.slice(i3 + 1).join("/");
-      }
+    const workIndex = normalizedDataDir.indexOf("\u5DE5\u4F5C\u5B89\u6392/");
+    if (workIndex !== -1) {
+      const relativeDataDir = normalizedDataDir.substring(workIndex);
+      const fileName = normalizedPath.split("/").pop() || "";
+      return relativeDataDir + "/" + fileName;
     }
-    const withoutDrive = normalizedPath.replace(/^[a-zA-Z]:\//, "");
-    return withoutDrive || normalizedPath.split("/").pop() || normalizedPath;
-  }
-  /**
-   * Find the vault root directory by analyzing project directories
-   */
-  findVaultRoot() {
-    if (this.projectDirectories.length === 0) {
-      return null;
+    const dataDirParts = normalizedDataDir.split("/");
+    const lastTwoParts = dataDirParts.slice(-2).join("/");
+    const lastTwoIndex = normalizedPath.indexOf(lastTwoParts);
+    if (lastTwoIndex !== -1) {
+      return normalizedPath.substring(lastTwoIndex);
     }
-    const normalizedDirs = this.projectDirectories.map((dir) => dir.replace(/\\/g, "/"));
-    const firstDir = normalizedDirs[0];
-    const parts = firstDir.split("/");
-    for (let i3 = parts.length; i3 > 0; i3--) {
-      const prefix = parts.slice(0, i3).join("/");
-      const allMatch = normalizedDirs.every((dir) => dir.startsWith(prefix));
-      if (allMatch) {
-        if (this.isPotentialVaultRoot(prefix)) {
-          return prefix;
-        }
-      }
-    }
-    return null;
-  }
-  /**
-   * Check if a path looks like a vault root
-   */
-  isPotentialVaultRoot(path2) {
-    return true;
+    return normalizedPath.split("/").pop() || normalizedPath;
   }
   /**
    * Get all items from all projects
@@ -22495,23 +22473,31 @@ var usePlugin = () => {
   return (0, import_react.useContext)(PluginContext);
 };
 
+// src/context/AppContext.tsx
+var import_react2 = __toESM(require_react());
+var AppContext = (0, import_react2.createContext)(void 0);
+var useApp = () => {
+  return (0, import_react2.useContext)(AppContext);
+};
+
 // src/hooks/useProjectData.ts
 var useProjectData = (options = {}) => {
   const { loadOnMount = true } = options;
   const pluginContext = usePlugin();
+  const app = useApp();
   const plugin = pluginContext?.plugin;
   const refreshKey = pluginContext?.refreshKey ?? 0;
   const refresh = pluginContext?.refresh;
   const selectedGroup = pluginContext?.selectedGroup ?? "";
   const setSelectedGroup = pluginContext?.setSelectedGroup;
   const availableGroups = pluginContext?.availableGroups ?? [];
-  const [projects, setProjects] = (0, import_react2.useState)([]);
-  const [isLoading, setIsLoading] = (0, import_react2.useState)(false);
-  const filteredProjects = (0, import_react2.useMemo)(() => {
+  const [projects, setProjects] = (0, import_react3.useState)([]);
+  const [isLoading, setIsLoading] = (0, import_react3.useState)(false);
+  const filteredProjects = (0, import_react3.useMemo)(() => {
     if (!selectedGroup) return projects;
     return projects.filter((project) => project.groupId === selectedGroup);
   }, [projects, selectedGroup]);
-  const loadData = (0, import_react2.useCallback)(async () => {
+  const loadData = (0, import_react3.useCallback)(async () => {
     if (!plugin) return;
     setIsLoading(true);
     try {
@@ -22522,7 +22508,8 @@ var useProjectData = (options = {}) => {
         return;
       }
       const dirConfigs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => ({ path: d2.path, groupId: d2.groupId }));
-      const parser = new MarkdownParser(enabledDirs, dirConfigs);
+      const vaultRoot = app ? app.vault.adapter?.basePath : void 0;
+      const parser = new MarkdownParser(enabledDirs, dirConfigs, vaultRoot);
       const loadedProjects = parser.parseAllProjects();
       setProjects(loadedProjects);
     } catch (error) {
@@ -22531,8 +22518,8 @@ var useProjectData = (options = {}) => {
     } finally {
       setIsLoading(false);
     }
-  }, [plugin]);
-  (0, import_react2.useEffect)(() => {
+  }, [plugin, app]);
+  (0, import_react3.useEffect)(() => {
     if (!loadOnMount) return;
     let isMounted = true;
     const initData = async () => {
@@ -22544,12 +22531,12 @@ var useProjectData = (options = {}) => {
       isMounted = false;
     };
   }, [loadData, refreshKey, loadOnMount]);
-  const handleGroupChange = (0, import_react2.useCallback)((e3) => {
+  const handleGroupChange = (0, import_react3.useCallback)((e3) => {
     if (setSelectedGroup) {
       setSelectedGroup(e3.target.value);
     }
   }, [setSelectedGroup]);
-  const handleRefresh = (0, import_react2.useCallback)((successMessage) => {
+  const handleRefresh = (0, import_react3.useCallback)((successMessage) => {
     if (refresh) {
       refresh();
       new import_obsidian.Notice(successMessage || t("common").dataRefreshed);
@@ -22569,7 +22556,7 @@ var useProjectData = (options = {}) => {
 };
 
 // src/components/shared/GroupSelect.tsx
-var import_react3 = __toESM(require_react());
+var import_react4 = __toESM(require_react());
 var import_jsx_runtime2 = __toESM(require_jsx_runtime());
 var SELECT_STYLE = {
   fontSize: "12px",
@@ -22579,7 +22566,7 @@ var SELECT_STYLE = {
   backgroundColor: "var(--background-primary)",
   color: "var(--text-normal)"
 };
-var GroupSelect = (0, import_react3.memo)(({ groups, value, onChange, className, style }) => {
+var GroupSelect = (0, import_react4.memo)(({ groups, value, onChange, className, style }) => {
   if (groups.length === 0) return null;
   return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: `hk-work-group-filter ${className || ""}`, children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
     "select",
@@ -22598,9 +22585,9 @@ var GroupSelect = (0, import_react3.memo)(({ groups, value, onChange, className,
 GroupSelect.displayName = "GroupSelect";
 
 // src/components/shared/RefreshButton.tsx
-var import_react4 = __toESM(require_react());
+var import_react5 = __toESM(require_react());
 var import_jsx_runtime3 = __toESM(require_jsx_runtime());
-var RefreshButton = (0, import_react4.memo)(({ onClick, isLoading, text, title, className }) => {
+var RefreshButton = (0, import_react5.memo)(({ onClick, isLoading, text, title, className }) => {
   return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
     "button",
     {
@@ -22635,9 +22622,9 @@ var RefreshButton = (0, import_react4.memo)(({ onClick, isLoading, text, title, 
 RefreshButton.displayName = "RefreshButton";
 
 // src/components/shared/ViewHeader.tsx
-var import_react5 = __toESM(require_react());
+var import_react6 = __toESM(require_react());
 var import_jsx_runtime4 = __toESM(require_jsx_runtime());
-var ViewHeader = (0, import_react5.memo)(({ title, subtitle, actions }) => {
+var ViewHeader = (0, import_react6.memo)(({ title, subtitle, actions }) => {
   return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "hk-work-header", children: [
     /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "hk-work-header-left", children: [
       /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h2", { className: "hk-work-title", children: title }),
@@ -22650,7 +22637,7 @@ ViewHeader.displayName = "ViewHeader";
 
 // src/components/ProjectView.tsx
 var import_jsx_runtime5 = __toESM(require_jsx_runtime());
-var ProjectList = (0, import_react6.memo)(({ projects, onSelectProject }) => {
+var ProjectList = (0, import_react7.memo)(({ projects, onSelectProject }) => {
   if (projects.length === 0) {
     return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { children: t("project").noProjects });
   }
@@ -22664,11 +22651,11 @@ var ProjectList = (0, import_react6.memo)(({ projects, onSelectProject }) => {
   )) });
 });
 ProjectList.displayName = "ProjectList";
-var ProjectItem = (0, import_react6.memo)(({ project, onClick }) => {
-  const handleLinkClick = (0, import_react6.useCallback)((e3) => {
+var ProjectItem = (0, import_react7.memo)(({ project, onClick }) => {
+  const handleLinkClick = (0, import_react7.useCallback)((e3) => {
     e3.stopPropagation();
   }, []);
-  const handleClick = (0, import_react6.useCallback)(() => {
+  const handleClick = (0, import_react7.useCallback)(() => {
     onClick(project);
   }, [onClick, project]);
   const displayName = project.directoryPath ? `${project.name} (${project.directoryPath})` : project.name;
@@ -22704,7 +22691,7 @@ var ProjectItem = (0, import_react6.memo)(({ project, onClick }) => {
   );
 });
 ProjectItem.displayName = "ProjectItem";
-var TaskItem = (0, import_react6.memo)(({ task }) => {
+var TaskItem = (0, import_react7.memo)(({ task }) => {
   return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: `task-item ${task.level.toLowerCase()}`, children: [
     /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h4", { children: task.name }),
     /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "task-meta", children: [
@@ -22734,7 +22721,7 @@ var TaskItem = (0, import_react6.memo)(({ task }) => {
 });
 TaskItem.displayName = "TaskItem";
 var ProjectDetails = ({ project, onBack }) => {
-  const taskList = (0, import_react6.useMemo)(() => {
+  const taskList = (0, import_react7.useMemo)(() => {
     if (project.tasks.length === 0) {
       return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { children: t("project").noTasks });
     }
@@ -22768,14 +22755,14 @@ var ProjectViewComponent = () => {
     handleGroupChange,
     handleRefresh
   } = useProjectData();
-  const [selectedProject, setSelectedProject] = (0, import_react6.useState)(null);
-  const handleSelectProject = (0, import_react6.useCallback)((project) => {
+  const [selectedProject, setSelectedProject] = (0, import_react7.useState)(null);
+  const handleSelectProject = (0, import_react7.useCallback)((project) => {
     setSelectedProject(project);
   }, []);
-  const handleBack = (0, import_react6.useCallback)(() => {
+  const handleBack = (0, import_react7.useCallback)(() => {
     setSelectedProject(null);
   }, []);
-  const onRefresh = (0, import_react6.useCallback)(() => {
+  const onRefresh = (0, import_react7.useCallback)(() => {
     handleRefresh(t("project").dataRefreshed);
   }, [handleRefresh]);
   if (selectedProject) {
@@ -22822,13 +22809,6 @@ var ProjectViewComponent = () => {
       }
     )
   ] });
-};
-
-// src/context/AppContext.tsx
-var import_react7 = __toESM(require_react());
-var AppContext = (0, import_react7.createContext)(void 0);
-var useApp = () => {
-  return (0, import_react7.useContext)(AppContext);
 };
 
 // src/views/ProjectView.tsx
@@ -37203,7 +37183,8 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       }
       setMissingConfig(false);
       const dirConfigs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => ({ path: d2.path, groupId: d2.groupId }));
-      const parser = new MarkdownParser(enabledDirs, dirConfigs);
+      const vaultRoot = app ? app.vault.adapter?.basePath : void 0;
+      const parser = new MarkdownParser(enabledDirs, dirConfigs, vaultRoot);
       parserRef.current = parser;
       const projects = parser.parseAllProjects();
       const events = DataConverter.projectsToCalendarEvents(projects);
@@ -50637,7 +50618,8 @@ var TodoSidebar = ({ onItemClick }) => {
       return;
     }
     const dirConfigs = pluginContext.plugin.settings.projectDirectories.filter((dir) => dir.enabled && dir.path).map((dir) => ({ path: dir.path, groupId: dir.groupId }));
-    const parser = new MarkdownParser(projectDirectories, dirConfigs);
+    const vaultRoot = app ? app.vault.adapter?.basePath : void 0;
+    const parser = new MarkdownParser(projectDirectories, dirConfigs, vaultRoot);
     const allItems = parser.getAllItems();
     const filteredItems = selectedGroup ? allItems.filter((item) => item.project?.groupId === selectedGroup) : allItems;
     const pendingItems = filteredItems.filter((item) => item.status === "pending");

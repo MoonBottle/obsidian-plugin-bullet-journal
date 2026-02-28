@@ -3,6 +3,7 @@ import { Notice } from 'obsidian';
 import { MarkdownParser } from '../parser/markdownParser';
 import { Project } from '../models/types';
 import { usePlugin } from '../context/PluginContext';
+import { useApp } from '../context/AppContext';
 import { t } from '../i18n';
 
 export interface DirConfig {
@@ -44,6 +45,7 @@ export const useProjectData = (options: UseProjectDataOptions = {}): UseProjectD
   const { loadOnMount = true } = options;
 
   const pluginContext = usePlugin();
+  const app = useApp();
   const plugin = pluginContext?.plugin;
   const refreshKey = pluginContext?.refreshKey ?? 0;
   const refresh = pluginContext?.refresh;
@@ -54,7 +56,6 @@ export const useProjectData = (options: UseProjectDataOptions = {}): UseProjectD
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Filter projects by selected group
   const filteredProjects = useMemo(() => {
     if (!selectedGroup) return projects;
     return projects.filter(project => project.groupId === selectedGroup);
@@ -80,7 +81,8 @@ export const useProjectData = (options: UseProjectDataOptions = {}): UseProjectD
         .filter(d => d.enabled && d.path)
         .map(d => ({ path: d.path, groupId: d.groupId }));
 
-      const parser = new MarkdownParser(enabledDirs, dirConfigs);
+      const vaultRoot = app ? (app.vault as any).adapter?.basePath : undefined;
+      const parser = new MarkdownParser(enabledDirs, dirConfigs, vaultRoot);
       const loadedProjects = parser.parseAllProjects();
       setProjects(loadedProjects);
     } catch (error) {
@@ -89,7 +91,7 @@ export const useProjectData = (options: UseProjectDataOptions = {}): UseProjectD
     } finally {
       setIsLoading(false);
     }
-  }, [plugin]);
+  }, [plugin, app]);
 
   // Load data on mount and when refreshKey changes
   useEffect(() => {
