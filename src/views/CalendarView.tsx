@@ -2,7 +2,7 @@ import { StrictMode, createRef } from 'react';
 import { ItemView, WorkspaceLeaf } from 'obsidian';
 import { Root, createRoot } from 'react-dom/client';
 import { Calendar } from '@fullcalendar/core';
-import HKWorkPlugin from '../../main';
+import BulletJournalPlugin from '../../main';
 import { CalendarViewComponent } from '../components/CalendarView';
 import { AppContext } from '../context/AppContext';
 import { PluginProvider } from '../context/PluginContext';
@@ -16,13 +16,13 @@ interface CalendarViewComponentHandle {
 }
 
 export class CalendarView extends ItemView {
-  private plugin: HKWorkPlugin;
+  private plugin: BulletJournalPlugin;
   root: Root | null = null;
   private unsubscribeRefresh: (() => void) | null = null;
   calendarInstance: Calendar | null = null;
   private componentRef = createRef<CalendarViewComponentHandle>();
 
-  constructor(leaf: WorkspaceLeaf, plugin: HKWorkPlugin) {
+  constructor(leaf: WorkspaceLeaf, plugin: BulletJournalPlugin) {
     super(leaf);
     this.plugin = plugin;
   }

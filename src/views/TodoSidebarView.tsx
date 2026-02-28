@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { ItemView, WorkspaceLeaf } from 'obsidian';
 import { Root, createRoot } from 'react-dom/client';
-import HKWorkPlugin from '../../main';
+import BulletJournalPlugin from '../../main';
 import { TodoSidebar } from '../components/TodoSidebar';
 import { AppContext } from '../context/AppContext';
 import { PluginProvider } from '../context/PluginContext';
@@ -12,11 +12,11 @@ import { openFileAtLine } from '../utils/fileUtils';
 export const TODO_SIDEBAR_VIEW_TYPE = 'bullet-journal-todo-sidebar';
 
 export class TodoSidebarView extends ItemView {
-  private plugin: HKWorkPlugin;
+  private plugin: BulletJournalPlugin;
   root: Root | null = null;
   private unsubscribeRefresh: (() => void) | null = null;
 
-  constructor(leaf: WorkspaceLeaf, plugin: HKWorkPlugin) {
+  constructor(leaf: WorkspaceLeaf, plugin: BulletJournalPlugin) {
     super(leaf);
     this.plugin = plugin;
   }

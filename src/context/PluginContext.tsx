@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode, useMemo, useRef } from 'react';
-import HKWorkPlugin from '../../main';
+import BulletJournalPlugin from '../../main';
 
 export interface GroupOption {
   id: string;
@@ -7,7 +7,7 @@ export interface GroupOption {
 }
 
 interface PluginContextType {
-  plugin: HKWorkPlugin | undefined;
+  plugin: BulletJournalPlugin | undefined;
   refreshKey: number;
   refresh: () => void;
   selectedGroup: string;
@@ -19,7 +19,7 @@ interface PluginContextType {
 export const PluginContext = createContext<PluginContextType | undefined>(undefined);
 
 interface PluginProviderProps {
-  plugin: HKWorkPlugin;
+  plugin: BulletJournalPlugin;
   children: ReactNode;
 }
 

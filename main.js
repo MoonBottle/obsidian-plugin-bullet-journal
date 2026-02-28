@@ -21856,7 +21856,7 @@ var init_fileUtils = __esm({
 // main.ts
 var main_exports = {};
 __export(main_exports, {
-  default: () => HKWorkPlugin
+  default: () => BulletJournalPlugin
 });
 module.exports = __toCommonJS(main_exports);
 var import_obsidian13 = require("obsidian");
@@ -51487,7 +51487,7 @@ var DEFAULT_SETTINGS = {
   lunchBreakStart: "12:00",
   lunchBreakEnd: "13:00"
 };
-var HKWorkPlugin = class extends import_obsidian13.Plugin {
+var BulletJournalPlugin = class extends import_obsidian13.Plugin {
   settings;
   refreshCallbacks = /* @__PURE__ */ new Set();
   debouncedRefresh;

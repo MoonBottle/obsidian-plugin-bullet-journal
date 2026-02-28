@@ -17,7 +17,7 @@ interface ProjectDirectory {
   groupId?: string;
 }
 
-interface HKWorkPluginSettings {
+interface BulletJournalPluginSettings {
   projectDirectories: ProjectDirectory[];
   projectGroups: ProjectGroup[];
   defaultGroup: string;
@@ -26,7 +26,7 @@ interface HKWorkPluginSettings {
   lunchBreakEnd: string;
 }
 
-const DEFAULT_SETTINGS: HKWorkPluginSettings = {
+const DEFAULT_SETTINGS: BulletJournalPluginSettings = {
   projectDirectories: [],
   projectGroups: [],
   defaultGroup: '',
@@ -35,8 +35,8 @@ const DEFAULT_SETTINGS: HKWorkPluginSettings = {
   lunchBreakEnd: '13:00'
 };
 
-export default class HKWorkPlugin extends Plugin {
-  settings: HKWorkPluginSettings;
+export default class BulletJournalPlugin extends Plugin {
+  settings: BulletJournalPluginSettings;
   private refreshCallbacks: Set<() => void> = new Set();
   private debouncedRefresh: () => void;
   private normalizedProjectDirectories: string[] = [];
@@ -350,9 +350,9 @@ export default class HKWorkPlugin extends Plugin {
 }
 
 class BulletJournalSettingTab extends PluginSettingTab {
-  plugin: HKWorkPlugin;
+  plugin: BulletJournalPlugin;
 
-  constructor(app: App, plugin: HKWorkPlugin) {
+  constructor(app: App, plugin: BulletJournalPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }
