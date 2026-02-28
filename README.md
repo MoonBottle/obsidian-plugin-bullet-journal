@@ -1,5 +1,7 @@
 # HK-Work Visualizer Obsidian Plugin
 
+[中文](README.zh.md) | English
+
 An Obsidian plugin for visualizing HK-Work project tasks with calendar and Gantt chart views.
 
 ## Features

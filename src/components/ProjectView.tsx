@@ -87,15 +87,6 @@ const TaskItem = memo(({ task }: TaskItemProps) => {
       <h4>{task.name}</h4>
       <div className="task-meta">
         <span>{t('project').level}: {task.level}</span>
-        {task.date && <span> • {t('project').date}: {task.date}</span>}
-        {task.link && (
-          <>
-            <span> • </span>
-            <a href={task.link} target="_blank" rel="noopener noreferrer">
-              {t('project').link}
-            </a>
-          </>
-        )}
       </div>
 
       {task.items.length > 0 && (

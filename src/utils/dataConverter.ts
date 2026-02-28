@@ -46,54 +46,22 @@ export class DataConverter {
   }
 
   /**
-   * Convert tasks with dates to calendar events
-   * Tasks without dates are skipped
+   * Convert tasks to calendar events
+   * Tasks no longer have their own dates - they are determined by their items
+   * This method returns empty array as tasks should not appear as independent events
    */
   public static tasksToCalendarEvents(tasks: Task[], project: Project): CalendarEvent[] {
-    const events: CalendarEvent[] = [];
-
-    tasks.forEach((task, index) => {
-      // Only process tasks with dates and no items (items are handled separately)
-      if (task.date && task.items.length === 0) {
-        const hasTime = !!task.startDateTime && task.startDateTime.includes(' ');
-        const start = task.startDateTime
-          ? task.startDateTime.replace(' ', 'T')
-          : task.date;
-        const end = task.endDateTime
-          ? task.endDateTime.replace(' ', 'T')
-          : task.startDateTime?.replace(' ', 'T') || task.date;
-
-        events.push({
-          id: `task-event-${project.name}-${task.date || 'nodate'}-${index}`,
-          title: task.name,
-          start,
-          end,
-          allDay: !hasTime,
-          item: task.name,
-          hasItems: false,
-          project: this.getProjectDisplayName(project),
-          projectLinks: project.links,
-          task: task.name,
-          taskLinks: task.links,
-          level: task.level,
-          filePath: project.filePath,
-          lineNumber: task.lineNumber,
-          projectGroupId: project.groupId
-        });
-      }
-    });
-
-    return events;
+    return [];
   }
 
   /**
-   * Convert all projects to calendar events (items + tasks with dates)
+   * Convert all projects to calendar events (items only)
    */
   public static projectsToCalendarEvents(projects: Project[]): CalendarEvent[] {
     const allEvents: CalendarEvent[] = [];
 
     projects.forEach(project => {
-      // Add events from items
+      // Add events from items only
       const items: Item[] = [];
       project.tasks.forEach(task => {
         task.items.forEach(item => {
@@ -103,9 +71,6 @@ export class DataConverter {
         });
       });
       allEvents.push(...this.itemsToCalendarEvents(items));
-
-      // Add events from tasks with dates but no items
-      allEvents.push(...this.tasksToCalendarEvents(project.tasks, project));
     });
 
     return allEvents;
@@ -113,23 +78,19 @@ export class DataConverter {
 
   /**
    * Convert tasks to gantt tasks
+   * Task dates are determined by their items, not by the task line itself
    */
   public static tasksToGanttTasks(tasks: Task[], project: Project): GanttTask[] {
     const ganttTasks: GanttTask[] = [];
     const projectDisplayName = this.getProjectDisplayName(project);
 
     tasks.forEach((task, index) => {
-      // Use task date if available, otherwise use earliest item date
-      let startDate = task.date;
-      let endDate = task.date;
-
-      if (!startDate && task.items.length > 0) {
+      // Task dates are determined by its items
+      if (task.items.length > 0) {
         const itemDates = task.items.map(item => item.date).sort();
-        startDate = itemDates[0];
-        endDate = itemDates[itemDates.length - 1];
-      }
+        const startDate = itemDates[0];
+        const endDate = itemDates[itemDates.length - 1];
 
-      if (startDate) {
         ganttTasks.push({
           id: `task-${project.name}-${index}`,
           title: task.name,
@@ -137,7 +98,7 @@ export class DataConverter {
           end: endDate || startDate,
           project: projectDisplayName,
           level: task.level,
-          progress: task.items.length > 0 ? 100 : 0
+          progress: 100
         });
       }
     });

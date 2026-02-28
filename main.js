@@ -22079,71 +22079,24 @@ var LineParser = class {
   /**
    * Parse a task line
    * Supports formats:
-   * - 任务名 #任务 [@日期] [@层级] [链接]
-   * - [任务名](url) #任务 @YYYY-MM-DD HH:mm:ss~HH:mm:ss (time range format)
+   * - 任务名 #任务 [@层级]
+   * Note: Task time is determined by its items, not by the task line itself
    */
   static parseTaskLine(line, lineNumber) {
     let level = "L1";
-    let date = "";
-    let startDateTime;
-    let endDateTime;
-    const links = [];
     const taskTagIndex = line.indexOf("#\u4EFB\u52A1");
     let name = taskTagIndex >= 0 ? line.substring(0, taskTagIndex).trim() : line.trim();
-    const markdownLinkRegex = /\[(.*?)\]\((.*?)\)/g;
-    let markdownMatch;
-    while ((markdownMatch = markdownLinkRegex.exec(line)) !== null) {
-      const linkName = markdownMatch[1];
-      const linkUrl = markdownMatch[2];
-      if (name.includes(`[${linkName}]`)) {
-        links.push({ name: linkName, url: linkUrl });
-        name = linkName;
-      } else {
-        links.push({ name: linkName, url: linkUrl });
-      }
-    }
-    const rawUrlRegex = /(https?:\/\/[^\s\)]+)/g;
-    let urlMatch;
-    while ((urlMatch = rawUrlRegex.exec(line)) !== null) {
-      const url = urlMatch[1];
-      const cleanUrl = url.replace(/\)$/, "");
-      if (!links.some((l3) => l3.url === cleanUrl || l3.url === url)) {
-        links.push({ name: "\u94FE\u63A5", url: cleanUrl });
-      }
-    }
     const levelMatch = line.match(/@(L[1-3])/);
     if (levelMatch) {
       level = levelMatch[1];
     }
-    const timeRangeRegex = /@(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})~(\d{2}:\d{2}:\d{2})/;
-    const timeRangeMatch = line.match(timeRangeRegex);
-    if (timeRangeMatch) {
-      date = timeRangeMatch[1];
-      startDateTime = `${date} ${timeRangeMatch[2]}`;
-      endDateTime = `${date} ${timeRangeMatch[3]}`;
-    } else {
-      const dateTimeRegex = /@(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2})?)/;
-      const dateTimeMatch = line.match(dateTimeRegex);
-      if (dateTimeMatch) {
-        const match = dateTimeMatch[1];
-        date = match.split(" ")[0];
-        if (match.includes(" ")) {
-          startDateTime = match;
-          endDateTime = match;
-        }
-      }
-    }
     name = name.replace(/\[|\]/g, "").trim();
-    name = name.replace(/https?:\/\/[^\s]+/g, "").trim();
     return {
       name,
       level,
-      date,
-      startDateTime,
-      endDateTime,
+      date: "",
       items: [],
-      lineNumber,
-      links: links.length > 0 ? links : void 0
+      lineNumber
     };
   }
   /**
@@ -22286,6 +22239,7 @@ var MarkdownParser = class {
       links: []
     };
     let currentTask = null;
+    let hasTaskItemStarted = false;
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
       const line = lines[lineIndex];
       const trimmedLine = line.trim();
@@ -22299,7 +22253,7 @@ var MarkdownParser = class {
         project.description = content2;
         continue;
       }
-      if (project.name && trimmedLine.startsWith("[") && trimmedLine.includes("](")) {
+      if (project.name && !currentTask && trimmedLine.startsWith("[") && trimmedLine.includes("](")) {
         const linkMatch = trimmedLine.match(/\[(.*?)\]\((.*?)\)/);
         if (linkMatch) {
           const linkName = linkMatch[1];
@@ -22320,15 +22274,28 @@ var MarkdownParser = class {
           project.tasks.push(currentTask);
         }
         currentTask = LineParser.parseTaskLine(trimmedLine, lineNumber);
+        currentTask.links = [];
+        hasTaskItemStarted = false;
         continue;
       }
       if (currentTask && trimmedLine.includes("@") && !trimmedLine.includes("#\u4EFB\u52A1")) {
         const item = LineParser.parseItemLine(trimmedLine, lineNumber);
         if (item) {
+          hasTaskItemStarted = true;
           item.id = generateItemId();
           item.status = detectItemStatus(trimmedLine);
           currentTask.items.push(item);
         }
+        continue;
+      }
+      if (currentTask && !hasTaskItemStarted && trimmedLine.startsWith("[") && trimmedLine.includes("](")) {
+        const linkMatch = trimmedLine.match(/\[(.*?)\]\((.*?)\)/);
+        if (linkMatch) {
+          const linkName = linkMatch[1];
+          const linkUrl = linkMatch[2];
+          currentTask.links.push({ name: linkName, url: linkUrl });
+        }
+        continue;
       }
     }
     if (currentTask) {
@@ -22373,20 +22340,6 @@ var MarkdownParser = class {
           item.task = task;
           item.project = project;
           items.push(item);
-        }
-        if (task.date && task.items.length === 0) {
-          const taskItem = {
-            id: generateItemId(),
-            content: task.name,
-            date: task.date,
-            startDateTime: task.startDateTime,
-            endDateTime: task.endDateTime,
-            task,
-            project,
-            lineNumber: task.lineNumber,
-            status: "pending"
-          };
-          items.push(taskItem);
         }
       }
     }
@@ -22689,23 +22642,11 @@ ProjectItem.displayName = "ProjectItem";
 var TaskItem = (0, import_react7.memo)(({ task }) => {
   return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: `task-item ${task.level.toLowerCase()}`, children: [
     /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h4", { children: task.name }),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "task-meta", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { children: [
-        t("project").level,
-        ": ",
-        task.level
-      ] }),
-      task.date && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { children: [
-        " \u2022 ",
-        t("project").date,
-        ": ",
-        task.date
-      ] }),
-      task.link && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { children: " \u2022 " }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("a", { href: task.link, target: "_blank", rel: "noopener noreferrer", children: t("project").link })
-      ] })
-    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "task-meta", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { children: [
+      t("project").level,
+      ": ",
+      task.level
+    ] }) }),
     task.items.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("ul", { children: task.items.map((item, index5) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { children: [
       "[",
       item.date,
@@ -36340,39 +36281,15 @@ var DataConverter = class {
     });
   }
   /**
-   * Convert tasks with dates to calendar events
-   * Tasks without dates are skipped
+   * Convert tasks to calendar events
+   * Tasks no longer have their own dates - they are determined by their items
+   * This method returns empty array as tasks should not appear as independent events
    */
   static tasksToCalendarEvents(tasks, project) {
-    const events = [];
-    tasks.forEach((task, index5) => {
-      if (task.date && task.items.length === 0) {
-        const hasTime = !!task.startDateTime && task.startDateTime.includes(" ");
-        const start = task.startDateTime ? task.startDateTime.replace(" ", "T") : task.date;
-        const end = task.endDateTime ? task.endDateTime.replace(" ", "T") : task.startDateTime?.replace(" ", "T") || task.date;
-        events.push({
-          id: `task-event-${project.name}-${task.date || "nodate"}-${index5}`,
-          title: task.name,
-          start,
-          end,
-          allDay: !hasTime,
-          item: task.name,
-          hasItems: false,
-          project: this.getProjectDisplayName(project),
-          projectLinks: project.links,
-          task: task.name,
-          taskLinks: task.links,
-          level: task.level,
-          filePath: project.filePath,
-          lineNumber: task.lineNumber,
-          projectGroupId: project.groupId
-        });
-      }
-    });
-    return events;
+    return [];
   }
   /**
-   * Convert all projects to calendar events (items + tasks with dates)
+   * Convert all projects to calendar events (items only)
    */
   static projectsToCalendarEvents(projects) {
     const allEvents = [];
@@ -36386,25 +36303,21 @@ var DataConverter = class {
         });
       });
       allEvents.push(...this.itemsToCalendarEvents(items));
-      allEvents.push(...this.tasksToCalendarEvents(project.tasks, project));
     });
     return allEvents;
   }
   /**
    * Convert tasks to gantt tasks
+   * Task dates are determined by their items, not by the task line itself
    */
   static tasksToGanttTasks(tasks, project) {
     const ganttTasks = [];
     const projectDisplayName = this.getProjectDisplayName(project);
     tasks.forEach((task, index5) => {
-      let startDate = task.date;
-      let endDate = task.date;
-      if (!startDate && task.items.length > 0) {
+      if (task.items.length > 0) {
         const itemDates = task.items.map((item) => item.date).sort();
-        startDate = itemDates[0];
-        endDate = itemDates[itemDates.length - 1];
-      }
-      if (startDate) {
+        const startDate = itemDates[0];
+        const endDate = itemDates[itemDates.length - 1];
         ganttTasks.push({
           id: `task-${project.name}-${index5}`,
           title: task.name,
@@ -36412,7 +36325,7 @@ var DataConverter = class {
           end: endDate || startDate,
           project: projectDisplayName,
           level: task.level,
-          progress: task.items.length > 0 ? 100 : 0
+          progress: 100
         });
       }
     });
@@ -50191,19 +50104,6 @@ var GanttViewComponent = () => {
   const [startDateFilter, setStartDateFilter] = (0, import_react11.useState)(getDefaultStartDate);
   const [endDateFilter, setEndDateFilter] = (0, import_react11.useState)(getDefaultEndDate);
   const calculateTaskDates = (task) => {
-    if (task.date || task.startDateTime) {
-      const startStr = task.startDateTime || task.date;
-      const endStr = task.endDateTime || task.startDateTime || task.date;
-      if (startStr) {
-        const start = new Date(startStr);
-        let end = endStr ? new Date(endStr) : new Date(startStr);
-        if (start.getTime() === end.getTime()) {
-          end = new Date(start);
-          end.setHours(23, 59, 59, 999);
-        }
-        return { start, end };
-      }
-    }
     if (task.items && task.items.length > 0) {
       let minDate = null;
       let maxDate = null;

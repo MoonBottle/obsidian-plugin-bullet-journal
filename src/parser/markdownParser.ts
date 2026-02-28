@@ -117,6 +117,7 @@ export class MarkdownParser {
     };
 
     let currentTask: Task | null = null;
+    let hasTaskItemStarted = false;
 
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
       const line = lines[lineIndex];
@@ -137,7 +138,8 @@ export class MarkdownParser {
       }
 
       // Parse project-level links (markdown format: [name](url))
-      if (project.name && trimmedLine.startsWith('[') && trimmedLine.includes('](')) {
+      // Only parse as project link if there's no current task
+      if (project.name && !currentTask && trimmedLine.startsWith('[') && trimmedLine.includes('](')) {
         const linkMatch = trimmedLine.match(/\[(.*?)\]\((.*?)\)/);
         if (linkMatch) {
           const linkName = linkMatch[1];
@@ -166,6 +168,8 @@ export class MarkdownParser {
 
         // Parse new task with line number
         currentTask = LineParser.parseTaskLine(trimmedLine, lineNumber);
+        currentTask.links = [];
+        hasTaskItemStarted = false;
         continue;
       }
 
@@ -173,10 +177,24 @@ export class MarkdownParser {
       if (currentTask && trimmedLine.includes('@') && !trimmedLine.includes('#任务')) {
         const item = LineParser.parseItemLine(trimmedLine, lineNumber);
         if (item) {
+          hasTaskItemStarted = true;
           item.id = generateItemId();
           item.status = detectItemStatus(trimmedLine);
           currentTask.items.push(item);
         }
+        continue;
+      }
+
+      // Parse task-level links (markdown format: [name](url))
+      // Links must be between task line and first item line
+      if (currentTask && !hasTaskItemStarted && trimmedLine.startsWith('[') && trimmedLine.includes('](')) {
+        const linkMatch = trimmedLine.match(/\[(.*?)\]\((.*?)\)/);
+        if (linkMatch) {
+          const linkName = linkMatch[1];
+          const linkUrl = linkMatch[2];
+          currentTask.links.push({ name: linkName, url: linkUrl });
+        }
+        continue;
       }
     }
 
@@ -235,23 +253,6 @@ export class MarkdownParser {
           item.task = task;
           item.project = project;
           items.push(item);
-        }
-
-        // Check if the task itself has a date/time and should be treated as an item
-        if (task.date && task.items.length === 0) {
-          // If task has a date but no sub-items, treat the task itself as an item
-          const taskItem: Item = {
-            id: generateItemId(),
-            content: task.name,
-            date: task.date,
-            startDateTime: task.startDateTime,
-            endDateTime: task.endDateTime,
-            task: task,
-            project: project,
-            lineNumber: task.lineNumber,
-            status: 'pending'
-          };
-          items.push(taskItem);
         }
       }
     }

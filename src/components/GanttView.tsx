@@ -68,31 +68,9 @@ export const GanttViewComponent = () => {
   const [startDateFilter, setStartDateFilter] = useState<string>(getDefaultStartDate);
   const [endDateFilter, setEndDateFilter] = useState<string>(getDefaultEndDate);
 
-  // Calculate task dates based on rules
+  // Calculate task dates based on items
   const calculateTaskDates = (task: Task): { start: Date | undefined, end: Date | undefined } => {
-    // 1. Explicit Date (Highest Priority)
-    if (task.date || task.startDateTime) {
-      const startStr = task.startDateTime || task.date;
-      const endStr = task.endDateTime || task.startDateTime || task.date; // default end to start/date if missing
-
-      if (startStr) {
-        const start = new Date(startStr);
-        let end = endStr ? new Date(endStr) : new Date(startStr);
-
-        // Fix for same-day tasks rendering as milestones
-        // If start and end are exactly the same (e.g. both 00:00:00), dhtmlx treats duration as 0.
-        // We want single-day tasks to show as 1 day duration.
-        if (start.getTime() === end.getTime()) {
-           // Set to end of day (23:59:59) as requested
-           end = new Date(start);
-           end.setHours(23, 59, 59, 999);
-        }
-
-        return { start, end };
-      }
-    }
-
-    // 2. Aggregated from Items
+    // Task dates are determined by its items, not by the task line itself
     if (task.items && task.items.length > 0) {
       let minDate: Date | null = null;
       let maxDate: Date | null = null;
@@ -104,17 +82,16 @@ export const GanttViewComponent = () => {
         if (itemStart) {
           const d = new Date(itemStart);
           if (!minDate || d < minDate) minDate = d;
-          if (!maxDate || d > maxDate) maxDate = d; // Initial max
+          if (!maxDate || d > maxDate) maxDate = d;
         }
         if (itemEnd) {
           const d = new Date(itemEnd);
           if (!maxDate || d > maxDate) maxDate = d;
-          if (!minDate || d < minDate) minDate = d; // Should not happen usually but safe
+          if (!minDate || d < minDate) minDate = d;
         }
       });
 
       if (minDate && maxDate) {
-         // Same fix for items aggregation
          if (minDate.getTime() === maxDate!.getTime()) {
              const adjustedMax = new Date(maxDate!);
              adjustedMax.setHours(23, 59, 59, 999);
@@ -124,7 +101,7 @@ export const GanttViewComponent = () => {
       }
     }
 
-    // 3. Fallback
+    // Fallback: no items
     return { start: undefined, end: undefined };
   };
 
