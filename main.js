@@ -36736,7 +36736,7 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
     const buttonsContainer = contentEl.createEl("div", { cls: "hk-work-modal-buttons" });
     if (this.details.fromEditor) {
       const openCalendarBtn = buttonsContainer.createEl("button", {
-        text: "\u6253\u5F00\u65E5\u5386",
+        text: "\u67E5\u770B\u65E5\u5386",
         cls: "hk-work-open-file-btn"
       });
       openCalendarBtn.addEventListener("click", async () => {
@@ -51213,7 +51213,7 @@ var TodoSidebar = ({ onItemClick }) => {
             {
               className: "hk-work-todo-action-btn",
               onClick: (e3) => handleOpenCalendar(item, e3),
-              title: "\u6253\u5F00\u65E5\u5386",
+              title: "\u67E5\u770B\u65E5\u5386",
               children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
                 /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("rect", { x: "3", y: "4", width: "18", height: "18", rx: "2", ry: "2" }),
                 /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "16", y1: "2", x2: "16", y2: "6" }),

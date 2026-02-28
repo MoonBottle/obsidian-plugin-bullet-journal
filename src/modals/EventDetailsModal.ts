@@ -155,7 +155,7 @@ export class EventDetailsModal extends Modal {
     // If opened from editor, show "Open Calendar" button
     if (this.details.fromEditor) {
       const openCalendarBtn = buttonsContainer.createEl('button', {
-        text: '打开日历',
+        text: '查看日历',
         cls: 'hk-work-open-file-btn'
       });
       openCalendarBtn.addEventListener('click', async () => {
