@@ -101,8 +101,8 @@ export default class HKWorkPlugin extends Plugin {
     });
 
     this.addCommand({
-      id: 'refresh-hk-work-data',
-      name: 'Refresh HK-Work Data',
+      id: 'refresh-bullet-journal-data',
+      name: 'Refresh Bullet Journal Data',
       callback: () => this.debouncedRefresh()
     });
 
@@ -113,10 +113,10 @@ export default class HKWorkPlugin extends Plugin {
     });
 
     // Add setting tab
-    this.addSettingTab(new HKWorkSettingTab(this.app, this));
+    this.addSettingTab(new BulletJournalSettingTab(this.app, this));
 
     // Add ribbon icon
-    this.addRibbonIcon('calendar', 'HK-Work Visualizer', (evt) => {
+    this.addRibbonIcon('calendar', '子弹笔记', (evt) => {
       this.openView(this.settings.defaultView === 'calendar' ? CALENDAR_VIEW_TYPE : PROJECT_VIEW_TYPE);
     });
 
@@ -349,7 +349,7 @@ export default class HKWorkPlugin extends Plugin {
   }
 }
 
-class HKWorkSettingTab extends PluginSettingTab {
+class BulletJournalSettingTab extends PluginSettingTab {
   plugin: HKWorkPlugin;
 
   constructor(app: App, plugin: HKWorkPlugin) {
@@ -434,11 +434,11 @@ class HKWorkSettingTab extends PluginSettingTab {
         }));
 
     // Create a container for groups to ensure correct positioning
-    const groupsContainer = containerEl.createDiv({ cls: 'hk-work-groups-container' });
+    const groupsContainer = containerEl.createDiv({ cls: 'bullet-journal-groups-container' });
     this.renderProjectGroups(groupsContainer, containerEl);
 
     // Default Group Setting - use container for dynamic refresh
-    const defaultGroupContainer = containerEl.createDiv({ cls: 'hk-work-default-group-container' });
+    const defaultGroupContainer = containerEl.createDiv({ cls: 'bullet-journal-default-group-container' });
     this.renderDefaultGroupDropdown(defaultGroupContainer);
 
     // Project Directories Section
@@ -483,20 +483,20 @@ class HKWorkSettingTab extends PluginSettingTab {
     if (this.plugin.settings.projectGroups.length === 0) {
       new Setting(groupsContainer)
         .setDesc(t('settings').projectGroups.emptyMessage)
-        .setClass('hk-work-group-setting');
+        .setClass('bullet-journal-group-setting');
       return;
     }
 
     this.plugin.settings.projectGroups.forEach((group, index) => {
       const setting = new Setting(groupsContainer)
-        .setClass('hk-work-group-setting')
+        .setClass('bullet-journal-group-setting')
         .addText(text => text
           .setPlaceholder(t('settings').projectGroups.namePlaceholder)
           .setValue(group.name)
           .onChange(async (value) => {
             this.plugin.settings.projectGroups[index].name = value;
             await this.plugin.saveSettings();
-            const defaultGroupContainer = mainContainer.querySelector('.hk-work-default-group-container') as HTMLElement;
+            const defaultGroupContainer = mainContainer.querySelector('.bullet-journal-default-group-container') as HTMLElement;
             if (defaultGroupContainer) {
               this.renderDefaultGroupDropdown(defaultGroupContainer);
             }
@@ -518,7 +518,7 @@ class HKWorkSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
             this.renderProjectGroups(groupsContainer, mainContainer);
             this.renderProjectDirectories(mainContainer);
-            const defaultGroupContainer = mainContainer.querySelector('.hk-work-default-group-container') as HTMLElement;
+            const defaultGroupContainer = mainContainer.querySelector('.bullet-journal-default-group-container') as HTMLElement;
             if (defaultGroupContainer) {
               this.renderDefaultGroupDropdown(defaultGroupContainer);
             }
@@ -528,12 +528,12 @@ class HKWorkSettingTab extends PluginSettingTab {
 
   private renderProjectDirectories(containerEl: HTMLElement): void {
     // Remove existing directory settings
-    containerEl.querySelectorAll('.hk-work-dir-setting').forEach(el => el.remove());
+    containerEl.querySelectorAll('.bullet-journal-dir-setting').forEach(el => el.remove());
 
     if (this.plugin.settings.projectDirectories.length === 0) {
       new Setting(containerEl)
         .setDesc(t('settings').projectDirectories.emptyMessage)
-        .setClass('hk-work-dir-setting');
+        .setClass('bullet-journal-dir-setting');
       return;
     }
 
@@ -545,9 +545,7 @@ class HKWorkSettingTab extends PluginSettingTab {
 
       const setting = new Setting(containerEl)
         .setName(dir.path || t('settings').projectDirectories.noPath)
-        .setClass('hk-work-dir-setting');
-
-      // Add group dropdown if groups exist
+        .setClass('bullet-journal-dir-setting');
       if (this.plugin.settings.projectGroups.length > 0) {
         setting.addDropdown(dropdown => dropdown
           .addOptions(groupOptions)

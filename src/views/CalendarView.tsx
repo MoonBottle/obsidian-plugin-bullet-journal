@@ -8,7 +8,7 @@ import { AppContext } from '../context/AppContext';
 import { PluginProvider } from '../context/PluginContext';
 import { t } from '../i18n';
 
-export const CALENDAR_VIEW_TYPE = 'hk-work-calendar-view';
+export const CALENDAR_VIEW_TYPE = 'bullet-journal-calendar-view';
 
 // 定义 CalendarViewComponent 暴露的接口
 interface CalendarViewComponentHandle {

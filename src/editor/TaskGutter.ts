@@ -19,7 +19,7 @@ class TaskButtonWidget extends WidgetType {
 
   toDOM(view: EditorView): HTMLElement {
     const span = document.createElement('span');
-    span.className = 'hk-work-task-btn';
+    span.className = 'bullet-journal-task-btn';
     // Add an icon or just a box. The screenshot implies a button.
     // We can use an SVG icon or a simple char.
     // Using a simple unicode char or CSS-styled box.

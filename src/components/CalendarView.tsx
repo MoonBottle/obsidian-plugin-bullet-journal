@@ -164,7 +164,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
             <div class="fc-event-title fc-sticky">
               ${info.timeText ? `<span class="fc-event-time" style="margin-right: 4px;">${info.timeText}</span>` : ''}
               ${info.event.title}
-              <span class="hk-work-event-task-inline">${task}</span>
+              <span class="bullet-journal-event-task-inline">${task}</span>
             </div>
           </div>
         </div>
@@ -178,7 +178,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
             <div class="fc-event-title">
               ${info.timeText ? `<span class="fc-event-time" style="margin-right: 4px;">${info.timeText}</span>` : ''}
               ${info.event.title}
-              <span class="hk-work-event-task-inline">${task}</span>
+              <span class="bullet-journal-event-task-inline">${task}</span>
             </div>
           </div>
         </div>
@@ -567,7 +567,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
 
   if (missingConfig) {
     return (
-      <div className="hk-work-container">
+      <div className="bullet-journal-container">
         <ViewHeader
           title={t('calendar').title}
           subtitle={t('calendar').subtitle}
@@ -581,7 +581,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
   }
 
   return (
-    <div className="hk-work-container">
+    <div className="bullet-journal-container">
       <ViewHeader
         title={t('calendar').title}
         subtitle={t('calendar').subtitle}

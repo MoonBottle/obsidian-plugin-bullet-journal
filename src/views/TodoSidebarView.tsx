@@ -9,7 +9,7 @@ import { t } from '../i18n';
 import { Item } from '../models/types';
 import { openFileAtLine } from '../utils/fileUtils';
 
-export const TODO_SIDEBAR_VIEW_TYPE = 'hk-work-todo-sidebar';
+export const TODO_SIDEBAR_VIEW_TYPE = 'bullet-journal-todo-sidebar';
 
 export class TodoSidebarView extends ItemView {
   private plugin: HKWorkPlugin;

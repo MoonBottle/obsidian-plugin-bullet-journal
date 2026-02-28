@@ -376,7 +376,7 @@ export const GanttViewComponent = () => {
   const ganttTexts = t('gantt');
 
   return (
-    <div className="hk-work-container">
+    <div className="bullet-journal-container">
       <ViewHeader
         title={ganttTexts.title}
         actions={
@@ -418,21 +418,21 @@ export const GanttViewComponent = () => {
             </label>
 
             <button
-              className={`hk-work-refresh-btn ${viewMode === 'Day' ? 'active' : ''}`}
+              className={`bullet-journal-refresh-btn ${viewMode === 'Day' ? 'active' : ''}`}
               onClick={() => setViewMode('Day')}
               style={{ backgroundColor: viewMode === 'Day' ? 'var(--interactive-accent)' : '', color: viewMode === 'Day' ? 'white' : '' }}
             >
               {ganttTexts.day}
             </button>
             <button
-              className={`hk-work-refresh-btn ${viewMode === 'Week' ? 'active' : ''}`}
+              className={`bullet-journal-refresh-btn ${viewMode === 'Week' ? 'active' : ''}`}
               onClick={() => setViewMode('Week')}
               style={{ backgroundColor: viewMode === 'Week' ? 'var(--interactive-accent)' : '', color: viewMode === 'Week' ? 'white' : '' }}
             >
               {ganttTexts.week}
             </button>
             <button
-              className={`hk-work-refresh-btn ${viewMode === 'Month' ? 'active' : ''}`}
+              className={`bullet-journal-refresh-btn ${viewMode === 'Month' ? 'active' : ''}`}
               onClick={() => setViewMode('Month')}
               style={{ backgroundColor: viewMode === 'Month' ? 'var(--interactive-accent)' : '', color: viewMode === 'Month' ? 'white' : '' }}
             >

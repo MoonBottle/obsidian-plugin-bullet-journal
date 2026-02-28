@@ -22671,12 +22671,12 @@ var SELECT_STYLE = {
 };
 var GroupSelect = (0, import_react4.memo)(({ groups, value, onChange, className, style }) => {
   if (groups.length === 0) return null;
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: `hk-work-group-filter ${className || ""}`, children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: `bullet-journal-group-filter ${className || ""}`, children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
     "select",
     {
       value,
       onChange,
-      className: "hk-work-group-select",
+      className: "bullet-journal-group-select",
       style: { ...SELECT_STYLE, ...style },
       children: [
         /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("option", { value: "", children: t("settings").projectGroups.allGroups }),
@@ -22694,7 +22694,7 @@ var RefreshButton = (0, import_react5.memo)(({ onClick, isLoading, text, title, 
   return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
     "button",
     {
-      className: `hk-work-refresh-btn ${className || ""}`,
+      className: `bullet-journal-refresh-btn ${className || ""}`,
       onClick,
       disabled: isLoading,
       title,
@@ -22728,12 +22728,12 @@ RefreshButton.displayName = "RefreshButton";
 var import_react6 = __toESM(require_react());
 var import_jsx_runtime4 = __toESM(require_jsx_runtime());
 var ViewHeader = (0, import_react6.memo)(({ title, subtitle, actions }) => {
-  return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "hk-work-header", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "hk-work-header-left", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h2", { className: "hk-work-title", children: title }),
-      subtitle && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "hk-work-subtitle", children: subtitle })
+  return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "bullet-journal-header", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "bullet-journal-header-left", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h2", { className: "bullet-journal-title", children: title }),
+      subtitle && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "bullet-journal-subtitle", children: subtitle })
     ] }),
-    actions && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "hk-work-header-right", children: actions })
+    actions && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "bullet-journal-header-right", children: actions })
   ] });
 });
 ViewHeader.displayName = "ViewHeader";
@@ -22818,13 +22818,13 @@ var ProjectDetails = ({ project, onBack }) => {
     }
     return project.tasks.map((task) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(TaskItem, { task }, task.name));
   }, [project.tasks]);
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "hk-work-container", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "hk-work-header", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "bullet-journal-container", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "bullet-journal-header", children: [
       /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("button", { onClick: onBack, children: [
         "\u2190 ",
         t("common").back
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { className: "hk-work-title", children: project.name })
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { className: "bullet-journal-title", children: project.name })
     ] }),
     project.description && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { children: project.description }),
     project.links && project.links.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { children: [
@@ -22865,7 +22865,7 @@ var ProjectViewComponent = () => {
       }
     );
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "hk-work-container", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "bullet-journal-container", children: [
     /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
       ViewHeader,
       {
@@ -22904,7 +22904,7 @@ var ProjectViewComponent = () => {
 
 // src/views/ProjectView.tsx
 var import_jsx_runtime6 = __toESM(require_jsx_runtime());
-var PROJECT_VIEW_TYPE = "hk-work-project-view";
+var PROJECT_VIEW_TYPE = "bullet-journal-project-view";
 var ProjectView = class extends import_obsidian2.ItemView {
   plugin;
   root = null;
@@ -36642,7 +36642,7 @@ var calculateDuration = (startStr, endStr, lunchBreakStart, lunchBreakEnd) => {
 // src/modals/EventDetailsModal.ts
 var createCopyButton = (container, value) => {
   const copyBtn = container.createEl("button", {
-    cls: "hk-work-copy-btn",
+    cls: "bullet-journal-copy-btn",
     attr: { "aria-label": "\u590D\u5236" }
   });
   copyBtn.style.cssText = `
@@ -36683,10 +36683,10 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
   }
   onOpen() {
     const { contentEl } = this;
-    contentEl.addClass("hk-work-event-modal");
+    contentEl.addClass("bullet-journal-event-modal");
     const cleanTitle = this.details.title.replace(/#任务/g, "").trim();
-    contentEl.createEl("h2", { text: cleanTitle, cls: "hk-work-modal-title" });
-    const infoGrid = contentEl.createEl("div", { cls: "hk-work-modal-info-grid" });
+    contentEl.createEl("h2", { text: cleanTitle, cls: "bullet-journal-modal-title" });
+    const infoGrid = contentEl.createEl("div", { cls: "bullet-journal-modal-info-grid" });
     const dateLabel = this.details.end && this.details.start !== this.details.end ? "\u65F6\u95F4" : "\u65E5\u671F";
     const dateValue = this.details.end && this.details.start !== this.details.end ? `${formatDateTime(this.details.start, this.details.allDay)} - ${formatDateTime(this.details.end, this.details.allDay)}` : formatDateTime(this.details.start, this.details.allDay);
     this.createInfoRow(infoGrid, dateLabel, dateValue);
@@ -36699,10 +36699,10 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
       }
       const duration = calculateDuration(this.details.start, this.details.end, lunchBreakStart, lunchBreakEnd);
       if (duration) {
-        const durationRow = infoGrid.createEl("div", { cls: "hk-work-modal-info-row" });
-        durationRow.createEl("span", { text: "\u8017\u65F6:", cls: "hk-work-modal-info-label" });
-        const durationValueContainer = durationRow.createEl("div", { cls: "hk-work-modal-desc-value" });
-        durationValueContainer.createEl("span", { text: duration, cls: "hk-work-modal-info-value" });
+        const durationRow = infoGrid.createEl("div", { cls: "bullet-journal-modal-info-row" });
+        durationRow.createEl("span", { text: "\u8017\u65F6:", cls: "bullet-journal-modal-info-label" });
+        const durationValueContainer = durationRow.createEl("div", { cls: "bullet-journal-modal-desc-value" });
+        durationValueContainer.createEl("span", { text: duration, cls: "bullet-journal-modal-info-value" });
         createCopyButton(durationValueContainer, duration);
       }
     }
@@ -36713,10 +36713,10 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
       this.createLinksRow(infoGrid, "\u9879\u76EE\u94FE\u63A5", this.details.projectLinks);
     }
     if (this.details.task) {
-      const taskRow = infoGrid.createEl("div", { cls: "hk-work-modal-info-row" });
-      taskRow.createEl("span", { text: "\u4EFB\u52A1:", cls: "hk-work-modal-info-label" });
-      const taskValueContainer = taskRow.createEl("div", { cls: "hk-work-modal-desc-value" });
-      taskValueContainer.createEl("span", { text: this.details.task, cls: "hk-work-modal-info-value" });
+      const taskRow = infoGrid.createEl("div", { cls: "bullet-journal-modal-info-row" });
+      taskRow.createEl("span", { text: "\u4EFB\u52A1:", cls: "bullet-journal-modal-info-label" });
+      const taskValueContainer = taskRow.createEl("div", { cls: "bullet-journal-modal-desc-value" });
+      taskValueContainer.createEl("span", { text: this.details.task, cls: "bullet-journal-modal-info-value" });
       createCopyButton(taskValueContainer, this.details.task);
     }
     if (this.details.taskLinks && this.details.taskLinks.length > 0) {
@@ -36726,18 +36726,18 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
       this.createInfoRow(infoGrid, "\u7EA7\u522B", this.details.level);
     }
     if (this.details.hasItems && this.details.item) {
-      const descRow = infoGrid.createEl("div", { cls: "hk-work-modal-info-row" });
-      descRow.createEl("span", { text: "\u4E8B\u9879:", cls: "hk-work-modal-info-label" });
-      const descValueContainer = descRow.createEl("div", { cls: "hk-work-modal-desc-value" });
-      descValueContainer.createEl("span", { text: this.details.item, cls: "hk-work-modal-info-value" });
+      const descRow = infoGrid.createEl("div", { cls: "bullet-journal-modal-info-row" });
+      descRow.createEl("span", { text: "\u4E8B\u9879:", cls: "bullet-journal-modal-info-label" });
+      const descValueContainer = descRow.createEl("div", { cls: "bullet-journal-modal-desc-value" });
+      descValueContainer.createEl("span", { text: this.details.item, cls: "bullet-journal-modal-info-value" });
       createCopyButton(descValueContainer, this.details.item);
     }
-    contentEl.createEl("hr", { cls: "hk-work-modal-divider" });
-    const buttonsContainer = contentEl.createEl("div", { cls: "hk-work-modal-buttons" });
+    contentEl.createEl("hr", { cls: "bullet-journal-modal-divider" });
+    const buttonsContainer = contentEl.createEl("div", { cls: "bullet-journal-modal-buttons" });
     if (this.details.fromEditor) {
       const openCalendarBtn = buttonsContainer.createEl("button", {
         text: "\u67E5\u770B\u65E5\u5386",
-        cls: "hk-work-open-file-btn"
+        cls: "bullet-journal-open-file-btn"
       });
       openCalendarBtn.addEventListener("click", async () => {
         const dateStr = this.details.start.split("T")[0];
@@ -36760,7 +36760,7 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
     } else if (this.details.filePath) {
       const openButton = buttonsContainer.createEl("button", {
         text: "\u6253\u5F00\u6587\u6863",
-        cls: "hk-work-open-file-btn"
+        cls: "bullet-journal-open-file-btn"
       });
       openButton.addEventListener("click", async () => {
         const success = await openFileAtLine(this.app, this.details.filePath, this.details.lineNumber);
@@ -36773,16 +36773,16 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
     }
   }
   createInfoRow(container, label, value) {
-    const row = container.createEl("div", { cls: "hk-work-modal-info-row" });
-    row.createEl("span", { text: `${label}:`, cls: "hk-work-modal-info-label" });
-    row.createEl("span", { text: value, cls: "hk-work-modal-info-value" });
+    const row = container.createEl("div", { cls: "bullet-journal-modal-info-row" });
+    row.createEl("span", { text: `${label}:`, cls: "bullet-journal-modal-info-label" });
+    row.createEl("span", { text: value, cls: "bullet-journal-modal-info-value" });
   }
   createLinkRow(container, label, url, displayName) {
-    const row = container.createEl("div", { cls: "hk-work-modal-info-row" });
-    row.createEl("span", { text: `${label}:`, cls: "hk-work-modal-info-label" });
+    const row = container.createEl("div", { cls: "bullet-journal-modal-info-row" });
+    row.createEl("span", { text: `${label}:`, cls: "bullet-journal-modal-info-label" });
     const link = row.createEl("a", {
       text: displayName || url,
-      cls: "hk-work-modal-link"
+      cls: "bullet-journal-modal-link"
     });
     link.addEventListener("click", (e3) => {
       e3.preventDefault();
@@ -36790,13 +36790,13 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
     });
   }
   createLinksRow(container, label, links) {
-    const row = container.createEl("div", { cls: "hk-work-modal-info-row" });
-    row.createEl("span", { text: `${label}:`, cls: "hk-work-modal-info-label" });
-    const valueContainer = row.createEl("div", { cls: "hk-work-modal-desc-value" });
+    const row = container.createEl("div", { cls: "bullet-journal-modal-info-row" });
+    row.createEl("span", { text: `${label}:`, cls: "bullet-journal-modal-info-label" });
+    const valueContainer = row.createEl("div", { cls: "bullet-journal-modal-desc-value" });
     links.forEach((link, index5) => {
       const linkEl = valueContainer.createEl("a", {
         text: link.name,
-        cls: "hk-work-modal-link"
+        cls: "bullet-journal-modal-link"
       });
       linkEl.addEventListener("click", (e3) => {
         e3.preventDefault();
@@ -36884,21 +36884,21 @@ var DatePickerModal = class extends import_obsidian5.Modal {
   }
   onOpen() {
     const { contentEl } = this;
-    contentEl.addClass("hk-work-date-picker-modal");
+    contentEl.addClass("bullet-journal-date-picker-modal");
     contentEl.createEl("h2", { text: this.title });
-    this.contentEl_div = contentEl.createDiv({ cls: "hk-work-date-picker-content" });
+    this.contentEl_div = contentEl.createDiv({ cls: "bullet-journal-date-picker-content" });
     this.renderContent();
   }
   renderContent() {
     this.contentEl_div.empty();
-    const navContainer = this.contentEl_div.createDiv({ cls: "hk-work-date-picker-nav" });
-    navContainer.createEl("button", { text: "\xAB", cls: "hk-work-date-picker-nav-btn" }, (btn) => {
+    const navContainer = this.contentEl_div.createDiv({ cls: "bullet-journal-date-picker-nav" });
+    navContainer.createEl("button", { text: "\xAB", cls: "bullet-journal-date-picker-nav-btn" }, (btn) => {
       btn.addEventListener("click", () => {
         this.currentYear--;
         this.renderContent();
       });
     });
-    navContainer.createEl("button", { text: "\u2039", cls: "hk-work-date-picker-nav-btn" }, (btn) => {
+    navContainer.createEl("button", { text: "\u2039", cls: "bullet-journal-date-picker-nav-btn" }, (btn) => {
       btn.addEventListener("click", () => {
         this.currentMonth--;
         if (this.currentMonth < 0) {
@@ -36910,9 +36910,9 @@ var DatePickerModal = class extends import_obsidian5.Modal {
     });
     navContainer.createEl("span", {
       text: `${this.currentYear}\u5E74${this.currentMonth + 1}\u6708`,
-      cls: "hk-work-date-picker-month-label"
+      cls: "bullet-journal-date-picker-month-label"
     });
-    navContainer.createEl("button", { text: "\u203A", cls: "hk-work-date-picker-nav-btn" }, (btn) => {
+    navContainer.createEl("button", { text: "\u203A", cls: "bullet-journal-date-picker-nav-btn" }, (btn) => {
       btn.addEventListener("click", () => {
         this.currentMonth++;
         if (this.currentMonth > 11) {
@@ -36922,19 +36922,19 @@ var DatePickerModal = class extends import_obsidian5.Modal {
         this.renderContent();
       });
     });
-    navContainer.createEl("button", { text: "\xBB", cls: "hk-work-date-picker-nav-btn" }, (btn) => {
+    navContainer.createEl("button", { text: "\xBB", cls: "bullet-journal-date-picker-nav-btn" }, (btn) => {
       btn.addEventListener("click", () => {
         this.currentYear++;
         this.renderContent();
       });
     });
-    const calendarContainer = this.contentEl_div.createDiv({ cls: "hk-work-date-picker-calendar" });
-    const headerRow = calendarContainer.createDiv({ cls: "hk-work-date-picker-header" });
+    const calendarContainer = this.contentEl_div.createDiv({ cls: "bullet-journal-date-picker-calendar" });
+    const headerRow = calendarContainer.createDiv({ cls: "bullet-journal-date-picker-header" });
     const weekDays = ["\u65E5", "\u4E00", "\u4E8C", "\u4E09", "\u56DB", "\u4E94", "\u516D"];
     weekDays.forEach((day) => {
-      headerRow.createEl("span", { text: day, cls: "hk-work-date-picker-weekday" });
+      headerRow.createEl("span", { text: day, cls: "bullet-journal-date-picker-weekday" });
     });
-    const gridContainer = calendarContainer.createDiv({ cls: "hk-work-date-picker-grid" });
+    const gridContainer = calendarContainer.createDiv({ cls: "bullet-journal-date-picker-grid" });
     const firstDay = new Date(this.currentYear, this.currentMonth, 1);
     const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
     const startDayOfWeek = firstDay.getDay();
@@ -36942,13 +36942,13 @@ var DatePickerModal = class extends import_obsidian5.Modal {
     const today = /* @__PURE__ */ new Date();
     const todayStr = today.toISOString().split("T")[0];
     for (let i3 = 0; i3 < startDayOfWeek; i3++) {
-      gridContainer.createEl("span", { cls: "hk-work-date-picker-day empty" });
+      gridContainer.createEl("span", { cls: "bullet-journal-date-picker-day empty" });
     }
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
       const isToday = dateStr === todayStr;
       const isSelected = dateStr === this.selectedDate;
-      let classes = "hk-work-date-picker-day";
+      let classes = "bullet-journal-date-picker-day";
       if (isToday) classes += " today";
       if (isSelected) classes += " selected";
       const dayEl = gridContainer.createEl("span", { text: String(day), cls: classes });
@@ -36958,8 +36958,8 @@ var DatePickerModal = class extends import_obsidian5.Modal {
         this.renderContent();
       });
     }
-    const buttonsContainer = this.contentEl_div.createDiv({ cls: "hk-work-date-picker-buttons" });
-    buttonsContainer.createEl("button", { text: "\u4ECA\u5929", cls: "hk-work-date-picker-btn" }, (btn) => {
+    const buttonsContainer = this.contentEl_div.createDiv({ cls: "bullet-journal-date-picker-buttons" });
+    buttonsContainer.createEl("button", { text: "\u4ECA\u5929", cls: "bullet-journal-date-picker-btn" }, (btn) => {
       btn.addEventListener("click", () => {
         const todayDate = /* @__PURE__ */ new Date();
         this.selectedDate = todayDate.toISOString().split("T")[0];
@@ -36968,12 +36968,12 @@ var DatePickerModal = class extends import_obsidian5.Modal {
         this.renderContent();
       });
     });
-    buttonsContainer.createEl("button", { text: "\u53D6\u6D88", cls: "hk-work-date-picker-btn hk-work-date-picker-btn-cancel" }, (btn) => {
+    buttonsContainer.createEl("button", { text: "\u53D6\u6D88", cls: "bullet-journal-date-picker-btn bullet-journal-date-picker-btn-cancel" }, (btn) => {
       btn.addEventListener("click", () => {
         this.close();
       });
     });
-    buttonsContainer.createEl("button", { text: "\u786E\u8BA4", cls: "hk-work-date-picker-btn hk-work-date-picker-btn-confirm" }, (btn) => {
+    buttonsContainer.createEl("button", { text: "\u786E\u8BA4", cls: "bullet-journal-date-picker-btn bullet-journal-date-picker-btn-confirm" }, (btn) => {
       btn.addEventListener("click", () => {
         this.onConfirm(this.selectedDate);
         this.close();
@@ -37243,7 +37243,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
             <div class="fc-event-title fc-sticky">
               ${info.timeText ? `<span class="fc-event-time" style="margin-right: 4px;">${info.timeText}</span>` : ""}
               ${info.event.title}
-              <span class="hk-work-event-task-inline">${task}</span>
+              <span class="bullet-journal-event-task-inline">${task}</span>
             </div>
           </div>
         </div>
@@ -37256,7 +37256,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
             <div class="fc-event-title">
               ${info.timeText ? `<span class="fc-event-time" style="margin-right: 4px;">${info.timeText}</span>` : ""}
               ${info.event.title}
-              <span class="hk-work-event-task-inline">${task}</span>
+              <span class="bullet-journal-event-task-inline">${task}</span>
             </div>
           </div>
         </div>
@@ -37578,7 +37578,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
     }
   }, [setSelectedGroup]);
   if (missingConfig) {
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "hk-work-container", children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "bullet-journal-container", children: [
       /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
         ViewHeader,
         {
@@ -37592,7 +37592,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       ] })
     ] });
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "hk-work-container", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "bullet-journal-container", children: [
     /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
       ViewHeader,
       {
@@ -37625,7 +37625,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
 
 // src/views/CalendarView.tsx
 var import_jsx_runtime8 = __toESM(require_jsx_runtime());
-var CALENDAR_VIEW_TYPE = "hk-work-calendar-view";
+var CALENDAR_VIEW_TYPE = "bullet-journal-calendar-view";
 var CalendarView = class extends import_obsidian8.ItemView {
   plugin;
   root = null;
@@ -50732,7 +50732,7 @@ var GanttViewComponent = () => {
     setShowItems(e3.target.checked);
   }, []);
   const ganttTexts = t("gantt");
-  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "hk-work-container", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "bullet-journal-container", children: [
     /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
       ViewHeader,
       {
@@ -50787,7 +50787,7 @@ var GanttViewComponent = () => {
           /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
             "button",
             {
-              className: `hk-work-refresh-btn ${viewMode === "Day" ? "active" : ""}`,
+              className: `bullet-journal-refresh-btn ${viewMode === "Day" ? "active" : ""}`,
               onClick: () => setViewMode("Day"),
               style: { backgroundColor: viewMode === "Day" ? "var(--interactive-accent)" : "", color: viewMode === "Day" ? "white" : "" },
               children: ganttTexts.day
@@ -50796,7 +50796,7 @@ var GanttViewComponent = () => {
           /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
             "button",
             {
-              className: `hk-work-refresh-btn ${viewMode === "Week" ? "active" : ""}`,
+              className: `bullet-journal-refresh-btn ${viewMode === "Week" ? "active" : ""}`,
               onClick: () => setViewMode("Week"),
               style: { backgroundColor: viewMode === "Week" ? "var(--interactive-accent)" : "", color: viewMode === "Week" ? "white" : "" },
               children: ganttTexts.week
@@ -50805,7 +50805,7 @@ var GanttViewComponent = () => {
           /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
             "button",
             {
-              className: `hk-work-refresh-btn ${viewMode === "Month" ? "active" : ""}`,
+              className: `bullet-journal-refresh-btn ${viewMode === "Month" ? "active" : ""}`,
               onClick: () => setViewMode("Month"),
               style: { backgroundColor: viewMode === "Month" ? "var(--interactive-accent)" : "", color: viewMode === "Month" ? "white" : "" },
               children: ganttTexts.month
@@ -50829,7 +50829,7 @@ var GanttViewComponent = () => {
 
 // src/views/GanttView.tsx
 var import_jsx_runtime10 = __toESM(require_jsx_runtime());
-var GANTT_VIEW_TYPE = "hk-work-gantt-view";
+var GANTT_VIEW_TYPE = "bullet-journal-gantt-view";
 var GanttView = class extends import_obsidian10.ItemView {
   plugin;
   root = null;
@@ -51149,23 +51149,23 @@ var TodoSidebar = ({ onItemClick }) => {
   const renderItem = (item, showActions = true) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(
     "div",
     {
-      className: `hk-work-todo-item ${item.status === "completed" ? "status-completed" : ""} ${item.status === "abandoned" ? "status-abandoned" : ""}`,
+      className: `bullet-journal-todo-item ${item.status === "completed" ? "status-completed" : ""} ${item.status === "abandoned" ? "status-abandoned" : ""}`,
       onClick: () => handleItemClick(item),
       onContextMenu: (e3) => handleContextMenu(e3, item),
       children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-item-content", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-item-header", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "hk-work-todo-item-time", children: formatTimeRange(item.startDateTime, item.endDateTime) || todoTexts.allDay }),
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "hk-work-todo-item-project", children: item.project?.name })
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-item-content", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-item-header", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-item-time", children: formatTimeRange(item.startDateTime, item.endDateTime) || todoTexts.allDay }),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-item-project", children: item.project?.name })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-item-task", children: item.task?.name }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-item-text", children: item.content })
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-item-task", children: item.task?.name }),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-item-text", children: item.content })
         ] }),
-        showActions && item.status !== "completed" && item.status !== "abandoned" && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-item-actions", children: [
+        showActions && item.status !== "completed" && item.status !== "abandoned" && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-item-actions", children: [
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
             "button",
             {
-              className: "hk-work-todo-action-btn",
+              className: "bullet-journal-todo-action-btn",
               onClick: (e3) => handleDone(item, e3),
               title: todoTexts.done,
               children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "20 6 9 17 4 12" }) })
@@ -51174,7 +51174,7 @@ var TodoSidebar = ({ onItemClick }) => {
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
             "button",
             {
-              className: "hk-work-todo-action-btn",
+              className: "bullet-journal-todo-action-btn",
               onClick: (e3) => handleMigrate(item, e3),
               title: todoTexts.migrate,
               children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
@@ -51186,7 +51186,7 @@ var TodoSidebar = ({ onItemClick }) => {
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
             "button",
             {
-              className: "hk-work-todo-action-btn",
+              className: "bullet-journal-todo-action-btn",
               onClick: (e3) => handleAbandon(item, e3),
               title: todoTexts.abandon,
               children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
@@ -51198,7 +51198,7 @@ var TodoSidebar = ({ onItemClick }) => {
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
             "button",
             {
-              className: "hk-work-todo-action-btn",
+              className: "bullet-journal-todo-action-btn",
               onClick: (e3) => handleOpenModal(item, e3),
               title: "\u67E5\u770B\u8BE6\u60C5",
               children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
@@ -51211,7 +51211,7 @@ var TodoSidebar = ({ onItemClick }) => {
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
             "button",
             {
-              className: "hk-work-todo-action-btn",
+              className: "bullet-journal-todo-action-btn",
               onClick: (e3) => handleOpenCalendar(item, e3),
               title: "\u67E5\u770B\u65E5\u5386",
               children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
@@ -51229,9 +51229,9 @@ var TodoSidebar = ({ onItemClick }) => {
   );
   const renderSection = (title, items, sectionKey, showActions = true) => {
     if (items.length === 0) return null;
-    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-section", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-section-label clickable", onClick: () => toggleSection(sectionKey), children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "hk-work-todo-collapse-icon", children: collapsedSections[sectionKey] ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "9 18 15 12 9 6" }) }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "6 9 12 15 18 9" }) }) }),
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-section", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-section-label clickable", onClick: () => toggleSection(sectionKey), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-collapse-icon", children: collapsedSections[sectionKey] ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "9 18 15 12 9 6" }) }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "6 9 12 15 18 9" }) }) }),
         /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("span", { children: [
           title,
           " (",
@@ -51239,16 +51239,16 @@ var TodoSidebar = ({ onItemClick }) => {
           ")"
         ] })
       ] }),
-      !collapsedSections[sectionKey] && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-items", children: items.map((item) => renderItem(item, showActions)) })
+      !collapsedSections[sectionKey] && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-items", children: items.map((item) => renderItem(item, showActions)) })
     ] }, sectionKey);
   };
   if (loading) {
-    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-sidebar", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-loading", children: t("common").loading }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-sidebar", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-loading", children: t("common").loading }) });
   }
   const hasNoItems = sortedDates.length === 0 && expiredItems.length === 0 && completedItems.length === 0 && abandonedItems.length === 0;
   if (hasNoItems) {
-    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-sidebar", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-header", children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-sidebar", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-header", children: [
         /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h3", { children: todoTexts.title }),
         /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
           GroupSelect,
@@ -51259,11 +51259,11 @@ var TodoSidebar = ({ onItemClick }) => {
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "hk-work-todo-empty", children: todoTexts.noTodos })
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-empty", children: todoTexts.noTodos })
     ] });
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-sidebar", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-header", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-sidebar", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-header", children: [
       /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h3", { children: todoTexts.title }),
       /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
         GroupSelect,
@@ -51274,7 +51274,7 @@ var TodoSidebar = ({ onItemClick }) => {
         }
       )
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "hk-work-todo-content", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-content", children: [
       renderSection(todoTexts.expired || "\u5DF2\u8FC7\u671F", expiredItems, "expired"),
       renderSection(todoTexts.today || "\u4ECA\u5929", todayItems, "today"),
       renderSection(todoTexts.tomorrow || "\u660E\u5929", tomorrowItems, "tomorrow"),
@@ -51290,7 +51290,7 @@ var TodoSidebar = ({ onItemClick }) => {
 // src/views/TodoSidebarView.tsx
 init_fileUtils();
 var import_jsx_runtime12 = __toESM(require_jsx_runtime());
-var TODO_SIDEBAR_VIEW_TYPE = "hk-work-todo-sidebar";
+var TODO_SIDEBAR_VIEW_TYPE = "bullet-journal-todo-sidebar";
 var TodoSidebarView = class extends import_obsidian11.ItemView {
   plugin;
   root = null;
@@ -51347,7 +51347,7 @@ var TaskButtonWidget = class extends import_view.WidgetType {
   }
   toDOM(view) {
     const span = document.createElement("span");
-    span.className = "hk-work-task-btn";
+    span.className = "bullet-journal-task-btn";
     span.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-check"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>';
     span.onclick = (e3) => {
       e3.preventDefault();
@@ -51535,8 +51535,8 @@ var HKWorkPlugin = class extends import_obsidian13.Plugin {
       callback: () => this.openView(GANTT_VIEW_TYPE)
     });
     this.addCommand({
-      id: "refresh-hk-work-data",
-      name: "Refresh HK-Work Data",
+      id: "refresh-bullet-journal-data",
+      name: "Refresh Bullet Journal Data",
       callback: () => this.debouncedRefresh()
     });
     this.addCommand({
@@ -51544,8 +51544,8 @@ var HKWorkPlugin = class extends import_obsidian13.Plugin {
       name: "Open Todo Sidebar",
       callback: () => this.openTodoSidebar()
     });
-    this.addSettingTab(new HKWorkSettingTab(this.app, this));
-    this.addRibbonIcon("calendar", "HK-Work Visualizer", (evt) => {
+    this.addSettingTab(new BulletJournalSettingTab(this.app, this));
+    this.addRibbonIcon("calendar", "\u5B50\u5F39\u7B14\u8BB0", (evt) => {
       this.openView(this.settings.defaultView === "calendar" ? CALENDAR_VIEW_TYPE : PROJECT_VIEW_TYPE);
     });
     this.registerFileWatcher();
@@ -51724,7 +51724,7 @@ var HKWorkPlugin = class extends import_obsidian13.Plugin {
     }
   }
 };
-var HKWorkSettingTab = class extends import_obsidian13.PluginSettingTab {
+var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
   plugin;
   constructor(app, plugin) {
     super(app, plugin);
@@ -51762,9 +51762,9 @@ var HKWorkSettingTab = class extends import_obsidian13.PluginSettingTab {
       this.renderDefaultGroupDropdown(defaultGroupContainer);
       this.renderProjectDirectories(containerEl);
     }));
-    const groupsContainer = containerEl.createDiv({ cls: "hk-work-groups-container" });
+    const groupsContainer = containerEl.createDiv({ cls: "bullet-journal-groups-container" });
     this.renderProjectGroups(groupsContainer, containerEl);
-    const defaultGroupContainer = containerEl.createDiv({ cls: "hk-work-default-group-container" });
+    const defaultGroupContainer = containerEl.createDiv({ cls: "bullet-journal-default-group-container" });
     this.renderDefaultGroupDropdown(defaultGroupContainer);
     new import_obsidian13.Setting(containerEl).setName(t("settings").projectDirectories.title).setHeading().addButton((button) => button.setButtonText(t("settings").projectDirectories.addButton).setCta().onClick(() => {
       this.plugin.settings.projectDirectories.push({ path: "", enabled: true });
@@ -51791,14 +51791,14 @@ var HKWorkSettingTab = class extends import_obsidian13.PluginSettingTab {
   renderProjectGroups(groupsContainer, mainContainer) {
     groupsContainer.empty();
     if (this.plugin.settings.projectGroups.length === 0) {
-      new import_obsidian13.Setting(groupsContainer).setDesc(t("settings").projectGroups.emptyMessage).setClass("hk-work-group-setting");
+      new import_obsidian13.Setting(groupsContainer).setDesc(t("settings").projectGroups.emptyMessage).setClass("bullet-journal-group-setting");
       return;
     }
     this.plugin.settings.projectGroups.forEach((group, index5) => {
-      const setting = new import_obsidian13.Setting(groupsContainer).setClass("hk-work-group-setting").addText((text) => text.setPlaceholder(t("settings").projectGroups.namePlaceholder).setValue(group.name).onChange(async (value) => {
+      const setting = new import_obsidian13.Setting(groupsContainer).setClass("bullet-journal-group-setting").addText((text) => text.setPlaceholder(t("settings").projectGroups.namePlaceholder).setValue(group.name).onChange(async (value) => {
         this.plugin.settings.projectGroups[index5].name = value;
         await this.plugin.saveSettings();
-        const defaultGroupContainer = mainContainer.querySelector(".hk-work-default-group-container");
+        const defaultGroupContainer = mainContainer.querySelector(".bullet-journal-default-group-container");
         if (defaultGroupContainer) {
           this.renderDefaultGroupDropdown(defaultGroupContainer);
         }
@@ -51816,7 +51816,7 @@ var HKWorkSettingTab = class extends import_obsidian13.PluginSettingTab {
         await this.plugin.saveSettings();
         this.renderProjectGroups(groupsContainer, mainContainer);
         this.renderProjectDirectories(mainContainer);
-        const defaultGroupContainer = mainContainer.querySelector(".hk-work-default-group-container");
+        const defaultGroupContainer = mainContainer.querySelector(".bullet-journal-default-group-container");
         if (defaultGroupContainer) {
           this.renderDefaultGroupDropdown(defaultGroupContainer);
         }
@@ -51824,9 +51824,9 @@ var HKWorkSettingTab = class extends import_obsidian13.PluginSettingTab {
     });
   }
   renderProjectDirectories(containerEl) {
-    containerEl.querySelectorAll(".hk-work-dir-setting").forEach((el) => el.remove());
+    containerEl.querySelectorAll(".bullet-journal-dir-setting").forEach((el) => el.remove());
     if (this.plugin.settings.projectDirectories.length === 0) {
-      new import_obsidian13.Setting(containerEl).setDesc(t("settings").projectDirectories.emptyMessage).setClass("hk-work-dir-setting");
+      new import_obsidian13.Setting(containerEl).setDesc(t("settings").projectDirectories.emptyMessage).setClass("bullet-journal-dir-setting");
       return;
     }
     this.plugin.settings.projectDirectories.forEach((dir, index5) => {
@@ -51834,7 +51834,7 @@ var HKWorkSettingTab = class extends import_obsidian13.PluginSettingTab {
       this.plugin.settings.projectGroups.forEach((group) => {
         groupOptions[group.id] = group.name || t("settings").projectGroups.unnamed;
       });
-      const setting = new import_obsidian13.Setting(containerEl).setName(dir.path || t("settings").projectDirectories.noPath).setClass("hk-work-dir-setting");
+      const setting = new import_obsidian13.Setting(containerEl).setName(dir.path || t("settings").projectDirectories.noPath).setClass("bullet-journal-dir-setting");
       if (this.plugin.settings.projectGroups.length > 0) {
         setting.addDropdown((dropdown) => dropdown.addOptions(groupOptions).setValue(dir.groupId || "").onChange(async (value) => {
           this.plugin.settings.projectDirectories[index5].groupId = value || void 0;

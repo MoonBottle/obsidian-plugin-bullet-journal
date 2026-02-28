@@ -7,7 +7,7 @@ import { AppContext } from '../context/AppContext';
 import { PluginProvider } from '../context/PluginContext';
 import { t } from '../i18n';
 
-export const GANTT_VIEW_TYPE = 'hk-work-gantt-view';
+export const GANTT_VIEW_TYPE = 'bullet-journal-gantt-view';
 
 export class GanttView extends ItemView {
   private plugin: HKWorkPlugin;

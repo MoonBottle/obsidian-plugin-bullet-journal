@@ -99,7 +99,7 @@ export class MarkdownParser {
     const lines = content.split('\n');
 
     // Convert absolute path to relative path from vault root
-    // dataDirectory is like "c:\project\code\hk-work\工作安排\2026\项目"
+    // dataDirectory is like "c:\project\code\bullet-journal\工作安排\2026\项目"
     // We need relative path like "工作安排/2026/项目/xxx.md"
     const relativePath = this.toRelativePath(filePath, dataDirectory);
 

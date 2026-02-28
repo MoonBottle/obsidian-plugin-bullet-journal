@@ -118,10 +118,10 @@ const ProjectDetails = ({ project, onBack }: ProjectDetailsProps) => {
   }, [project.tasks]);
 
   return (
-    <div className="hk-work-container">
-      <div className="hk-work-header">
+    <div className="bullet-journal-container">
+      <div className="bullet-journal-header">
         <button onClick={onBack}>← {t('common').back}</button>
-        <h2 className="hk-work-title">{project.name}</h2>
+        <h2 className="bullet-journal-title">{project.name}</h2>
       </div>
 
       {project.description && <p>{project.description}</p>}
@@ -185,7 +185,7 @@ export const ProjectViewComponent = () => {
   }
 
   return (
-    <div className="hk-work-container">
+    <div className="bullet-journal-container">
       <ViewHeader
         title={t('project').title}
         subtitle={t('project').subtitle}

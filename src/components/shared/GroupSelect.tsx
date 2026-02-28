@@ -35,11 +35,11 @@ export const GroupSelect = memo(({ groups, value, onChange, className, style }: 
   if (groups.length === 0) return null;
 
   return (
-    <div className={`hk-work-group-filter ${className || ''}`}>
+    <div className={`bullet-journal-group-filter ${className || ''}`}>
       <select
         value={value}
         onChange={onChange}
-        className="hk-work-group-select"
+        className="bullet-journal-group-select"
         style={{ ...SELECT_STYLE, ...style }}
       >
         <option value="">{t('settings').projectGroups.allGroups}</option>

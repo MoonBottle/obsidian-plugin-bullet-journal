@@ -19,7 +19,7 @@ export interface RefreshButtonProps {
 export const RefreshButton = memo(({ onClick, isLoading, text, title, className }: RefreshButtonProps) => {
   return (
     <button
-      className={`hk-work-refresh-btn ${className || ''}`}
+      className={`bullet-journal-refresh-btn ${className || ''}`}
       onClick={onClick}
       disabled={isLoading}
       title={title}

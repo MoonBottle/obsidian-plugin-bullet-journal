@@ -349,30 +349,30 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
   const renderItem = (item: Item, showActions: boolean = true) => (
     <div
       key={item.id}
-      className={`hk-work-todo-item ${item.status === 'completed' ? 'status-completed' : ''} ${item.status === 'abandoned' ? 'status-abandoned' : ''}`}
+      className={`bullet-journal-todo-item ${item.status === 'completed' ? 'status-completed' : ''} ${item.status === 'abandoned' ? 'status-abandoned' : ''}`}
       onClick={() => handleItemClick(item)}
       onContextMenu={(e) => handleContextMenu(e, item)}
     >
-      <div className="hk-work-todo-item-content">
-        <div className="hk-work-todo-item-header">
-          <span className="hk-work-todo-item-time">
+      <div className="bullet-journal-todo-item-content">
+        <div className="bullet-journal-todo-item-header">
+          <span className="bullet-journal-todo-item-time">
             {formatTimeRange(item.startDateTime, item.endDateTime) || todoTexts.allDay}
           </span>
-          <span className="hk-work-todo-item-project">
+          <span className="bullet-journal-todo-item-project">
             {item.project?.name}
           </span>
         </div>
-        <div className="hk-work-todo-item-task">
+        <div className="bullet-journal-todo-item-task">
           {item.task?.name}
         </div>
-        <div className="hk-work-todo-item-text">
+        <div className="bullet-journal-todo-item-text">
           {item.content}
         </div>
       </div>
       {showActions && item.status !== 'completed' && item.status !== 'abandoned' && (
-        <div className="hk-work-todo-item-actions">
+        <div className="bullet-journal-todo-item-actions">
           <button
-            className="hk-work-todo-action-btn"
+            className="bullet-journal-todo-action-btn"
             onClick={(e) => handleDone(item, e)}
             title={todoTexts.done}
           >
@@ -381,7 +381,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
             </svg>
           </button>
           <button
-            className="hk-work-todo-action-btn"
+            className="bullet-journal-todo-action-btn"
             onClick={(e) => handleMigrate(item, e)}
             title={todoTexts.migrate}
           >
@@ -391,7 +391,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
             </svg>
           </button>
           <button
-            className="hk-work-todo-action-btn"
+            className="bullet-journal-todo-action-btn"
             onClick={(e) => handleAbandon(item, e)}
             title={todoTexts.abandon}
           >
@@ -401,7 +401,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
             </svg>
           </button>
           <button
-            className="hk-work-todo-action-btn"
+            className="bullet-journal-todo-action-btn"
             onClick={(e) => handleOpenModal(item, e)}
             title="查看详情"
           >
@@ -412,7 +412,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
             </svg>
           </button>
           <button
-            className="hk-work-todo-action-btn"
+            className="bullet-journal-todo-action-btn"
             onClick={(e) => handleOpenCalendar(item, e)}
             title="查看日历"
           >
@@ -432,9 +432,9 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     if (items.length === 0) return null;
 
     return (
-      <div key={sectionKey} className="hk-work-todo-section">
-        <div className="hk-work-todo-section-label clickable" onClick={() => toggleSection(sectionKey)}>
-          <span className="hk-work-todo-collapse-icon">
+      <div key={sectionKey} className="bullet-journal-todo-section">
+        <div className="bullet-journal-todo-section-label clickable" onClick={() => toggleSection(sectionKey)}>
+          <span className="bullet-journal-todo-collapse-icon">
             {collapsedSections[sectionKey] ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -448,7 +448,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
           <span>{title} ({items.length})</span>
         </div>
         {!collapsedSections[sectionKey] && (
-          <div className="hk-work-todo-items">
+          <div className="bullet-journal-todo-items">
             {items.map(item => renderItem(item, showActions))}
           </div>
         )}
@@ -458,8 +458,8 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
 
   if (loading) {
     return (
-      <div className="hk-work-todo-sidebar">
-        <div className="hk-work-todo-loading">{t('common').loading}</div>
+      <div className="bullet-journal-todo-sidebar">
+        <div className="bullet-journal-todo-loading">{t('common').loading}</div>
       </div>
     );
   }
@@ -468,8 +468,8 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
 
   if (hasNoItems) {
     return (
-      <div className="hk-work-todo-sidebar">
-        <div className="hk-work-todo-header">
+      <div className="bullet-journal-todo-sidebar">
+        <div className="bullet-journal-todo-header">
           <h3>{todoTexts.title}</h3>
           <GroupSelect
             groups={availableGroups}
@@ -477,14 +477,14 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
             onChange={handleGroupChange}
           />
         </div>
-        <div className="hk-work-todo-empty">{todoTexts.noTodos}</div>
+        <div className="bullet-journal-todo-empty">{todoTexts.noTodos}</div>
       </div>
     );
   }
 
   return (
-    <div className="hk-work-todo-sidebar">
-      <div className="hk-work-todo-header">
+    <div className="bullet-journal-todo-sidebar">
+      <div className="bullet-journal-todo-header">
         <h3>{todoTexts.title}</h3>
         <GroupSelect
           groups={availableGroups}
@@ -492,7 +492,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
           onChange={handleGroupChange}
         />
       </div>
-      <div className="hk-work-todo-content">
+      <div className="bullet-journal-todo-content">
         {renderSection(todoTexts.expired || '已过期', expiredItems, 'expired')}
         
         {renderSection(todoTexts.today || '今天', todayItems, 'today')}

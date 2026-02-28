@@ -34,27 +34,27 @@ export class DatePickerModal extends Modal {
 
   onOpen() {
     const { contentEl } = this;
-    contentEl.addClass('hk-work-date-picker-modal');
+    contentEl.addClass('bullet-journal-date-picker-modal');
 
     contentEl.createEl('h2', { text: this.title });
 
-    this.contentEl_div = contentEl.createDiv({ cls: 'hk-work-date-picker-content' });
+    this.contentEl_div = contentEl.createDiv({ cls: 'bullet-journal-date-picker-content' });
     this.renderContent();
   }
 
   private renderContent() {
     this.contentEl_div.empty();
     
-    const navContainer = this.contentEl_div.createDiv({ cls: 'hk-work-date-picker-nav' });
+    const navContainer = this.contentEl_div.createDiv({ cls: 'bullet-journal-date-picker-nav' });
     
-    navContainer.createEl('button', { text: '«', cls: 'hk-work-date-picker-nav-btn' }, (btn) => {
+    navContainer.createEl('button', { text: '«', cls: 'bullet-journal-date-picker-nav-btn' }, (btn) => {
       btn.addEventListener('click', () => {
         this.currentYear--;
         this.renderContent();
       });
     });
     
-    navContainer.createEl('button', { text: '‹', cls: 'hk-work-date-picker-nav-btn' }, (btn) => {
+    navContainer.createEl('button', { text: '‹', cls: 'bullet-journal-date-picker-nav-btn' }, (btn) => {
       btn.addEventListener('click', () => {
         this.currentMonth--;
         if (this.currentMonth < 0) {
@@ -67,10 +67,10 @@ export class DatePickerModal extends Modal {
     
     navContainer.createEl('span', { 
       text: `${this.currentYear}年${this.currentMonth + 1}月`, 
-      cls: 'hk-work-date-picker-month-label' 
+      cls: 'bullet-journal-date-picker-month-label' 
     });
     
-    navContainer.createEl('button', { text: '›', cls: 'hk-work-date-picker-nav-btn' }, (btn) => {
+    navContainer.createEl('button', { text: '›', cls: 'bullet-journal-date-picker-nav-btn' }, (btn) => {
       btn.addEventListener('click', () => {
         this.currentMonth++;
         if (this.currentMonth > 11) {
@@ -81,22 +81,22 @@ export class DatePickerModal extends Modal {
       });
     });
     
-    navContainer.createEl('button', { text: '»', cls: 'hk-work-date-picker-nav-btn' }, (btn) => {
+    navContainer.createEl('button', { text: '»', cls: 'bullet-journal-date-picker-nav-btn' }, (btn) => {
       btn.addEventListener('click', () => {
         this.currentYear++;
         this.renderContent();
       });
     });
 
-    const calendarContainer = this.contentEl_div.createDiv({ cls: 'hk-work-date-picker-calendar' });
+    const calendarContainer = this.contentEl_div.createDiv({ cls: 'bullet-journal-date-picker-calendar' });
     
-    const headerRow = calendarContainer.createDiv({ cls: 'hk-work-date-picker-header' });
+    const headerRow = calendarContainer.createDiv({ cls: 'bullet-journal-date-picker-header' });
     const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
     weekDays.forEach(day => {
-      headerRow.createEl('span', { text: day, cls: 'hk-work-date-picker-weekday' });
+      headerRow.createEl('span', { text: day, cls: 'bullet-journal-date-picker-weekday' });
     });
 
-    const gridContainer = calendarContainer.createDiv({ cls: 'hk-work-date-picker-grid' });
+    const gridContainer = calendarContainer.createDiv({ cls: 'bullet-journal-date-picker-grid' });
     
     const firstDay = new Date(this.currentYear, this.currentMonth, 1);
     const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
@@ -107,7 +107,7 @@ export class DatePickerModal extends Modal {
     const todayStr = today.toISOString().split('T')[0];
     
     for (let i = 0; i < startDayOfWeek; i++) {
-      gridContainer.createEl('span', { cls: 'hk-work-date-picker-day empty' });
+      gridContainer.createEl('span', { cls: 'bullet-journal-date-picker-day empty' });
     }
     
     for (let day = 1; day <= daysInMonth; day++) {
@@ -115,7 +115,7 @@ export class DatePickerModal extends Modal {
       const isToday = dateStr === todayStr;
       const isSelected = dateStr === this.selectedDate;
       
-      let classes = 'hk-work-date-picker-day';
+      let classes = 'bullet-journal-date-picker-day';
       if (isToday) classes += ' today';
       if (isSelected) classes += ' selected';
       
@@ -128,9 +128,9 @@ export class DatePickerModal extends Modal {
       });
     }
 
-    const buttonsContainer = this.contentEl_div.createDiv({ cls: 'hk-work-date-picker-buttons' });
+    const buttonsContainer = this.contentEl_div.createDiv({ cls: 'bullet-journal-date-picker-buttons' });
     
-    buttonsContainer.createEl('button', { text: '今天', cls: 'hk-work-date-picker-btn' }, (btn) => {
+    buttonsContainer.createEl('button', { text: '今天', cls: 'bullet-journal-date-picker-btn' }, (btn) => {
       btn.addEventListener('click', () => {
         const todayDate = new Date();
         this.selectedDate = todayDate.toISOString().split('T')[0];
@@ -140,13 +140,13 @@ export class DatePickerModal extends Modal {
       });
     });
     
-    buttonsContainer.createEl('button', { text: '取消', cls: 'hk-work-date-picker-btn hk-work-date-picker-btn-cancel' }, (btn) => {
+    buttonsContainer.createEl('button', { text: '取消', cls: 'bullet-journal-date-picker-btn bullet-journal-date-picker-btn-cancel' }, (btn) => {
       btn.addEventListener('click', () => {
         this.close();
       });
     });
     
-    buttonsContainer.createEl('button', { text: '确认', cls: 'hk-work-date-picker-btn hk-work-date-picker-btn-confirm' }, (btn) => {
+    buttonsContainer.createEl('button', { text: '确认', cls: 'bullet-journal-date-picker-btn bullet-journal-date-picker-btn-confirm' }, (btn) => {
       btn.addEventListener('click', () => {
         this.onConfirm(this.selectedDate);
         this.close();
