@@ -51497,6 +51497,7 @@ var TaskButtonWidget = class extends import_view.WidgetType {
     const projectLinks = [];
     let taskLinks;
     const doc = view.state.doc;
+    let taskLineNumber = -1;
     const currentLine = doc.line(currentLineNumber);
     const currentText = currentLine.text;
     if (currentText.includes("#\u4EFB\u52A1")) {
@@ -51505,7 +51506,7 @@ var TaskButtonWidget = class extends import_view.WidgetType {
       console.log("[TaskGutter] Parsed task:", task);
       taskName = task.name;
       level = task.level;
-      taskLinks = task.links;
+      taskLineNumber = currentLineNumber;
     } else {
       for (let i3 = currentLineNumber - 1; i3 >= 1; i3--) {
         const line = doc.line(i3);
@@ -51516,8 +51517,27 @@ var TaskButtonWidget = class extends import_view.WidgetType {
           console.log("[TaskGutter] Parsed task:", task);
           taskName = task.name;
           level = task.level;
-          taskLinks = task.links;
+          taskLineNumber = i3;
           break;
+        }
+      }
+    }
+    if (taskLineNumber > 0) {
+      taskLinks = [];
+      for (let i3 = taskLineNumber + 1; i3 <= doc.lines; i3++) {
+        const line = doc.line(i3);
+        const text = line.text.trim();
+        if (text.includes("#\u4EFB\u52A1")) {
+          break;
+        }
+        if (LineParser.isItemLine(text)) {
+          break;
+        }
+        if (text.startsWith("[") && text.includes("](")) {
+          const linkMatch = text.match(/\[(.*?)\]\((.*?)\)/);
+          if (linkMatch) {
+            taskLinks.push({ name: linkMatch[1], url: linkMatch[2] });
+          }
         }
       }
     }

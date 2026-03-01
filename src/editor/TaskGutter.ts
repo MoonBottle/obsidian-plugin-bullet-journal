@@ -91,6 +91,7 @@ class TaskButtonWidget extends WidgetType {
     let taskLinks: Array<{ name: string; url: string }> | undefined;
 
     const doc = view.state.doc;
+    let taskLineNumber = -1;
     
     // First check if current line is a task line
     const currentLine = doc.line(currentLineNumber);
@@ -101,7 +102,7 @@ class TaskButtonWidget extends WidgetType {
       console.log('[TaskGutter] Parsed task:', task);
       taskName = task.name;
       level = task.level;
-      taskLinks = task.links;
+      taskLineNumber = currentLineNumber;
     } else {
       // Scan upwards for Task
       // currentLineNumber is 1-based. 
@@ -116,8 +117,35 @@ class TaskButtonWidget extends WidgetType {
           console.log('[TaskGutter] Parsed task:', task);
           taskName = task.name;
           level = task.level;
-          taskLinks = task.links;
+          taskLineNumber = i;
           break;
+        }
+      }
+    }
+
+    // Scan task-level links (between task line and first item line)
+    if (taskLineNumber > 0) {
+      taskLinks = [];
+      for (let i = taskLineNumber + 1; i <= doc.lines; i++) {
+        const line = doc.line(i);
+        const text = line.text.trim();
+
+        // Stop scanning if we hit another task line
+        if (text.includes('#任务')) {
+          break;
+        }
+
+        // Stop scanning if we hit an item line
+        if (LineParser.isItemLine(text)) {
+          break;
+        }
+
+        // Parse markdown links [name](url)
+        if (text.startsWith('[') && text.includes('](')) {
+          const linkMatch = text.match(/\[(.*?)\]\((.*?)\)/);
+          if (linkMatch) {
+            taskLinks.push({ name: linkMatch[1], url: linkMatch[2] });
+          }
         }
       }
     }
