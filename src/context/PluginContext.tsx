@@ -48,7 +48,10 @@ export const PluginProvider = ({ plugin, children }: PluginProviderProps) => {
 
   // Use Map to optimize repeated lookups
   const availableGroups = useMemo(() => {
-    return plugin.getProjectGroups();
+    // Create a new array copy to ensure React detects the change
+    // when settings are modified in the settings tab
+    const groups = plugin.getProjectGroups();
+    return groups.map(g => ({ ...g }));
   }, [plugin, refreshKey]);
 
   const groupMap = useMemo(() => {

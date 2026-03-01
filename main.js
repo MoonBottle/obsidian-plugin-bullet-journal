@@ -22558,7 +22558,8 @@ var PluginProvider = ({ plugin, children }) => {
     setSelectedGroupState(groupId);
   }, []);
   const availableGroups = (0, import_react.useMemo)(() => {
-    return plugin.getProjectGroups();
+    const groups = plugin.getProjectGroups();
+    return groups.map((g4) => ({ ...g4 }));
   }, [plugin, refreshKey]);
   const groupMap = (0, import_react.useMemo)(() => {
     return new Map(availableGroups.map((g4) => [g4.id, g4.name]));
