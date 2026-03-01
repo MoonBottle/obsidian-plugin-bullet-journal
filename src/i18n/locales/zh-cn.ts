@@ -1,7 +1,7 @@
 export const zhCN = {
   // 设置界面
   settings: {
-    title: '子弹笔记设置',
+    title: '子弹笔记助手设置',
     projectGroups: {
       title: '项目分组',
       description: '管理项目分组，用于区分不同类型的项目（如工作、生活）',

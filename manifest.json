@@ -1,9 +1,9 @@
 {
   "id": "bullet-journal",
-  "name": "Bullet Journal",
+  "name": "Bullet Journal Assistant",
   "version": "0.1.0",
   "minAppVersion": "0.15.0",
-  "description": "A Bullet Journal plugin with calendar and Gantt chart views.",
+  "description": "A Bullet Journal style task management assistant plugin with calendar and Gantt chart views.",
   "author": "MoonBottle",
   "authorUrl": "https://github.com/MoonBottle",
   "isDesktopOnly": false

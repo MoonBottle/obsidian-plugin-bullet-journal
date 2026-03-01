@@ -3,7 +3,7 @@ import { Translations } from './zh-cn';
 export const en: Translations = {
   // Settings
   settings: {
-    title: 'Bullet Journal Settings',
+    title: 'Bullet Journal Assistant Settings',
     projectGroups: {
       title: 'Project Groups',
       description: 'Manage project groups to categorize different types of projects (e.g., Work, Life)',

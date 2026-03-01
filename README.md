@@ -1,8 +1,8 @@
-# Bullet Journal Obsidian Plugin
+# Bullet Journal Assistant Obsidian Plugin
 
 [中文](README.zh.md) | English
 
-An Obsidian plugin for visualizing Bullet Journal project tasks with calendar and Gantt chart views.
+An Obsidian assistant plugin for visualizing Bullet Journal project tasks with calendar and Gantt chart views.
 
 ## Features
 

@@ -1,8 +1,8 @@
-# 子弹笔记 Obsidian 插件
+# 子弹笔记助手 Obsidian 插件
 
 [中文](README.zh.md) | English
 
-一个用于可视化子弹笔记项目任务的 Obsidian 插件，支持日历和甘特图视图。
+一个用于可视化子弹笔记项目任务的 Obsidian 辅助插件，支持日历和甘特图视图。
 
 ## 功能特性
 

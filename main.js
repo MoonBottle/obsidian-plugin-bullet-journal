@@ -21873,7 +21873,7 @@ var import_react7 = __toESM(require_react());
 var zhCN = {
   // 设置界面
   settings: {
-    title: "\u5B50\u5F39\u7B14\u8BB0\u8BBE\u7F6E",
+    title: "\u5B50\u5F39\u7B14\u8BB0\u52A9\u624B\u8BBE\u7F6E",
     projectGroups: {
       title: "\u9879\u76EE\u5206\u7EC4",
       description: "\u7BA1\u7406\u9879\u76EE\u5206\u7EC4\uFF0C\u7528\u4E8E\u533A\u5206\u4E0D\u540C\u7C7B\u578B\u7684\u9879\u76EE\uFF08\u5982\u5DE5\u4F5C\u3001\u751F\u6D3B\uFF09",
@@ -22049,7 +22049,7 @@ var zhCN = {
 var en = {
   // Settings
   settings: {
-    title: "Bullet Journal Settings",
+    title: "Bullet Journal Assistant Settings",
     projectGroups: {
       title: "Project Groups",
       description: "Manage project groups to categorize different types of projects (e.g., Work, Life)",
