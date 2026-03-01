@@ -172,7 +172,7 @@ export const ProjectViewComponent = () => {
   }, []);
 
   const onRefresh = useCallback(() => {
-    handleRefresh(t('project').dataRefreshed);
+    handleRefresh();
   }, [handleRefresh]);
 
   if (selectedProject) {

@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { Notice } from 'obsidian';
 import { MarkdownParser } from '../parser/markdownParser';
 import { Project } from '../models/types';
 import { usePlugin } from '../context/PluginContext';
@@ -117,10 +116,9 @@ export const useProjectData = (options: UseProjectDataOptions = {}): UseProjectD
     }
   }, [setSelectedGroup]);
 
-  const handleRefresh = useCallback((successMessage?: string) => {
+  const handleRefresh = useCallback(() => {
     if (refresh) {
       refresh();
-      new Notice(successMessage || t('common').dataRefreshed);
     }
   }, [refresh]);
 

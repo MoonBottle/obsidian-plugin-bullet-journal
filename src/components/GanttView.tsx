@@ -1,5 +1,4 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
-import { Notice } from 'obsidian';
 import { gantt } from 'dhtmlx-gantt';
 // CSS imported via styles.css concatenation
 import { usePlugin } from '../context/PluginContext';
@@ -351,7 +350,6 @@ export const GanttViewComponent = () => {
   const handleRefresh = useCallback(() => {
     if (refresh) {
       refresh();
-      new Notice(t('gantt').dataRefreshed);
     }
   }, [refresh]);
 

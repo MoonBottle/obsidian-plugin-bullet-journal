@@ -84,6 +84,7 @@ export const zhCN = {
     close: '关闭',
     back: '返回',
     filterByGroup: '筛选分组',
+    dataRefreshed: '数据已刷新',
   },
 
   // 日历视图
@@ -100,7 +101,6 @@ export const zhCN = {
     noDataDirectory: '未配置数据目录',
     configureDirectory: '请在插件设置中配置子弹笔记数据目录以启用日历视图。',
     refreshData: '刷新数据',
-    dataRefreshed: '数据已刷新',
     updateTimeFailed: '更新时间失败',
     timeUpdated: '时间已更新',
     fileNotFound: '文件不存在',
@@ -131,7 +131,6 @@ export const zhCN = {
     week: '周',
     month: '月',
     refreshData: '刷新数据',
-    dataRefreshed: '数据已刷新',
   },
 
   // 项目视图
@@ -148,7 +147,6 @@ export const zhCN = {
     workItems: '工作任务',
     projectLinks: '项目链接',
     refreshData: '刷新数据',
-    dataRefreshed: '数据已刷新',
   },
 
   // 事件详情弹窗

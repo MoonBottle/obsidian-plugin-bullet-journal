@@ -21859,7 +21859,7 @@ __export(main_exports, {
   default: () => BulletJournalPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian14 = require("obsidian");
+var import_obsidian13 = require("obsidian");
 
 // src/views/ProjectView.tsx
 var import_react8 = __toESM(require_react());
@@ -21952,7 +21952,8 @@ var zhCN = {
     confirm: "\u786E\u8BA4",
     close: "\u5173\u95ED",
     back: "\u8FD4\u56DE",
-    filterByGroup: "\u7B5B\u9009\u5206\u7EC4"
+    filterByGroup: "\u7B5B\u9009\u5206\u7EC4",
+    dataRefreshed: "\u6570\u636E\u5DF2\u5237\u65B0"
   },
   // 日历视图
   calendar: {
@@ -21968,7 +21969,6 @@ var zhCN = {
     noDataDirectory: "\u672A\u914D\u7F6E\u6570\u636E\u76EE\u5F55",
     configureDirectory: "\u8BF7\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u5B50\u5F39\u7B14\u8BB0\u6570\u636E\u76EE\u5F55\u4EE5\u542F\u7528\u65E5\u5386\u89C6\u56FE\u3002",
     refreshData: "\u5237\u65B0\u6570\u636E",
-    dataRefreshed: "\u6570\u636E\u5DF2\u5237\u65B0",
     updateTimeFailed: "\u66F4\u65B0\u65F6\u95F4\u5931\u8D25",
     timeUpdated: "\u65F6\u95F4\u5DF2\u66F4\u65B0",
     fileNotFound: "\u6587\u4EF6\u4E0D\u5B58\u5728",
@@ -21997,8 +21997,7 @@ var zhCN = {
     day: "\u65E5",
     week: "\u5468",
     month: "\u6708",
-    refreshData: "\u5237\u65B0\u6570\u636E",
-    dataRefreshed: "\u6570\u636E\u5DF2\u5237\u65B0"
+    refreshData: "\u5237\u65B0\u6570\u636E"
   },
   // 项目视图
   project: {
@@ -22013,8 +22012,7 @@ var zhCN = {
     link: "\u94FE\u63A5",
     workItems: "\u5DE5\u4F5C\u4EFB\u52A1",
     projectLinks: "\u9879\u76EE\u94FE\u63A5",
-    refreshData: "\u5237\u65B0\u6570\u636E",
-    dataRefreshed: "\u6570\u636E\u5DF2\u5237\u65B0"
+    refreshData: "\u5237\u65B0\u6570\u636E"
   },
   // 事件详情弹窗
   eventModal: {
@@ -22124,7 +22122,8 @@ var en = {
     confirm: "Confirm",
     close: "Close",
     back: "Back",
-    filterByGroup: "Filter by Group"
+    filterByGroup: "Filter by Group",
+    dataRefreshed: "Data refreshed"
   },
   // Calendar view
   calendar: {
@@ -22140,7 +22139,6 @@ var en = {
     noDataDirectory: "No Data Directory Configured",
     configureDirectory: "Please configure the Bullet Journal data directory in plugin settings to enable calendar view.",
     refreshData: "Refresh Data",
-    dataRefreshed: "Data refreshed",
     updateTimeFailed: "Failed to update time",
     timeUpdated: "Time updated",
     fileNotFound: "File not found",
@@ -22169,8 +22167,7 @@ var en = {
     day: "Day",
     week: "Week",
     month: "Month",
-    refreshData: "Refresh Data",
-    dataRefreshed: "Data refreshed"
+    refreshData: "Refresh Data"
   },
   // Project view
   project: {
@@ -22185,8 +22182,7 @@ var en = {
     link: "Link",
     workItems: "Work Items",
     projectLinks: "Project Links",
-    refreshData: "Refresh Data",
-    dataRefreshed: "Data refreshed"
+    refreshData: "Refresh Data"
   },
   // Event modal
   eventModal: {
@@ -22242,7 +22238,6 @@ function t(key) {
 
 // src/hooks/useProjectData.ts
 var import_react3 = __toESM(require_react());
-var import_obsidian = require("obsidian");
 
 // src/utils/lineParser.ts
 var LineParser = class {
@@ -22623,7 +22618,7 @@ var useProjectData = (options = {}) => {
     try {
       const enabledDirs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => d2.path);
       if (enabledDirs.length === 0) {
-        new import_obsidian.Notice(t("config").setDirectory);
+        new Notice(t("config").setDirectory);
         setIsLoading(false);
         return;
       }
@@ -22634,7 +22629,7 @@ var useProjectData = (options = {}) => {
       setProjects(loadedProjects);
     } catch (error) {
       console.error("Error loading projects:", error);
-      new import_obsidian.Notice("Error loading data");
+      new Notice("Error loading data");
     } finally {
       setIsLoading(false);
     }
@@ -22656,10 +22651,9 @@ var useProjectData = (options = {}) => {
       setSelectedGroup(e3.target.value);
     }
   }, [setSelectedGroup]);
-  const handleRefresh = (0, import_react3.useCallback)((successMessage) => {
+  const handleRefresh = (0, import_react3.useCallback)(() => {
     if (refresh) {
       refresh();
-      new import_obsidian.Notice(successMessage || t("common").dataRefreshed);
     }
   }, [refresh]);
   return {
@@ -22706,13 +22700,28 @@ GroupSelect.displayName = "GroupSelect";
 
 // src/components/shared/RefreshButton.tsx
 var import_react5 = __toESM(require_react());
+var import_obsidian = require("obsidian");
 var import_jsx_runtime3 = __toESM(require_jsx_runtime());
-var RefreshButton = (0, import_react5.memo)(({ onClick, isLoading, text, title, className }) => {
+var RefreshButton = (0, import_react5.memo)(({
+  onClick,
+  isLoading,
+  text,
+  title,
+  className,
+  showNotification = true,
+  notificationMessage
+}) => {
+  const handleClick = (0, import_react5.useCallback)(() => {
+    onClick();
+    if (showNotification) {
+      new import_obsidian.Notice(notificationMessage || t("common").dataRefreshed);
+    }
+  }, [onClick, showNotification, notificationMessage]);
   return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
     "button",
     {
       className: `bullet-journal-refresh-btn ${className || ""}`,
-      onClick,
+      onClick: handleClick,
       disabled: isLoading,
       title,
       children: [
@@ -22871,7 +22880,7 @@ var ProjectViewComponent = () => {
     setSelectedProject(null);
   }, []);
   const onRefresh = (0, import_react7.useCallback)(() => {
-    handleRefresh(t("project").dataRefreshed);
+    handleRefresh();
   }, [handleRefresh]);
   if (selectedProject) {
     return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
@@ -37298,7 +37307,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
     const allDay = info.event.allDay;
     const { filePath, lineNumber } = info.event.extendedProps;
     if (!filePath || !lineNumber || !start) {
-      new import_obsidian7.Notice(t("calendar").cannotUpdate);
+      new Notice(t("calendar").cannotUpdate);
       return;
     }
     start = snapTo15Minutes(start);
@@ -37311,7 +37320,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
     try {
       const file = app.vault.getAbstractFileByPath(filePath);
       if (!file) {
-        new import_obsidian7.Notice(t("calendar").fileNotFound);
+        new Notice(t("calendar").fileNotFound);
         return;
       }
       const startDateTime = formatDateTimeForMarkdown(start);
@@ -37328,7 +37337,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       await app.vault.process(file, (content) => {
         const lines = content.split("\n");
         if (lineNumber <= 0 || lineNumber > lines.length) {
-          new import_obsidian7.Notice(t("calendar").lineOutOfRange);
+          new Notice(t("calendar").lineOutOfRange);
           return content;
         }
         const lineIndex = lineNumber - 1;
@@ -37343,15 +37352,15 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
         }
         if (updatedLine !== originalLine) {
           lines[lineIndex] = updatedLine;
-          new import_obsidian7.Notice(t("calendar").timeUpdated);
+          new Notice(t("calendar").timeUpdated);
           return lines.join("\n");
         }
-        new import_obsidian7.Notice(t("calendar").timeFormatNotFound);
+        new Notice(t("calendar").timeFormatNotFound);
         return content;
       });
     } catch (error) {
       console.error("[BulletJournal] Error updating event time:", error);
-      new import_obsidian7.Notice(t("calendar").updateTimeFailed);
+      new Notice(t("calendar").updateTimeFailed);
     }
   }, [plugin, app, snapTo15Minutes]);
   const handleEventDrop = (0, import_react9.useCallback)((info) => {
@@ -37503,7 +37512,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       const enabledDirs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => d2.path);
       if (enabledDirs.length === 0) {
         setMissingConfig(true);
-        new import_obsidian7.Notice(t("config").setDirectory);
+        new Notice(t("config").setDirectory);
         setIsLoading(false);
         return;
       }
@@ -37533,7 +37542,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       }
     } catch (error) {
       console.error("Error loading calendar data:", error);
-      new import_obsidian7.Notice("Error loading calendar data");
+      new Notice("Error loading calendar data");
     } finally {
       isLoadingRef.current = false;
       setIsLoading(false);
@@ -37586,7 +37595,6 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
   const handleRefresh = (0, import_react9.useCallback)(() => {
     if (refresh) {
       refresh();
-      new import_obsidian7.Notice(t("calendar").dataRefreshed);
     }
   }, [refresh]);
   const handleGroupChange = (0, import_react9.useCallback)((e3) => {
@@ -37686,12 +37694,11 @@ var CalendarView = class extends import_obsidian8.ItemView {
 };
 
 // src/views/GanttView.tsx
-var import_obsidian10 = require("obsidian");
+var import_obsidian9 = require("obsidian");
 var import_client3 = __toESM(require_client());
 
 // src/components/GanttView.tsx
 var import_react11 = __toESM(require_react());
-var import_obsidian9 = require("obsidian");
 
 // node_modules/dhtmlx-gantt/codebase/dhtmlxgantt.es.js
 function Y(t4) {
@@ -50639,7 +50646,7 @@ var GanttViewComponent = () => {
     try {
       const enabledDirs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => d2.path);
       if (enabledDirs.length === 0) {
-        new import_obsidian9.Notice(t("config").setDirectory);
+        new Notice(t("config").setDirectory);
         return;
       }
       const dirConfigs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => ({ path: d2.path, groupId: d2.groupId }));
@@ -50648,7 +50655,7 @@ var GanttViewComponent = () => {
       setProjectsData(projects);
     } catch (error) {
       console.error("Error loading data:", error);
-      new import_obsidian9.Notice("Error loading data");
+      new Notice("Error loading data");
     } finally {
       setIsLoading(false);
     }
@@ -50731,7 +50738,6 @@ var GanttViewComponent = () => {
   const handleRefresh = (0, import_react11.useCallback)(() => {
     if (refresh) {
       refresh();
-      new import_obsidian9.Notice(t("gantt").dataRefreshed);
     }
   }, [refresh]);
   const handleGroupChange = (0, import_react11.useCallback)((e3) => {
@@ -50847,7 +50853,7 @@ var GanttViewComponent = () => {
 // src/views/GanttView.tsx
 var import_jsx_runtime10 = __toESM(require_jsx_runtime());
 var GANTT_VIEW_TYPE = "bullet-journal-gantt-view";
-var GanttView = class extends import_obsidian10.ItemView {
+var GanttView = class extends import_obsidian9.ItemView {
   plugin;
   root = null;
   constructor(leaf, plugin) {
@@ -50880,13 +50886,13 @@ var GanttView = class extends import_obsidian10.ItemView {
 
 // src/views/TodoSidebarView.tsx
 var import_react13 = __toESM(require_react());
-var import_obsidian12 = require("obsidian");
+var import_obsidian11 = require("obsidian");
 var import_client4 = __toESM(require_client());
 
 // src/components/TodoSidebar.tsx
 var import_react12 = __toESM(require_react());
 init_fileUtils();
-var import_obsidian11 = require("obsidian");
+var import_obsidian10 = require("obsidian");
 var import_jsx_runtime11 = __toESM(require_jsx_runtime());
 var TodoSidebar = ({ onItemClick }) => {
   const pluginContext = usePlugin();
@@ -51172,7 +51178,7 @@ var TodoSidebar = ({ onItemClick }) => {
     const target = event.currentTarget;
     if (!target) return;
     const rect = target.getBoundingClientRect();
-    const menu = new import_obsidian11.Menu();
+    const menu = new import_obsidian10.Menu();
     const moreMenuTexts = t("moreMenu");
     menu.addItem((menuItem) => {
       menuItem.setTitle(moreMenuTexts.refresh).setIcon("refresh-cw").onClick(() => {
@@ -51386,7 +51392,7 @@ var TodoSidebar = ({ onItemClick }) => {
 init_fileUtils();
 var import_jsx_runtime12 = __toESM(require_jsx_runtime());
 var TODO_SIDEBAR_VIEW_TYPE = "bullet-journal-todo-sidebar";
-var TodoSidebarView = class extends import_obsidian12.ItemView {
+var TodoSidebarView = class extends import_obsidian11.ItemView {
   plugin;
   root = null;
   unsubscribeRefresh = null;
@@ -51428,7 +51434,7 @@ var TodoSidebarView = class extends import_obsidian12.ItemView {
 };
 
 // src/editor/TaskGutter.ts
-var import_obsidian13 = require("obsidian");
+var import_obsidian12 = require("obsidian");
 var import_view = require("@codemirror/view");
 var import_state = require("@codemirror/state");
 function getApp() {
@@ -51455,7 +51461,7 @@ var TaskButtonWidget = class extends import_view.WidgetType {
     const app = getApp();
     const activeLeaf = app.workspace.getLeaf(false);
     let file = null;
-    if (activeLeaf.view instanceof import_obsidian13.MarkdownView) {
+    if (activeLeaf.view instanceof import_obsidian12.MarkdownView) {
       file = activeLeaf.view.file;
     } else {
       file = app.workspace.getActiveFile();
@@ -51586,7 +51592,7 @@ var DEFAULT_SETTINGS = {
     hideAbandoned: false
   }
 };
-var BulletJournalPlugin = class extends import_obsidian14.Plugin {
+var BulletJournalPlugin = class extends import_obsidian13.Plugin {
   settings;
   refreshCallbacks = /* @__PURE__ */ new Set();
   debouncedRefresh;
@@ -51594,7 +51600,7 @@ var BulletJournalPlugin = class extends import_obsidian14.Plugin {
   constructor(app, manifest) {
     super(app, manifest);
     this.settings = { ...DEFAULT_SETTINGS };
-    this.debouncedRefresh = (0, import_obsidian14.debounce)(this.triggerRefresh.bind(this), 500, true);
+    this.debouncedRefresh = (0, import_obsidian13.debounce)(this.triggerRefresh.bind(this), 500, true);
   }
   async onload() {
     await this.loadSettings();
@@ -51823,7 +51829,7 @@ var BulletJournalPlugin = class extends import_obsidian14.Plugin {
     }
   }
 };
-var BulletJournalSettingTab = class extends import_obsidian14.PluginSettingTab {
+var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
   plugin;
   constructor(app, plugin) {
     super(app, plugin);
@@ -51833,24 +51839,24 @@ var BulletJournalSettingTab = class extends import_obsidian14.PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
     containerEl.createEl("h2", { text: t("settings").title });
-    new import_obsidian14.Setting(containerEl).setName(t("settings").defaultView.title).setDesc(t("settings").defaultView.description).addDropdown((dropdown) => dropdown.addOption("project", t("settings").defaultView.options.project).addOption("calendar", t("settings").defaultView.options.calendar).addOption("gantt", t("settings").defaultView.options.gantt).setValue(this.plugin.settings.defaultView).onChange(async (value) => {
+    new import_obsidian13.Setting(containerEl).setName(t("settings").defaultView.title).setDesc(t("settings").defaultView.description).addDropdown((dropdown) => dropdown.addOption("project", t("settings").defaultView.options.project).addOption("calendar", t("settings").defaultView.options.calendar).addOption("gantt", t("settings").defaultView.options.gantt).setValue(this.plugin.settings.defaultView).onChange(async (value) => {
       this.plugin.settings.defaultView = value;
       await this.plugin.saveSettings();
     }));
-    new import_obsidian14.Setting(containerEl).setName(t("settings").lunchBreak.title).setDesc(t("settings").lunchBreak.description).setHeading();
-    new import_obsidian14.Setting(containerEl).setName(t("settings").lunchBreak.start.title).setDesc(t("settings").lunchBreak.start.description).addText((text) => text.setPlaceholder("12:00").setValue(this.plugin.settings.lunchBreakStart).onChange(async (value) => {
+    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.title).setDesc(t("settings").lunchBreak.description).setHeading();
+    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.start.title).setDesc(t("settings").lunchBreak.start.description).addText((text) => text.setPlaceholder("12:00").setValue(this.plugin.settings.lunchBreakStart).onChange(async (value) => {
       if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
         this.plugin.settings.lunchBreakStart = value;
         await this.plugin.saveSettings();
       }
     }));
-    new import_obsidian14.Setting(containerEl).setName(t("settings").lunchBreak.end.title).setDesc(t("settings").lunchBreak.end.description).addText((text) => text.setPlaceholder("13:00").setValue(this.plugin.settings.lunchBreakEnd).onChange(async (value) => {
+    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.end.title).setDesc(t("settings").lunchBreak.end.description).addText((text) => text.setPlaceholder("13:00").setValue(this.plugin.settings.lunchBreakEnd).onChange(async (value) => {
       if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
         this.plugin.settings.lunchBreakEnd = value;
         await this.plugin.saveSettings();
       }
     }));
-    new import_obsidian14.Setting(containerEl).setName(t("settings").projectGroups.title).setDesc(t("settings").projectGroups.description).setHeading().addButton((button) => button.setButtonText(t("settings").projectGroups.addButton).setCta().onClick(() => {
+    new import_obsidian13.Setting(containerEl).setName(t("settings").projectGroups.title).setDesc(t("settings").projectGroups.description).setHeading().addButton((button) => button.setButtonText(t("settings").projectGroups.addButton).setCta().onClick(() => {
       const newGroup = {
         id: "group-" + Date.now(),
         name: ""
@@ -51865,7 +51871,7 @@ var BulletJournalSettingTab = class extends import_obsidian14.PluginSettingTab {
     this.renderProjectGroups(groupsContainer, containerEl);
     const defaultGroupContainer = containerEl.createDiv({ cls: "bullet-journal-default-group-container" });
     this.renderDefaultGroupDropdown(defaultGroupContainer);
-    new import_obsidian14.Setting(containerEl).setName(t("settings").projectDirectories.title).setHeading().addButton((button) => button.setButtonText(t("settings").projectDirectories.addButton).setCta().onClick(() => {
+    new import_obsidian13.Setting(containerEl).setName(t("settings").projectDirectories.title).setHeading().addButton((button) => button.setButtonText(t("settings").projectDirectories.addButton).setCta().onClick(() => {
       this.plugin.settings.projectDirectories.push({ path: "", enabled: true });
       this.plugin.saveSettings();
       this.renderProjectDirectories(containerEl);
@@ -51874,7 +51880,7 @@ var BulletJournalSettingTab = class extends import_obsidian14.PluginSettingTab {
   }
   renderDefaultGroupDropdown(container) {
     container.empty();
-    new import_obsidian14.Setting(container).setName(t("settings").projectGroups.defaultGroupTitle).setDesc(t("settings").projectGroups.defaultGroupDesc).addDropdown((dropdown) => {
+    new import_obsidian13.Setting(container).setName(t("settings").projectGroups.defaultGroupTitle).setDesc(t("settings").projectGroups.defaultGroupDesc).addDropdown((dropdown) => {
       dropdown.addOption("", t("settings").projectGroups.allGroups);
       this.plugin.settings.projectGroups.forEach((group) => {
         dropdown.addOption(group.id, group.name || t("settings").projectGroups.unnamed);
@@ -51890,11 +51896,11 @@ var BulletJournalSettingTab = class extends import_obsidian14.PluginSettingTab {
   renderProjectGroups(groupsContainer, mainContainer) {
     groupsContainer.empty();
     if (this.plugin.settings.projectGroups.length === 0) {
-      new import_obsidian14.Setting(groupsContainer).setDesc(t("settings").projectGroups.emptyMessage).setClass("bullet-journal-group-setting");
+      new import_obsidian13.Setting(groupsContainer).setDesc(t("settings").projectGroups.emptyMessage).setClass("bullet-journal-group-setting");
       return;
     }
     this.plugin.settings.projectGroups.forEach((group, index5) => {
-      const setting = new import_obsidian14.Setting(groupsContainer).setClass("bullet-journal-group-setting").addText((text) => text.setPlaceholder(t("settings").projectGroups.namePlaceholder).setValue(group.name).onChange(async (value) => {
+      const setting = new import_obsidian13.Setting(groupsContainer).setClass("bullet-journal-group-setting").addText((text) => text.setPlaceholder(t("settings").projectGroups.namePlaceholder).setValue(group.name).onChange(async (value) => {
         this.plugin.settings.projectGroups[index5].name = value;
         await this.plugin.saveSettings();
         const defaultGroupContainer = mainContainer.querySelector(".bullet-journal-default-group-container");
@@ -51925,7 +51931,7 @@ var BulletJournalSettingTab = class extends import_obsidian14.PluginSettingTab {
   renderProjectDirectories(containerEl) {
     containerEl.querySelectorAll(".bullet-journal-dir-setting").forEach((el) => el.remove());
     if (this.plugin.settings.projectDirectories.length === 0) {
-      new import_obsidian14.Setting(containerEl).setDesc(t("settings").projectDirectories.emptyMessage).setClass("bullet-journal-dir-setting");
+      new import_obsidian13.Setting(containerEl).setDesc(t("settings").projectDirectories.emptyMessage).setClass("bullet-journal-dir-setting");
       return;
     }
     this.plugin.settings.projectDirectories.forEach((dir, index5) => {
@@ -51933,7 +51939,7 @@ var BulletJournalSettingTab = class extends import_obsidian14.PluginSettingTab {
       this.plugin.settings.projectGroups.forEach((group) => {
         groupOptions[group.id] = group.name || t("settings").projectGroups.unnamed;
       });
-      const setting = new import_obsidian14.Setting(containerEl).setName(dir.path || t("settings").projectDirectories.noPath).setClass("bullet-journal-dir-setting");
+      const setting = new import_obsidian13.Setting(containerEl).setName(dir.path || t("settings").projectDirectories.noPath).setClass("bullet-journal-dir-setting");
       if (this.plugin.settings.projectGroups.length > 0) {
         setting.addDropdown((dropdown) => dropdown.addOptions(groupOptions).setValue(dir.groupId || "").onChange(async (value) => {
           this.plugin.settings.projectDirectories[index5].groupId = value || void 0;

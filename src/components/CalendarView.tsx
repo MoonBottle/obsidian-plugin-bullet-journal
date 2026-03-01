@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useMemo, useState, forwardRef, useImperativeHandle } from 'react';
-import { Notice, Modal, App } from 'obsidian';
+import { Modal, App } from 'obsidian';
 import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/list';
@@ -555,7 +555,6 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
   const handleRefresh = useCallback(() => {
     if (refresh) {
       refresh();
-      new Notice(t('calendar').dataRefreshed);
     }
   }, [refresh]);
 

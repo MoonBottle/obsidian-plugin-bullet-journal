@@ -1,4 +1,6 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
+import { Notice } from 'obsidian';
+import { t } from '../../i18n';
 
 export interface RefreshButtonProps {
   /** Click handler */
@@ -11,16 +13,35 @@ export interface RefreshButtonProps {
   title?: string;
   /** Additional CSS class name */
   className?: string;
+  /** Whether to show notification after refresh */
+  showNotification?: boolean;
+  /** Custom notification message */
+  notificationMessage?: string;
 }
 
 /**
- * Reusable refresh button with spinning icon
+ * Reusable refresh button with spinning icon and notification feedback
  */
-export const RefreshButton = memo(({ onClick, isLoading, text, title, className }: RefreshButtonProps) => {
+export const RefreshButton = memo(({
+  onClick,
+  isLoading,
+  text,
+  title,
+  className,
+  showNotification = true,
+  notificationMessage
+}: RefreshButtonProps) => {
+  const handleClick = useCallback(() => {
+    onClick();
+    if (showNotification) {
+      new Notice(notificationMessage || t('common').dataRefreshed);
+    }
+  }, [onClick, showNotification, notificationMessage]);
+
   return (
     <button
       className={`bullet-journal-refresh-btn ${className || ''}`}
-      onClick={onClick}
+      onClick={handleClick}
       disabled={isLoading}
       title={title}
     >

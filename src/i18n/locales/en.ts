@@ -74,6 +74,7 @@ export const en: Translations = {
     close: 'Close',
     back: 'Back',
     filterByGroup: 'Filter by Group',
+    dataRefreshed: 'Data refreshed',
   },
 
   // Calendar view
@@ -90,7 +91,6 @@ export const en: Translations = {
     noDataDirectory: 'No Data Directory Configured',
     configureDirectory: 'Please configure the Bullet Journal data directory in plugin settings to enable calendar view.',
     refreshData: 'Refresh Data',
-    dataRefreshed: 'Data refreshed',
     updateTimeFailed: 'Failed to update time',
     timeUpdated: 'Time updated',
     fileNotFound: 'File not found',
@@ -121,7 +121,6 @@ export const en: Translations = {
     week: 'Week',
     month: 'Month',
     refreshData: 'Refresh Data',
-    dataRefreshed: 'Data refreshed',
   },
 
   // Project view
@@ -138,7 +137,6 @@ export const en: Translations = {
     workItems: 'Work Items',
     projectLinks: 'Project Links',
     refreshData: 'Refresh Data',
-    dataRefreshed: 'Data refreshed',
   },
 
   // Event modal
