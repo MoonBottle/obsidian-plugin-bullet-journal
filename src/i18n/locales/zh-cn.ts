@@ -180,6 +180,15 @@ export const zhCN = {
     showDetail: '查看详情',
     showCalendar: '查看日历',
   },
+
+  // 更多菜单
+  moreMenu: {
+    refresh: '刷新',
+    hideCompleted: '隐藏已完成',
+    showCompleted: '显示已完成',
+    hideAbandoned: '隐藏已放弃',
+    showAbandoned: '显示已放弃',
+  },
 };
 
 export type Translations = typeof zhCN;

@@ -1395,3 +1395,37 @@
   background-color: var(--interactive-accent-hover);
   border-color: var(--interactive-accent-hover);
 }
+
+/* Todo Sidebar Header Actions */
+.bullet-journal-todo-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Todo Sidebar More Button */
+.bullet-journal-todo-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bullet-journal-todo-more-btn:hover {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+  color: var(--interactive-accent);
+}
+
+.bullet-journal-todo-more-btn svg {
+  width: 16px;
+  height: 16px;
+}

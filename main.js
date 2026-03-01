@@ -21859,7 +21859,7 @@ __export(main_exports, {
   default: () => BulletJournalPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian13 = require("obsidian");
+var import_obsidian14 = require("obsidian");
 
 // src/views/ProjectView.tsx
 var import_react8 = __toESM(require_react());
@@ -22042,6 +22042,14 @@ var zhCN = {
     openDoc: "\u6253\u5F00\u6587\u6863",
     showDetail: "\u67E5\u770B\u8BE6\u60C5",
     showCalendar: "\u67E5\u770B\u65E5\u5386"
+  },
+  // 更多菜单
+  moreMenu: {
+    refresh: "\u5237\u65B0",
+    hideCompleted: "\u9690\u85CF\u5DF2\u5B8C\u6210",
+    showCompleted: "\u663E\u793A\u5DF2\u5B8C\u6210",
+    hideAbandoned: "\u9690\u85CF\u5DF2\u653E\u5F03",
+    showAbandoned: "\u663E\u793A\u5DF2\u653E\u5F03"
   }
 };
 
@@ -22206,6 +22214,14 @@ var en = {
     openDoc: "Open Document",
     showDetail: "View Detail",
     showCalendar: "View Calendar"
+  },
+  // More menu
+  moreMenu: {
+    refresh: "Refresh",
+    hideCompleted: "Hide Completed",
+    showCompleted: "Show Completed",
+    hideAbandoned: "Hide Abandoned",
+    showAbandoned: "Show Abandoned"
   }
 };
 
@@ -50863,12 +50879,13 @@ var GanttView = class extends import_obsidian10.ItemView {
 
 // src/views/TodoSidebarView.tsx
 var import_react13 = __toESM(require_react());
-var import_obsidian11 = require("obsidian");
+var import_obsidian12 = require("obsidian");
 var import_client4 = __toESM(require_client());
 
 // src/components/TodoSidebar.tsx
 var import_react12 = __toESM(require_react());
 init_fileUtils();
+var import_obsidian11 = require("obsidian");
 var import_jsx_runtime11 = __toESM(require_jsx_runtime());
 var TodoSidebar = ({ onItemClick }) => {
   const pluginContext = usePlugin();
@@ -50892,6 +50909,15 @@ var TodoSidebar = ({ onItemClick }) => {
     completed: false,
     abandoned: false
   });
+  const [hideCompleted, setHideCompleted] = (0, import_react12.useState)(false);
+  const [hideAbandoned, setHideAbandoned] = (0, import_react12.useState)(false);
+  const moreButtonRef = (0, import_react12.useRef)(null);
+  (0, import_react12.useEffect)(() => {
+    if (plugin?.settings?.todoDock) {
+      setHideCompleted(plugin.settings.todoDock.hideCompleted);
+      setHideAbandoned(plugin.settings.todoDock.hideAbandoned);
+    }
+  }, [plugin]);
   const loadItems = (0, import_react12.useCallback)(() => {
     if (!pluginContext?.plugin?.settings) {
       setGroupedItems({});
@@ -51139,6 +51165,42 @@ var TodoSidebar = ({ onItemClick }) => {
       [section]: !prev[section]
     }));
   };
+  const handleMoreClick = (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    const target = event.currentTarget;
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const menu = new import_obsidian11.Menu();
+    const moreMenuTexts = t("moreMenu");
+    menu.addItem((menuItem) => {
+      menuItem.setTitle(moreMenuTexts.refresh).setIcon("refresh-cw").onClick(() => {
+        loadItems();
+      });
+    });
+    menu.addSeparator();
+    menu.addItem((menuItem) => {
+      menuItem.setTitle(hideCompleted ? moreMenuTexts.showCompleted : moreMenuTexts.hideCompleted).setIcon(hideCompleted ? "eye" : "eye-off").onClick(() => {
+        const newValue = !hideCompleted;
+        setHideCompleted(newValue);
+        if (plugin) {
+          plugin.settings.todoDock.hideCompleted = newValue;
+          plugin.saveSettings();
+        }
+      });
+    });
+    menu.addItem((menuItem) => {
+      menuItem.setTitle(hideAbandoned ? moreMenuTexts.showAbandoned : moreMenuTexts.hideAbandoned).setIcon(hideAbandoned ? "eye" : "eye-off").onClick(() => {
+        const newValue = !hideAbandoned;
+        setHideAbandoned(newValue);
+        if (plugin) {
+          plugin.settings.todoDock.hideAbandoned = newValue;
+          plugin.saveSettings();
+        }
+      });
+    });
+    menu.showAtPosition({ x: rect.left, y: rect.bottom + 4 });
+  };
   const sortedDates = Object.keys(groupedItems).sort();
   const todoTexts = t("todoSidebar");
   const handleGroupChange = (0, import_react12.useCallback)((e3) => {
@@ -51265,14 +51327,30 @@ var TodoSidebar = ({ onItemClick }) => {
   return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-sidebar", children: [
     /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-header", children: [
       /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h3", { children: todoTexts.title }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
-        GroupSelect,
-        {
-          groups: availableGroups,
-          value: selectedGroup,
-          onChange: handleGroupChange
-        }
-      )
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-header-actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+          GroupSelect,
+          {
+            groups: availableGroups,
+            value: selectedGroup,
+            onChange: handleGroupChange
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+          "button",
+          {
+            ref: moreButtonRef,
+            className: "bullet-journal-todo-more-btn",
+            onClick: handleMoreClick,
+            title: "\u66F4\u591A",
+            children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("circle", { cx: "12", cy: "12", r: "1" }),
+              /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("circle", { cx: "19", cy: "12", r: "1" }),
+              /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("circle", { cx: "5", cy: "12", r: "1" })
+            ] })
+          }
+        )
+      ] })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-content", children: [
       renderSection(todoTexts.expired || "\u5DF2\u8FC7\u671F", expiredItems, "expired"),
@@ -51281,8 +51359,8 @@ var TodoSidebar = ({ onItemClick }) => {
       sortedDates.filter((d2) => d2 !== getTodayISO() && d2 !== getTomorrowDate()).map(
         (date) => renderSection(formatDateLabel(date, todoTexts.today, todoTexts.tomorrow), groupedItems[date], date, true)
       ),
-      renderSection(todoTexts.completed || "\u5DF2\u5B8C\u6210", completedItems, "completed", false),
-      renderSection(todoTexts.abandoned || "\u5DF2\u653E\u5F03", abandonedItems, "abandoned", false)
+      !hideCompleted && renderSection(todoTexts.completed || "\u5DF2\u5B8C\u6210", completedItems, "completed", false),
+      !hideAbandoned && renderSection(todoTexts.abandoned || "\u5DF2\u653E\u5F03", abandonedItems, "abandoned", false)
     ] })
   ] });
 };
@@ -51291,7 +51369,7 @@ var TodoSidebar = ({ onItemClick }) => {
 init_fileUtils();
 var import_jsx_runtime12 = __toESM(require_jsx_runtime());
 var TODO_SIDEBAR_VIEW_TYPE = "bullet-journal-todo-sidebar";
-var TodoSidebarView = class extends import_obsidian11.ItemView {
+var TodoSidebarView = class extends import_obsidian12.ItemView {
   plugin;
   root = null;
   unsubscribeRefresh = null;
@@ -51333,7 +51411,7 @@ var TodoSidebarView = class extends import_obsidian11.ItemView {
 };
 
 // src/editor/TaskGutter.ts
-var import_obsidian12 = require("obsidian");
+var import_obsidian13 = require("obsidian");
 var import_view = require("@codemirror/view");
 var import_state = require("@codemirror/state");
 function getApp() {
@@ -51360,7 +51438,7 @@ var TaskButtonWidget = class extends import_view.WidgetType {
     const app = getApp();
     const activeLeaf = app.workspace.getLeaf(false);
     let file = null;
-    if (activeLeaf.view instanceof import_obsidian12.MarkdownView) {
+    if (activeLeaf.view instanceof import_obsidian13.MarkdownView) {
       file = activeLeaf.view.file;
     } else {
       file = app.workspace.getActiveFile();
@@ -51485,9 +51563,13 @@ var DEFAULT_SETTINGS = {
   defaultGroup: "",
   defaultView: "calendar",
   lunchBreakStart: "12:00",
-  lunchBreakEnd: "13:00"
+  lunchBreakEnd: "13:00",
+  todoDock: {
+    hideCompleted: false,
+    hideAbandoned: false
+  }
 };
-var BulletJournalPlugin = class extends import_obsidian13.Plugin {
+var BulletJournalPlugin = class extends import_obsidian14.Plugin {
   settings;
   refreshCallbacks = /* @__PURE__ */ new Set();
   debouncedRefresh;
@@ -51495,7 +51577,7 @@ var BulletJournalPlugin = class extends import_obsidian13.Plugin {
   constructor(app, manifest) {
     super(app, manifest);
     this.settings = { ...DEFAULT_SETTINGS };
-    this.debouncedRefresh = (0, import_obsidian13.debounce)(this.triggerRefresh.bind(this), 500, true);
+    this.debouncedRefresh = (0, import_obsidian14.debounce)(this.triggerRefresh.bind(this), 500, true);
   }
   async onload() {
     await this.loadSettings();
@@ -51724,7 +51806,7 @@ var BulletJournalPlugin = class extends import_obsidian13.Plugin {
     }
   }
 };
-var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
+var BulletJournalSettingTab = class extends import_obsidian14.PluginSettingTab {
   plugin;
   constructor(app, plugin) {
     super(app, plugin);
@@ -51734,24 +51816,24 @@ var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
     containerEl.createEl("h2", { text: t("settings").title });
-    new import_obsidian13.Setting(containerEl).setName(t("settings").defaultView.title).setDesc(t("settings").defaultView.description).addDropdown((dropdown) => dropdown.addOption("project", t("settings").defaultView.options.project).addOption("calendar", t("settings").defaultView.options.calendar).addOption("gantt", t("settings").defaultView.options.gantt).setValue(this.plugin.settings.defaultView).onChange(async (value) => {
+    new import_obsidian14.Setting(containerEl).setName(t("settings").defaultView.title).setDesc(t("settings").defaultView.description).addDropdown((dropdown) => dropdown.addOption("project", t("settings").defaultView.options.project).addOption("calendar", t("settings").defaultView.options.calendar).addOption("gantt", t("settings").defaultView.options.gantt).setValue(this.plugin.settings.defaultView).onChange(async (value) => {
       this.plugin.settings.defaultView = value;
       await this.plugin.saveSettings();
     }));
-    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.title).setDesc(t("settings").lunchBreak.description).setHeading();
-    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.start.title).setDesc(t("settings").lunchBreak.start.description).addText((text) => text.setPlaceholder("12:00").setValue(this.plugin.settings.lunchBreakStart).onChange(async (value) => {
+    new import_obsidian14.Setting(containerEl).setName(t("settings").lunchBreak.title).setDesc(t("settings").lunchBreak.description).setHeading();
+    new import_obsidian14.Setting(containerEl).setName(t("settings").lunchBreak.start.title).setDesc(t("settings").lunchBreak.start.description).addText((text) => text.setPlaceholder("12:00").setValue(this.plugin.settings.lunchBreakStart).onChange(async (value) => {
       if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
         this.plugin.settings.lunchBreakStart = value;
         await this.plugin.saveSettings();
       }
     }));
-    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.end.title).setDesc(t("settings").lunchBreak.end.description).addText((text) => text.setPlaceholder("13:00").setValue(this.plugin.settings.lunchBreakEnd).onChange(async (value) => {
+    new import_obsidian14.Setting(containerEl).setName(t("settings").lunchBreak.end.title).setDesc(t("settings").lunchBreak.end.description).addText((text) => text.setPlaceholder("13:00").setValue(this.plugin.settings.lunchBreakEnd).onChange(async (value) => {
       if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
         this.plugin.settings.lunchBreakEnd = value;
         await this.plugin.saveSettings();
       }
     }));
-    new import_obsidian13.Setting(containerEl).setName(t("settings").projectGroups.title).setDesc(t("settings").projectGroups.description).setHeading().addButton((button) => button.setButtonText(t("settings").projectGroups.addButton).setCta().onClick(() => {
+    new import_obsidian14.Setting(containerEl).setName(t("settings").projectGroups.title).setDesc(t("settings").projectGroups.description).setHeading().addButton((button) => button.setButtonText(t("settings").projectGroups.addButton).setCta().onClick(() => {
       const newGroup = {
         id: "group-" + Date.now(),
         name: ""
@@ -51766,7 +51848,7 @@ var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
     this.renderProjectGroups(groupsContainer, containerEl);
     const defaultGroupContainer = containerEl.createDiv({ cls: "bullet-journal-default-group-container" });
     this.renderDefaultGroupDropdown(defaultGroupContainer);
-    new import_obsidian13.Setting(containerEl).setName(t("settings").projectDirectories.title).setHeading().addButton((button) => button.setButtonText(t("settings").projectDirectories.addButton).setCta().onClick(() => {
+    new import_obsidian14.Setting(containerEl).setName(t("settings").projectDirectories.title).setHeading().addButton((button) => button.setButtonText(t("settings").projectDirectories.addButton).setCta().onClick(() => {
       this.plugin.settings.projectDirectories.push({ path: "", enabled: true });
       this.plugin.saveSettings();
       this.renderProjectDirectories(containerEl);
@@ -51775,7 +51857,7 @@ var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
   }
   renderDefaultGroupDropdown(container) {
     container.empty();
-    new import_obsidian13.Setting(container).setName(t("settings").projectGroups.defaultGroupTitle).setDesc(t("settings").projectGroups.defaultGroupDesc).addDropdown((dropdown) => {
+    new import_obsidian14.Setting(container).setName(t("settings").projectGroups.defaultGroupTitle).setDesc(t("settings").projectGroups.defaultGroupDesc).addDropdown((dropdown) => {
       dropdown.addOption("", t("settings").projectGroups.allGroups);
       this.plugin.settings.projectGroups.forEach((group) => {
         dropdown.addOption(group.id, group.name || t("settings").projectGroups.unnamed);
@@ -51791,11 +51873,11 @@ var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
   renderProjectGroups(groupsContainer, mainContainer) {
     groupsContainer.empty();
     if (this.plugin.settings.projectGroups.length === 0) {
-      new import_obsidian13.Setting(groupsContainer).setDesc(t("settings").projectGroups.emptyMessage).setClass("bullet-journal-group-setting");
+      new import_obsidian14.Setting(groupsContainer).setDesc(t("settings").projectGroups.emptyMessage).setClass("bullet-journal-group-setting");
       return;
     }
     this.plugin.settings.projectGroups.forEach((group, index5) => {
-      const setting = new import_obsidian13.Setting(groupsContainer).setClass("bullet-journal-group-setting").addText((text) => text.setPlaceholder(t("settings").projectGroups.namePlaceholder).setValue(group.name).onChange(async (value) => {
+      const setting = new import_obsidian14.Setting(groupsContainer).setClass("bullet-journal-group-setting").addText((text) => text.setPlaceholder(t("settings").projectGroups.namePlaceholder).setValue(group.name).onChange(async (value) => {
         this.plugin.settings.projectGroups[index5].name = value;
         await this.plugin.saveSettings();
         const defaultGroupContainer = mainContainer.querySelector(".bullet-journal-default-group-container");
@@ -51826,7 +51908,7 @@ var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
   renderProjectDirectories(containerEl) {
     containerEl.querySelectorAll(".bullet-journal-dir-setting").forEach((el) => el.remove());
     if (this.plugin.settings.projectDirectories.length === 0) {
-      new import_obsidian13.Setting(containerEl).setDesc(t("settings").projectDirectories.emptyMessage).setClass("bullet-journal-dir-setting");
+      new import_obsidian14.Setting(containerEl).setDesc(t("settings").projectDirectories.emptyMessage).setClass("bullet-journal-dir-setting");
       return;
     }
     this.plugin.settings.projectDirectories.forEach((dir, index5) => {
@@ -51834,7 +51916,7 @@ var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
       this.plugin.settings.projectGroups.forEach((group) => {
         groupOptions[group.id] = group.name || t("settings").projectGroups.unnamed;
       });
-      const setting = new import_obsidian13.Setting(containerEl).setName(dir.path || t("settings").projectDirectories.noPath).setClass("bullet-journal-dir-setting");
+      const setting = new import_obsidian14.Setting(containerEl).setName(dir.path || t("settings").projectDirectories.noPath).setClass("bullet-journal-dir-setting");
       if (this.plugin.settings.projectGroups.length > 0) {
         setting.addDropdown((dropdown) => dropdown.addOptions(groupOptions).setValue(dir.groupId || "").onChange(async (value) => {
           this.plugin.settings.projectDirectories[index5].groupId = value || void 0;

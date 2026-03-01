@@ -24,6 +24,10 @@ interface BulletJournalPluginSettings {
   defaultView: string;
   lunchBreakStart: string;
   lunchBreakEnd: string;
+  todoDock: {
+    hideCompleted: boolean;
+    hideAbandoned: boolean;
+  };
 }
 
 const DEFAULT_SETTINGS: BulletJournalPluginSettings = {
@@ -32,7 +36,11 @@ const DEFAULT_SETTINGS: BulletJournalPluginSettings = {
   defaultGroup: '',
   defaultView: 'calendar',
   lunchBreakStart: '12:00',
-  lunchBreakEnd: '13:00'
+  lunchBreakEnd: '13:00',
+  todoDock: {
+    hideCompleted: false,
+    hideAbandoned: false
+  }
 };
 
 export default class BulletJournalPlugin extends Plugin {

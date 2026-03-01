@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Item } from '../models/types';
 import { MarkdownParser } from '../parser/markdownParser';
 import { usePlugin } from '../context/PluginContext';
@@ -11,6 +11,7 @@ import { openFileAtLine, updateItemDate, updateItemStatus, getTomorrowDate, getT
 import { GroupSelect } from './shared';
 import { formatDateLabel, formatTimeRange, getTodayISO } from '../utils/dateUtils';
 import { showItemContextMenu } from '../utils/contextMenu';
+import { Menu, MenuItem } from 'obsidian';
 
 interface GroupedItems {
   [date: string]: Item[];
@@ -42,6 +43,17 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     completed: false,
     abandoned: false
   });
+  const [hideCompleted, setHideCompleted] = useState(false);
+  const [hideAbandoned, setHideAbandoned] = useState(false);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+
+  // 从插件设置读取初始状态
+  useEffect(() => {
+    if (plugin?.settings?.todoDock) {
+      setHideCompleted(plugin.settings.todoDock.hideCompleted);
+      setHideAbandoned(plugin.settings.todoDock.hideAbandoned);
+    }
+  }, [plugin]);
 
   const loadItems = useCallback(() => {
     if (!pluginContext?.plugin?.settings) {
@@ -337,6 +349,65 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     }));
   };
 
+  const handleMoreClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const target = event.currentTarget as HTMLElement;
+    if (!target) return;
+
+    const rect = target.getBoundingClientRect();
+    const menu = new Menu();
+    const moreMenuTexts = t('moreMenu');
+
+    // 刷新选项
+    menu.addItem((menuItem: MenuItem) => {
+      menuItem
+        .setTitle(moreMenuTexts.refresh)
+        .setIcon('refresh-cw')
+        .onClick(() => {
+          loadItems();
+        });
+    });
+
+    // 分隔线
+    menu.addSeparator();
+
+    // 隐藏/显示已完成选项
+    menu.addItem((menuItem: MenuItem) => {
+      menuItem
+        .setTitle(hideCompleted ? moreMenuTexts.showCompleted : moreMenuTexts.hideCompleted)
+        .setIcon(hideCompleted ? 'eye' : 'eye-off')
+        .onClick(() => {
+          const newValue = !hideCompleted;
+          setHideCompleted(newValue);
+          // 持久化到插件设置
+          if (plugin) {
+            plugin.settings.todoDock.hideCompleted = newValue;
+            plugin.saveSettings();
+          }
+        });
+    });
+
+    // 隐藏/显示已放弃选项
+    menu.addItem((menuItem: MenuItem) => {
+      menuItem
+        .setTitle(hideAbandoned ? moreMenuTexts.showAbandoned : moreMenuTexts.hideAbandoned)
+        .setIcon(hideAbandoned ? 'eye' : 'eye-off')
+        .onClick(() => {
+          const newValue = !hideAbandoned;
+          setHideAbandoned(newValue);
+          // 持久化到插件设置
+          if (plugin) {
+            plugin.settings.todoDock.hideAbandoned = newValue;
+            plugin.saveSettings();
+          }
+        });
+    });
+
+    menu.showAtPosition({ x: rect.left, y: rect.bottom + 4 });
+  };
+
   const sortedDates = Object.keys(groupedItems).sort();
   const todoTexts = t('todoSidebar') as any;
 
@@ -486,11 +557,25 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     <div className="bullet-journal-todo-sidebar">
       <div className="bullet-journal-todo-header">
         <h3>{todoTexts.title}</h3>
-        <GroupSelect
-          groups={availableGroups}
-          value={selectedGroup}
-          onChange={handleGroupChange}
-        />
+        <div className="bullet-journal-todo-header-actions">
+          <GroupSelect
+            groups={availableGroups}
+            value={selectedGroup}
+            onChange={handleGroupChange}
+          />
+          <button
+            ref={moreButtonRef}
+            className="bullet-journal-todo-more-btn"
+            onClick={handleMoreClick}
+            title="更多"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="1"/>
+              <circle cx="19" cy="12" r="1"/>
+              <circle cx="5" cy="12" r="1"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <div className="bullet-journal-todo-content">
         {renderSection(todoTexts.expired || '已过期', expiredItems, 'expired')}
@@ -503,9 +588,9 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
           renderSection(formatDateLabel(date, todoTexts.today, todoTexts.tomorrow), groupedItems[date], date as any, true)
         )}
         
-        {renderSection(todoTexts.completed || '已完成', completedItems, 'completed', false)}
+        {!hideCompleted && renderSection(todoTexts.completed || '已完成', completedItems, 'completed', false)}
         
-        {renderSection(todoTexts.abandoned || '已放弃', abandonedItems, 'abandoned', false)}
+        {!hideAbandoned && renderSection(todoTexts.abandoned || '已放弃', abandonedItems, 'abandoned', false)}
       </div>
     </div>
   );

@@ -170,4 +170,13 @@ export const en: Translations = {
     showDetail: 'View Detail',
     showCalendar: 'View Calendar',
   },
+
+  // More menu
+  moreMenu: {
+    refresh: 'Refresh',
+    hideCompleted: 'Hide Completed',
+    showCompleted: 'Show Completed',
+    hideAbandoned: 'Hide Abandoned',
+    showAbandoned: 'Show Abandoned',
+  },
 };
