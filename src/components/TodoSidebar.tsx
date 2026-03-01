@@ -11,7 +11,7 @@ import { openFileAtLine, updateItemDate, updateItemStatus, getTomorrowDate, getT
 import { GroupSelect } from './shared';
 import { formatDateLabel, formatTimeRange, getTodayISO } from '../utils/dateUtils';
 import { showItemContextMenu } from '../utils/contextMenu';
-import { Menu, MenuItem } from 'obsidian';
+import { Menu, MenuItem, Notice } from 'obsidian';
 
 interface GroupedItems {
   [date: string]: Item[];
@@ -367,6 +367,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
         .setIcon('refresh-cw')
         .onClick(() => {
           loadItems();
+          new Notice(t('common').dataRefreshed);
         });
     });
 

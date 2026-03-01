@@ -51183,6 +51183,7 @@ var TodoSidebar = ({ onItemClick }) => {
     menu.addItem((menuItem) => {
       menuItem.setTitle(moreMenuTexts.refresh).setIcon("refresh-cw").onClick(() => {
         loadItems();
+        new import_obsidian10.Notice(t("common").dataRefreshed);
       });
     });
     menu.addSeparator();
