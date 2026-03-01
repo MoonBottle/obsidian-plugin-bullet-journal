@@ -139,28 +139,17 @@ export class MarkdownParser {
 
       // Parse project-level links (markdown format: [name](url))
       // Only parse as project link if there's no current task
-      if (project.name && !currentTask && trimmedLine.startsWith('[') && trimmedLine.includes('](')) {
-        const linkMatch = trimmedLine.match(/\[(.*?)\]\((.*?)\)/);
-        if (linkMatch) {
-          const linkName = linkMatch[1];
-          const linkUrl = linkMatch[2];
-          project.links!.push({ name: linkName, url: linkUrl });
-        }
-        continue;
-      }
-
-      // Parse project-level gantt link (format: 甘特图：url)
-      if (project.name && trimmedLine.includes('甘特图') && trimmedLine.includes('http')) {
-        const ganttMatch = trimmedLine.match(/甘特图[：:]\s*(https?:\/\/\S+)/);
-        if (ganttMatch) {
-          project.links!.push({ name: '甘特图', url: ganttMatch[1] });
+      if (project.name && !currentTask && LineParser.isLinkLine(trimmedLine)) {
+        const link = LineParser.parseMarkdownLink(trimmedLine);
+        if (link) {
+          project.links!.push(link);
         }
         continue;
       }
 
       // Parse tasks and items (anywhere in the file, not limited to ### 工作任务 section)
       // Check for task line
-      if (trimmedLine.includes('#任务')) {
+      if (LineParser.isTaskLine(trimmedLine)) {
         // Save previous task if exists
         if (currentTask) {
           project.tasks.push(currentTask);
@@ -174,7 +163,7 @@ export class MarkdownParser {
       }
 
       // Check for item line
-      if (currentTask && trimmedLine.includes('@') && !trimmedLine.includes('#任务')) {
+      if (currentTask && trimmedLine.includes('@') && !LineParser.isTaskLine(trimmedLine)) {
         const item = LineParser.parseItemLine(trimmedLine, lineNumber);
         if (item) {
           hasTaskItemStarted = true;
@@ -187,12 +176,10 @@ export class MarkdownParser {
 
       // Parse task-level links (markdown format: [name](url))
       // Links must be between task line and first item line
-      if (currentTask && !hasTaskItemStarted && trimmedLine.startsWith('[') && trimmedLine.includes('](')) {
-        const linkMatch = trimmedLine.match(/\[(.*?)\]\((.*?)\)/);
-        if (linkMatch) {
-          const linkName = linkMatch[1];
-          const linkUrl = linkMatch[2];
-          currentTask.links.push({ name: linkName, url: linkUrl });
+      if (currentTask && !hasTaskItemStarted && LineParser.isLinkLine(trimmedLine)) {
+        const link = LineParser.parseMarkdownLink(trimmedLine);
+        if (link) {
+          currentTask.links.push(link);
         }
         continue;
       }

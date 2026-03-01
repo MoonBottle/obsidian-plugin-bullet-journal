@@ -22241,6 +22241,8 @@ var import_react3 = __toESM(require_react());
 
 // src/utils/lineParser.ts
 var LineParser = class {
+  // Constants for parsing markers
+  static TASK_TAG = "#\u4EFB\u52A1";
   /**
    * Parse a task line
    * Supports formats:
@@ -22311,6 +22313,30 @@ var LineParser = class {
     const timeRangeRegex = /@(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})~(\d{2}:\d{2}:\d{2})/;
     const dateTimeRegex = /@(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2})?)/;
     return timeRangeRegex.test(line) || dateTimeRegex.test(line);
+  }
+  /**
+   * Check if a line is a task line (contains #任务)
+   */
+  static isTaskLine(line) {
+    return line.includes(this.TASK_TAG);
+  }
+  /**
+   * Check if a line is a markdown link line
+   */
+  static isLinkLine(line) {
+    return line.startsWith("[") && line.includes("](");
+  }
+  /**
+   * Parse a markdown link from a line
+   * Supports format: [name](url)
+   * @returns { name: string, url: string } | null
+   */
+  static parseMarkdownLink(line) {
+    const linkMatch = line.match(/\[(.*?)\]\((.*?)\)/);
+    if (linkMatch) {
+      return { name: linkMatch[1], url: linkMatch[2] };
+    }
+    return null;
   }
 };
 
@@ -22419,23 +22445,14 @@ var MarkdownParser = class {
         project.description = content2;
         continue;
       }
-      if (project.name && !currentTask && trimmedLine.startsWith("[") && trimmedLine.includes("](")) {
-        const linkMatch = trimmedLine.match(/\[(.*?)\]\((.*?)\)/);
-        if (linkMatch) {
-          const linkName = linkMatch[1];
-          const linkUrl = linkMatch[2];
-          project.links.push({ name: linkName, url: linkUrl });
+      if (project.name && !currentTask && LineParser.isLinkLine(trimmedLine)) {
+        const link = LineParser.parseMarkdownLink(trimmedLine);
+        if (link) {
+          project.links.push(link);
         }
         continue;
       }
-      if (project.name && trimmedLine.includes("\u7518\u7279\u56FE") && trimmedLine.includes("http")) {
-        const ganttMatch = trimmedLine.match(/甘特图[：:]\s*(https?:\/\/\S+)/);
-        if (ganttMatch) {
-          project.links.push({ name: "\u7518\u7279\u56FE", url: ganttMatch[1] });
-        }
-        continue;
-      }
-      if (trimmedLine.includes("#\u4EFB\u52A1")) {
+      if (LineParser.isTaskLine(trimmedLine)) {
         if (currentTask) {
           project.tasks.push(currentTask);
         }
@@ -22444,7 +22461,7 @@ var MarkdownParser = class {
         hasTaskItemStarted = false;
         continue;
       }
-      if (currentTask && trimmedLine.includes("@") && !trimmedLine.includes("#\u4EFB\u52A1")) {
+      if (currentTask && trimmedLine.includes("@") && !LineParser.isTaskLine(trimmedLine)) {
         const item = LineParser.parseItemLine(trimmedLine, lineNumber);
         if (item) {
           hasTaskItemStarted = true;
@@ -22454,12 +22471,10 @@ var MarkdownParser = class {
         }
         continue;
       }
-      if (currentTask && !hasTaskItemStarted && trimmedLine.startsWith("[") && trimmedLine.includes("](")) {
-        const linkMatch = trimmedLine.match(/\[(.*?)\]\((.*?)\)/);
-        if (linkMatch) {
-          const linkName = linkMatch[1];
-          const linkUrl = linkMatch[2];
-          currentTask.links.push({ name: linkName, url: linkUrl });
+      if (currentTask && !hasTaskItemStarted && LineParser.isLinkLine(trimmedLine)) {
+        const link = LineParser.parseMarkdownLink(trimmedLine);
+        if (link) {
+          currentTask.links.push(link);
         }
         continue;
       }
@@ -51471,7 +51486,7 @@ var TaskButtonWidget = class extends import_view.WidgetType {
     const item = LineParser.parseItemLine(this.lineText, this.lineNumber);
     if (!item) return;
     const context = this.scanContext(view, this.lineNumber);
-    const isTaskLine = this.lineText.includes("#\u4EFB\u52A1");
+    const isTaskLine = LineParser.isTaskLine(this.lineText);
     const plugin = window.hkWorkPlugin;
     new EventDetailsModal(app, {
       title: item.content,
@@ -51500,7 +51515,7 @@ var TaskButtonWidget = class extends import_view.WidgetType {
     let taskLineNumber = -1;
     const currentLine = doc.line(currentLineNumber);
     const currentText = currentLine.text;
-    if (currentText.includes("#\u4EFB\u52A1")) {
+    if (LineParser.isTaskLine(currentText)) {
       const task = LineParser.parseTaskLine(currentText, currentLineNumber);
       console.log("[TaskGutter] Current line is task line:", currentText);
       console.log("[TaskGutter] Parsed task:", task);
@@ -51511,7 +51526,7 @@ var TaskButtonWidget = class extends import_view.WidgetType {
       for (let i3 = currentLineNumber - 1; i3 >= 1; i3--) {
         const line = doc.line(i3);
         const text = line.text;
-        if (text.includes("#\u4EFB\u52A1")) {
+        if (LineParser.isTaskLine(text)) {
           const task = LineParser.parseTaskLine(text, i3);
           console.log("[TaskGutter] Found task line:", text);
           console.log("[TaskGutter] Parsed task:", task);
@@ -51527,37 +51542,30 @@ var TaskButtonWidget = class extends import_view.WidgetType {
       for (let i3 = taskLineNumber + 1; i3 <= doc.lines; i3++) {
         const line = doc.line(i3);
         const text = line.text.trim();
-        if (text.includes("#\u4EFB\u52A1")) {
+        if (LineParser.isTaskLine(text)) {
           break;
         }
         if (LineParser.isItemLine(text)) {
           break;
         }
-        if (text.startsWith("[") && text.includes("](")) {
-          const linkMatch = text.match(/\[(.*?)\]\((.*?)\)/);
-          if (linkMatch) {
-            taskLinks.push({ name: linkMatch[1], url: linkMatch[2] });
-          }
+        const link = LineParser.parseMarkdownLink(text);
+        if (link) {
+          taskLinks.push(link);
         }
       }
     }
-    const limit = Math.min(doc.lines, 50);
-    for (let i3 = 1; i3 <= limit; i3++) {
+    for (let i3 = 1; i3 <= doc.lines; i3++) {
       const line = doc.line(i3);
       const text = line.text.trim();
-      if (text === "### \u5DE5\u4F5C\u4EFB\u52A1") {
+      if (LineParser.isTaskLine(text)) {
         break;
       }
-      const ganttMatch = text.match(/甘特图[：:]\s*(https?:\/\/\S+)/);
-      if (ganttMatch) {
-        projectLinks.push({ name: "\u7518\u7279\u56FE", url: ganttMatch[1] });
+      if (LineParser.isItemLine(text)) {
         continue;
       }
-      if (!text.includes("#\u4EFB\u52A1") && !LineParser.isItemLine(text) && text.startsWith("[") && text.includes("](")) {
-        const linkMatch = text.match(/\[(.*?)\]\((.*?)\)/);
-        if (linkMatch) {
-          projectLinks.push({ name: linkMatch[1], url: linkMatch[2] });
-        }
+      const link = LineParser.parseMarkdownLink(text);
+      if (link) {
+        projectLinks.push(link);
       }
     }
     return { taskName, level, projectLinks, taskLinks };

@@ -1,6 +1,8 @@
 import { Task, Item } from '../models/types';
 
 export class LineParser {
+  // Constants for parsing markers
+  public static readonly TASK_TAG = '#任务';
   /**
    * Parse a task line
    * Supports formats:
@@ -94,5 +96,32 @@ export class LineParser {
     const timeRangeRegex = /@(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})~(\d{2}:\d{2}:\d{2})/;
     const dateTimeRegex = /@(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2})?)/;
     return timeRangeRegex.test(line) || dateTimeRegex.test(line);
+  }
+
+  /**
+   * Check if a line is a task line (contains #任务)
+   */
+  public static isTaskLine(line: string): boolean {
+    return line.includes(this.TASK_TAG);
+  }
+
+  /**
+   * Check if a line is a markdown link line
+   */
+  public static isLinkLine(line: string): boolean {
+    return line.startsWith('[') && line.includes('](');
+  }
+
+  /**
+   * Parse a markdown link from a line
+   * Supports format: [name](url)
+   * @returns { name: string, url: string } | null
+   */
+  public static parseMarkdownLink(line: string): { name: string; url: string } | null {
+    const linkMatch = line.match(/\[(.*?)\]\((.*?)\)/);
+    if (linkMatch) {
+      return { name: linkMatch[1], url: linkMatch[2] };
+    }
+    return null;
   }
 }

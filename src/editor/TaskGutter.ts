@@ -61,7 +61,7 @@ class TaskButtonWidget extends WidgetType {
     const context = this.scanContext(view, this.lineNumber);
 
     // Check if current line is a task line (not an item line)
-    const isTaskLine = this.lineText.includes('#任务');
+    const isTaskLine = LineParser.isTaskLine(this.lineText);
 
     // Get plugin instance from global
     const plugin = (window as any).hkWorkPlugin;
@@ -96,7 +96,7 @@ class TaskButtonWidget extends WidgetType {
     // First check if current line is a task line
     const currentLine = doc.line(currentLineNumber);
     const currentText = currentLine.text;
-    if (currentText.includes('#任务')) {
+    if (LineParser.isTaskLine(currentText)) {
       const task = LineParser.parseTaskLine(currentText, currentLineNumber);
       console.log('[TaskGutter] Current line is task line:', currentText);
       console.log('[TaskGutter] Parsed task:', task);
@@ -105,13 +105,13 @@ class TaskButtonWidget extends WidgetType {
       taskLineNumber = currentLineNumber;
     } else {
       // Scan upwards for Task
-      // currentLineNumber is 1-based. 
+      // currentLineNumber is 1-based.
       // We start from the line before the current one.
       for (let i = currentLineNumber - 1; i >= 1; i--) {
         const line = doc.line(i);
         const text = line.text;
-        
-        if (text.includes('#任务')) {
+
+        if (LineParser.isTaskLine(text)) {
           const task = LineParser.parseTaskLine(text, i);
           console.log('[TaskGutter] Found task line:', text);
           console.log('[TaskGutter] Parsed task:', task);
@@ -131,7 +131,7 @@ class TaskButtonWidget extends WidgetType {
         const text = line.text.trim();
 
         // Stop scanning if we hit another task line
-        if (text.includes('#任务')) {
+        if (LineParser.isTaskLine(text)) {
           break;
         }
 
@@ -141,43 +141,33 @@ class TaskButtonWidget extends WidgetType {
         }
 
         // Parse markdown links [name](url)
-        if (text.startsWith('[') && text.includes('](')) {
-          const linkMatch = text.match(/\[(.*?)\]\((.*?)\)/);
-          if (linkMatch) {
-            taskLinks.push({ name: linkMatch[1], url: linkMatch[2] });
-          }
+        const link = LineParser.parseMarkdownLink(text);
+        if (link) {
+          taskLinks.push(link);
         }
       }
     }
 
-    // Scan file header for Project Links (first 50 lines)
-    // Supports: 
-    // - 甘特图：url
-    // - [name](url) (excluding task lines)
-    const limit = Math.min(doc.lines, 50);
-    for (let i = 1; i <= limit; i++) {
+    // Scan file header for Project Links (from start until first task line)
+    // Supports: [name](url)
+    for (let i = 1; i <= doc.lines; i++) {
       const line = doc.line(i);
       const text = line.text.trim();
-      
-      // Stop scanning if we hit "### 工作任务"
-      if (text === '### 工作任务') {
+
+      // Stop scanning if we hit a task line
+      if (LineParser.isTaskLine(text)) {
         break;
       }
 
-      // Check for Gantt link
-      const ganttMatch = text.match(/甘特图[：:]\s*(https?:\/\/\S+)/);
-      if (ganttMatch) {
-        projectLinks.push({ name: '甘特图', url: ganttMatch[1] });
+      // Skip item lines
+      if (LineParser.isItemLine(text)) {
         continue;
       }
 
-      // Check for Markdown links [name](url)
-      // Make sure it's not a task line or an item line
-      if (!text.includes('#任务') && !LineParser.isItemLine(text) && text.startsWith('[') && text.includes('](')) {
-        const linkMatch = text.match(/\[(.*?)\]\((.*?)\)/);
-        if (linkMatch) {
-          projectLinks.push({ name: linkMatch[1], url: linkMatch[2] });
-        }
+      // Parse markdown links [name](url)
+      const link = LineParser.parseMarkdownLink(text);
+      if (link) {
+        projectLinks.push(link);
       }
     }
 
