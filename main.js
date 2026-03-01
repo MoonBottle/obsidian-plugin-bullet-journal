@@ -51313,30 +51313,6 @@ var TodoSidebar = ({ onItemClick }) => {
       /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-header", children: [
         /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h3", { children: todoTexts.title }),
         /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
-          GroupSelect,
-          {
-            groups: availableGroups,
-            value: selectedGroup,
-            onChange: handleGroupChange
-          }
-        )
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-empty", children: todoTexts.noTodos })
-    ] });
-  }
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-sidebar", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-header", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h3", { children: todoTexts.title }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-header-actions", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
-          GroupSelect,
-          {
-            groups: availableGroups,
-            value: selectedGroup,
-            onChange: handleGroupChange
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
           "button",
           {
             ref: moreButtonRef,
@@ -51350,17 +51326,57 @@ var TodoSidebar = ({ onItemClick }) => {
             ] })
           }
         )
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-body", children: [
+        availableGroups.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-filter-card", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+          GroupSelect,
+          {
+            groups: availableGroups,
+            value: selectedGroup,
+            onChange: handleGroupChange
+          }
+        ) }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-empty", children: todoTexts.noTodos })
       ] })
+    ] });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-sidebar", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-header", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h3", { children: todoTexts.title }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+        "button",
+        {
+          ref: moreButtonRef,
+          className: "bullet-journal-todo-more-btn",
+          onClick: handleMoreClick,
+          title: "\u66F4\u591A",
+          children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("circle", { cx: "12", cy: "12", r: "1" }),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("circle", { cx: "19", cy: "12", r: "1" }),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("circle", { cx: "5", cy: "12", r: "1" })
+          ] })
+        }
+      )
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-content", children: [
-      renderSection(todoTexts.expired || "\u5DF2\u8FC7\u671F", expiredItems, "expired"),
-      renderSection(todoTexts.today || "\u4ECA\u5929", todayItems, "today"),
-      renderSection(todoTexts.tomorrow || "\u660E\u5929", tomorrowItems, "tomorrow"),
-      sortedDates.filter((d2) => d2 !== getTodayISO() && d2 !== getTomorrowDate()).map(
-        (date) => renderSection(formatDateLabel(date, todoTexts.today, todoTexts.tomorrow), groupedItems[date], date, true)
-      ),
-      !hideCompleted && renderSection(todoTexts.completed || "\u5DF2\u5B8C\u6210", completedItems, "completed", false),
-      !hideAbandoned && renderSection(todoTexts.abandoned || "\u5DF2\u653E\u5F03", abandonedItems, "abandoned", false)
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-body", children: [
+      availableGroups.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-filter-card", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+        GroupSelect,
+        {
+          groups: availableGroups,
+          value: selectedGroup,
+          onChange: handleGroupChange
+        }
+      ) }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-content", children: [
+        renderSection(todoTexts.expired || "\u5DF2\u8FC7\u671F", expiredItems, "expired"),
+        renderSection(todoTexts.today || "\u4ECA\u5929", todayItems, "today"),
+        renderSection(todoTexts.tomorrow || "\u660E\u5929", tomorrowItems, "tomorrow"),
+        sortedDates.filter((d2) => d2 !== getTodayISO() && d2 !== getTomorrowDate()).map(
+          (date) => renderSection(formatDateLabel(date, todoTexts.today, todoTexts.tomorrow), groupedItems[date], date, true)
+        ),
+        !hideCompleted && renderSection(todoTexts.completed || "\u5DF2\u5B8C\u6210", completedItems, "completed", false),
+        !hideAbandoned && renderSection(todoTexts.abandoned || "\u5DF2\u653E\u5F03", abandonedItems, "abandoned", false)
+      ] })
     ] })
   ] });
 };

@@ -542,27 +542,6 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
       <div className="bullet-journal-todo-sidebar">
         <div className="bullet-journal-todo-header">
           <h3>{todoTexts.title}</h3>
-          <GroupSelect
-            groups={availableGroups}
-            value={selectedGroup}
-            onChange={handleGroupChange}
-          />
-        </div>
-        <div className="bullet-journal-todo-empty">{todoTexts.noTodos}</div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bullet-journal-todo-sidebar">
-      <div className="bullet-journal-todo-header">
-        <h3>{todoTexts.title}</h3>
-        <div className="bullet-journal-todo-header-actions">
-          <GroupSelect
-            groups={availableGroups}
-            value={selectedGroup}
-            onChange={handleGroupChange}
-          />
           <button
             ref={moreButtonRef}
             className="bullet-journal-todo-more-btn"
@@ -576,21 +555,64 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
             </svg>
           </button>
         </div>
+        <div className="bullet-journal-todo-body">
+          {availableGroups.length > 0 && (
+            <div className="bullet-journal-todo-filter-card">
+              <GroupSelect
+                groups={availableGroups}
+                value={selectedGroup}
+                onChange={handleGroupChange}
+              />
+            </div>
+          )}
+          <div className="bullet-journal-todo-empty">{todoTexts.noTodos}</div>
+        </div>
       </div>
-      <div className="bullet-journal-todo-content">
-        {renderSection(todoTexts.expired || '已过期', expiredItems, 'expired')}
-        
-        {renderSection(todoTexts.today || '今天', todayItems, 'today')}
-        
-        {renderSection(todoTexts.tomorrow || '明天', tomorrowItems, 'tomorrow')}
-        
-        {sortedDates.filter(d => d !== getTodayISO() && d !== getTomorrowDate()).map(date => 
-          renderSection(formatDateLabel(date, todoTexts.today, todoTexts.tomorrow), groupedItems[date], date as any, true)
+    );
+  }
+
+  return (
+    <div className="bullet-journal-todo-sidebar">
+      <div className="bullet-journal-todo-header">
+        <h3>{todoTexts.title}</h3>
+        <button
+          ref={moreButtonRef}
+          className="bullet-journal-todo-more-btn"
+          onClick={handleMoreClick}
+          title="更多"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="1"/>
+            <circle cx="19" cy="12" r="1"/>
+            <circle cx="5" cy="12" r="1"/>
+          </svg>
+        </button>
+      </div>
+      <div className="bullet-journal-todo-body">
+        {availableGroups.length > 0 && (
+          <div className="bullet-journal-todo-filter-card">
+            <GroupSelect
+              groups={availableGroups}
+              value={selectedGroup}
+              onChange={handleGroupChange}
+            />
+          </div>
         )}
-        
-        {!hideCompleted && renderSection(todoTexts.completed || '已完成', completedItems, 'completed', false)}
-        
-        {!hideAbandoned && renderSection(todoTexts.abandoned || '已放弃', abandonedItems, 'abandoned', false)}
+        <div className="bullet-journal-todo-content">
+          {renderSection(todoTexts.expired || '已过期', expiredItems, 'expired')}
+          
+          {renderSection(todoTexts.today || '今天', todayItems, 'today')}
+          
+          {renderSection(todoTexts.tomorrow || '明天', tomorrowItems, 'tomorrow')}
+          
+          {sortedDates.filter(d => d !== getTodayISO() && d !== getTomorrowDate()).map(date => 
+            renderSection(formatDateLabel(date, todoTexts.today, todoTexts.tomorrow), groupedItems[date], date as any, true)
+          )}
+          
+          {!hideCompleted && renderSection(todoTexts.completed || '已完成', completedItems, 'completed', false)}
+          
+          {!hideAbandoned && renderSection(todoTexts.abandoned || '已放弃', abandonedItems, 'abandoned', false)}
+        </div>
       </div>
     </div>
   );
