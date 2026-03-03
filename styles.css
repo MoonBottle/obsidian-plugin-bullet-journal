@@ -712,7 +712,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top:2px;
+  margin-top:4px;
 }
 
 /* Tag Style Links - 与取消按钮样式一致 */
@@ -748,7 +748,7 @@
   padding: var(--tag-padding-y) var(--tag-padding-x);
   border-radius: var(--tag-radius);
   white-space: nowrap;
-  margin-right: 4px;
+  margin-right: 2px;
 }
 
 /* Time Row with Icons */

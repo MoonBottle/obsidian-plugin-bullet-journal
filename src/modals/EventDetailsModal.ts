@@ -114,37 +114,38 @@ export class EventDetailsModal extends Modal {
 
       const taskContent = taskCard.createEl('div', { cls: 'bullet-journal-modal-card-content' });
 
-      // 级别和任务名放在同一行
-      if (this.details.task || this.details.level) {
+      // 任务名单独一行
+      if (this.details.task) {
         const taskRow = taskContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
+        taskRow.createEl('span', { text: this.details.task, cls: 'bullet-journal-modal-card-value' });
+        createCopyButton(taskRow, this.details.task);
+      }
 
-        // 级别作为 tag 放在左侧
+      // 级别和任务链接放在同一行
+      if (this.details.level || (this.details.taskLinks && this.details.taskLinks.length > 0)) {
+        const linksRow = taskContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
+
+        // 级别放在左侧
         if (this.details.level) {
-          taskRow.createEl('span', {
+          linksRow.createEl('span', {
             text: this.details.level,
             cls: 'bullet-journal-modal-tag bullet-journal-modal-tag-level'
           });
         }
 
-        if (this.details.task) {
-          taskRow.createEl('span', { text: this.details.task, cls: 'bullet-journal-modal-card-value' });
-          createCopyButton(taskRow, this.details.task);
+        // 任务链接
+        if (this.details.taskLinks && this.details.taskLinks.length > 0) {
+          this.details.taskLinks.forEach(link => {
+            const tag = linksRow.createEl('a', {
+              text: link.name,
+              cls: 'bullet-journal-modal-tag'
+            });
+            tag.addEventListener('click', (e) => {
+              e.preventDefault();
+              window.open(link.url, '_blank');
+            });
+          });
         }
-      }
-
-      // 任务链接单独一行
-      if (this.details.taskLinks && this.details.taskLinks.length > 0) {
-        const linksRow = taskContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
-        this.details.taskLinks.forEach(link => {
-          const tag = linksRow.createEl('a', {
-            text: link.name,
-            cls: 'bullet-journal-modal-tag'
-          });
-          tag.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.open(link.url, '_blank');
-          });
-        });
       }
     }
 

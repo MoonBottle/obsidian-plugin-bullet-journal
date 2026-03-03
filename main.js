@@ -36775,31 +36775,31 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
       const taskCard = contentEl.createEl("div", { cls: "bullet-journal-modal-card" });
       taskCard.createEl("div", { text: "\u4EFB\u52A1", cls: "bullet-journal-modal-card-title" });
       const taskContent = taskCard.createEl("div", { cls: "bullet-journal-modal-card-content" });
-      if (this.details.task || this.details.level) {
+      if (this.details.task) {
         const taskRow = taskContent.createEl("div", { cls: "bullet-journal-modal-card-row" });
+        taskRow.createEl("span", { text: this.details.task, cls: "bullet-journal-modal-card-value" });
+        createCopyButton(taskRow, this.details.task);
+      }
+      if (this.details.level || this.details.taskLinks && this.details.taskLinks.length > 0) {
+        const linksRow = taskContent.createEl("div", { cls: "bullet-journal-modal-card-row" });
         if (this.details.level) {
-          taskRow.createEl("span", {
+          linksRow.createEl("span", {
             text: this.details.level,
             cls: "bullet-journal-modal-tag bullet-journal-modal-tag-level"
           });
         }
-        if (this.details.task) {
-          taskRow.createEl("span", { text: this.details.task, cls: "bullet-journal-modal-card-value" });
-          createCopyButton(taskRow, this.details.task);
+        if (this.details.taskLinks && this.details.taskLinks.length > 0) {
+          this.details.taskLinks.forEach((link) => {
+            const tag = linksRow.createEl("a", {
+              text: link.name,
+              cls: "bullet-journal-modal-tag"
+            });
+            tag.addEventListener("click", (e3) => {
+              e3.preventDefault();
+              window.open(link.url, "_blank");
+            });
+          });
         }
-      }
-      if (this.details.taskLinks && this.details.taskLinks.length > 0) {
-        const linksRow = taskContent.createEl("div", { cls: "bullet-journal-modal-card-row" });
-        this.details.taskLinks.forEach((link) => {
-          const tag = linksRow.createEl("a", {
-            text: link.name,
-            cls: "bullet-journal-modal-tag"
-          });
-          tag.addEventListener("click", (e3) => {
-            e3.preventDefault();
-            window.open(link.url, "_blank");
-          });
-        });
       }
     }
     const itemCard = contentEl.createEl("div", { cls: "bullet-journal-modal-card" });
