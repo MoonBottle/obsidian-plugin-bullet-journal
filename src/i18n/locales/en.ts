@@ -156,6 +156,13 @@ export const en: Translations = {
     setDirectory: 'Please set at least one project directory in plugin settings',
   },
 
+  // File menu
+  fileMenu: {
+    addAsProjectDirectory: 'Add as Project Directory',
+    alreadyExists: 'This directory already exists in configuration',
+    addSuccess: 'Added as project directory',
+  },
+
   // Context menu
   contextMenu: {
     complete: 'Complete',

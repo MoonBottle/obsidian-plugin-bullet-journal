@@ -22029,6 +22029,12 @@ var zhCN = {
   config: {
     setDirectory: "\u8BF7\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u81F3\u5C11\u4E00\u4E2A\u9879\u76EE\u76EE\u5F55"
   },
+  // 文件菜单
+  fileMenu: {
+    addAsProjectDirectory: "\u6DFB\u52A0\u4E3A\u9879\u76EE\u76EE\u5F55",
+    alreadyExists: "\u8BE5\u76EE\u5F55\u5DF2\u5B58\u5728\u4E8E\u914D\u7F6E\u4E2D",
+    addSuccess: "\u5DF2\u6DFB\u52A0\u4E3A\u9879\u76EE\u76EE\u5F55"
+  },
   // 右键菜单
   contextMenu: {
     complete: "\u5B8C\u6210",
@@ -22199,6 +22205,12 @@ var en = {
   config: {
     setDirectory: "Please set at least one project directory in plugin settings"
   },
+  // File menu
+  fileMenu: {
+    addAsProjectDirectory: "Add as Project Directory",
+    alreadyExists: "This directory already exists in configuration",
+    addSuccess: "Added as project directory"
+  },
   // Context menu
   contextMenu: {
     complete: "Complete",
@@ -22272,6 +22284,7 @@ var LineParser = class {
    * - @YYYY-MM-DD (single date, all-day event)
    * - @YYYY-MM-DD HH:mm:ss (single datetime)
    * - @YYYY-MM-DD HH:mm:ss~HH:mm:ss (time range format)
+   * - Supports markdown links: [name](url)
    */
   static parseItemLine(line, lineNumber) {
     const timeRangeRegex = /@(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})~(\d{2}:\d{2}:\d{2})/;
@@ -22296,14 +22309,22 @@ var LineParser = class {
         endDateTime = match;
       }
     }
+    const links = [];
+    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    let linkMatch;
+    while ((linkMatch = linkRegex.exec(line)) !== null) {
+      links.push({ name: linkMatch[1], url: linkMatch[2] });
+    }
     let content = line.replace(timeRangeRegex, "").replace(/@(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2})?)/, "").trim();
     content = content.replace(/#done|#已完成|#abandoned|#已放弃/g, "").trim();
+    content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, "").trim();
     return {
       content,
       date,
       startDateTime,
       endDateTime,
-      lineNumber
+      lineNumber,
+      links: links.length > 0 ? links : void 0
     };
   }
   /**
@@ -36469,6 +36490,7 @@ var DataConverter = class {
         projectLinks: item.project?.links,
         task: item.task?.name,
         taskLinks: item.task?.links,
+        itemLinks: item.links,
         level: item.task?.level,
         filePath: item.project?.filePath,
         lineNumber: item.lineNumber,
@@ -51693,6 +51715,37 @@ var BulletJournalPlugin = class extends import_obsidian13.Plugin {
     });
     this.registerFileWatcher();
     this.registerEditorExtension(taskGutterPlugin);
+    this.registerFileMenuHandler();
+  }
+  /**
+   * Register file menu handler for folder context menu
+   */
+  registerFileMenuHandler() {
+    this.registerEvent(
+      this.app.workspace.on("file-menu", (menu, file) => {
+        if (!(file instanceof import_obsidian13.TFolder)) {
+          return;
+        }
+        const folderPath = file.path;
+        const isAlreadyAdded = this.settings.projectDirectories.some(
+          (dir) => dir.path === folderPath
+        );
+        menu.addItem((item) => {
+          item.setTitle(t("fileMenu").addAsProjectDirectory).setIcon("folder-plus").onClick(async () => {
+            if (isAlreadyAdded) {
+              new import_obsidian13.Notice(t("fileMenu").alreadyExists);
+              return;
+            }
+            this.settings.projectDirectories.push({
+              path: folderPath,
+              enabled: true
+            });
+            await this.saveSettings();
+            new import_obsidian13.Notice(t("fileMenu").addSuccess);
+          });
+        });
+      })
+    );
   }
   onunload() {
     this.refreshCallbacks.clear();

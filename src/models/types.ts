@@ -33,6 +33,7 @@ export interface Item {
   project?: Project;
   lineNumber?: number;
   status?: ItemStatus;
+  links?: Array<{ name: string; url: string }>;
 }
 
 export interface CalendarEvent {
@@ -47,6 +48,7 @@ export interface CalendarEvent {
   projectLinks?: Array<{ name: string; url: string }>;
   task?: string;
   taskLinks?: Array<{ name: string; url: string }>;
+  itemLinks?: Array<{ name: string; url: string }>;
   level?: string;
   filePath?: string;
   lineNumber?: number;

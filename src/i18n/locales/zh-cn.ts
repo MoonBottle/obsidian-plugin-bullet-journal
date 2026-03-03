@@ -166,6 +166,13 @@ export const zhCN = {
     setDirectory: '请在插件设置中配置至少一个项目目录',
   },
 
+  // 文件菜单
+  fileMenu: {
+    addAsProjectDirectory: '添加为项目目录',
+    alreadyExists: '该目录已存在于配置中',
+    addSuccess: '已添加为项目目录',
+  },
+
   // 右键菜单
   contextMenu: {
     complete: '完成',

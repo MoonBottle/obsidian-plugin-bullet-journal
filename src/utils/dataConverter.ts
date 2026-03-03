@@ -37,6 +37,7 @@ export class DataConverter {
         projectLinks: item.project?.links,
         task: item.task?.name,
         taskLinks: item.task?.links,
+        itemLinks: item.links,
         level: item.task?.level,
         filePath: item.project?.filePath,
         lineNumber: item.lineNumber,

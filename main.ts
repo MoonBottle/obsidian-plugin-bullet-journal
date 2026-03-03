@@ -1,4 +1,4 @@
-import { App, Plugin, PluginManifest, PluginSettingTab, Setting, WorkspaceLeaf, TFile, debounce } from 'obsidian';
+import { App, Plugin, PluginManifest, PluginSettingTab, Setting, WorkspaceLeaf, TFile, TFolder, debounce, Notice } from 'obsidian';
 import { ProjectView, PROJECT_VIEW_TYPE } from './src/views/ProjectView.tsx';
 import { CalendarView, CALENDAR_VIEW_TYPE } from './src/views/CalendarView.tsx';
 import { GanttView, GANTT_VIEW_TYPE } from './src/views/GanttView.tsx';
@@ -133,6 +133,54 @@ export default class BulletJournalPlugin extends Plugin {
 
     // Register editor extension
     this.registerEditorExtension(taskGutterPlugin);
+
+    // Register file menu for folder context menu
+    this.registerFileMenuHandler();
+  }
+
+  /**
+   * Register file menu handler for folder context menu
+   */
+  private registerFileMenuHandler(): void {
+    this.registerEvent(
+      this.app.workspace.on('file-menu', (menu, file) => {
+        // Only show for folders
+        if (!(file instanceof TFolder)) {
+          return;
+        }
+
+        const folderPath = file.path;
+
+        // Check if folder is already in project directories
+        const isAlreadyAdded = this.settings.projectDirectories.some(
+          dir => dir.path === folderPath
+        );
+
+        menu.addItem((item) => {
+          item
+            .setTitle(t('fileMenu').addAsProjectDirectory)
+            .setIcon('folder-plus')
+            .onClick(async () => {
+              if (isAlreadyAdded) {
+                // Show notification that directory already exists
+                new Notice(t('fileMenu').alreadyExists);
+                return;
+              }
+
+              // Add new directory
+              this.settings.projectDirectories.push({
+                path: folderPath,
+                enabled: true,
+              });
+
+              await this.saveSettings();
+
+              // Show success notification
+              new Notice(t('fileMenu').addSuccess);
+            });
+        });
+      })
+    );
   }
 
   onunload() {
