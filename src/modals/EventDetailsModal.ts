@@ -122,7 +122,7 @@ export class EventDetailsModal extends Modal {
         if (this.details.level) {
           taskRow.createEl('span', {
             text: this.details.level,
-            cls: 'bullet-journal-modal-tag'
+            cls: 'bullet-journal-modal-tag bullet-journal-modal-tag-level'
           });
         }
 
