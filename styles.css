@@ -772,11 +772,9 @@
 /* Description Row */
 .bullet-journal-modal-desc-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--background-modifier-border);
 }
 
 /* Buttons */
