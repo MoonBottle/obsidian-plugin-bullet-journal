@@ -734,6 +734,8 @@
 .bullet-journal-modal-tag:hover {
   background-color: var(--background-modifier-hover);
   border-color: var(--interactive-accent);
+  text-decoration: none;
+  color: var(--text-normal);
 }
 
 /* Time Row with Icons */
