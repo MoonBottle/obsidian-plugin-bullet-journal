@@ -36761,23 +36761,24 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
         taskRow.createEl("span", { text: this.details.task, cls: "bullet-journal-modal-card-value" });
         createCopyButton(taskRow, this.details.task);
       }
-      if (this.details.level) {
-        const levelRow = taskContent.createEl("div", { cls: "bullet-journal-modal-card-row" });
-        levelRow.createEl("span", { text: "\u7EA7\u522B:", cls: "bullet-journal-modal-card-label" });
-        levelRow.createEl("span", { text: this.details.level, cls: "bullet-journal-modal-card-value" });
-      }
-      if (this.details.taskLinks && this.details.taskLinks.length > 0) {
-        const linksContainer = taskContent.createEl("div", { cls: "bullet-journal-modal-tags" });
-        this.details.taskLinks.forEach((link) => {
-          const tag = linksContainer.createEl("a", {
-            text: link.name,
-            cls: "bullet-journal-modal-tag bullet-journal-modal-tag-secondary"
+      if (this.details.level || this.details.taskLinks && this.details.taskLinks.length > 0) {
+        const levelLinksRow = taskContent.createEl("div", { cls: "bullet-journal-modal-card-row" });
+        if (this.details.level) {
+          levelLinksRow.createEl("span", { text: "\u7EA7\u522B:", cls: "bullet-journal-modal-card-label" });
+          levelLinksRow.createEl("span", { text: this.details.level, cls: "bullet-journal-modal-card-value" });
+        }
+        if (this.details.taskLinks && this.details.taskLinks.length > 0) {
+          this.details.taskLinks.forEach((link) => {
+            const tag = levelLinksRow.createEl("a", {
+              text: link.name,
+              cls: "bullet-journal-modal-tag"
+            });
+            tag.addEventListener("click", (e3) => {
+              e3.preventDefault();
+              window.open(link.url, "_blank");
+            });
           });
-          tag.addEventListener("click", (e3) => {
-            e3.preventDefault();
-            window.open(link.url, "_blank");
-          });
-        });
+        }
       }
     }
     const itemCard = contentEl.createEl("div", { cls: "bullet-journal-modal-card" });

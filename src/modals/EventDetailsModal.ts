@@ -119,24 +119,27 @@ export class EventDetailsModal extends Modal {
         createCopyButton(taskRow, this.details.task);
       }
       
-      if (this.details.level) {
-        const levelRow = taskContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
-        levelRow.createEl('span', { text: '级别:', cls: 'bullet-journal-modal-card-label' });
-        levelRow.createEl('span', { text: this.details.level, cls: 'bullet-journal-modal-card-value' });
-      }
-      
-      if (this.details.taskLinks && this.details.taskLinks.length > 0) {
-        const linksContainer = taskContent.createEl('div', { cls: 'bullet-journal-modal-tags' });
-        this.details.taskLinks.forEach(link => {
-          const tag = linksContainer.createEl('a', {
-            text: link.name,
-            cls: 'bullet-journal-modal-tag bullet-journal-modal-tag-secondary'
+      // 级别和任务链接放在同一行
+      if (this.details.level || (this.details.taskLinks && this.details.taskLinks.length > 0)) {
+        const levelLinksRow = taskContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
+
+        if (this.details.level) {
+          levelLinksRow.createEl('span', { text: '级别:', cls: 'bullet-journal-modal-card-label' });
+          levelLinksRow.createEl('span', { text: this.details.level, cls: 'bullet-journal-modal-card-value' });
+        }
+
+        if (this.details.taskLinks && this.details.taskLinks.length > 0) {
+          this.details.taskLinks.forEach(link => {
+            const tag = levelLinksRow.createEl('a', {
+              text: link.name,
+              cls: 'bullet-journal-modal-tag'
+            });
+            tag.addEventListener('click', (e) => {
+              e.preventDefault();
+              window.open(link.url, '_blank');
+            });
           });
-          tag.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.open(link.url, '_blank');
-          });
-        });
+        }
       }
     }
 

@@ -715,15 +715,15 @@
   margin-top: 4px;
 }
 
-/* Tag Style Links */
+/* Tag Style Links - 与取消按钮样式一致 */
 .bullet-journal-modal-tag {
   display: inline-flex;
   align-items: center;
   padding: 4px 12px;
-  background-color: rgba(var(--interactive-accent-rgb), 0.1);
-  color: var(--interactive-accent);
-  border: 1px solid rgba(var(--interactive-accent-rgb), 0.3);
-  border-radius: 4px;
+  background-color: transparent;
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
   text-decoration: none;
@@ -732,21 +732,8 @@
 }
 
 .bullet-journal-modal-tag:hover {
-  background-color: var(--interactive-accent);
-  color: white;
-  border-color: var(--interactive-accent);
-}
-
-.bullet-journal-modal-tag-secondary {
-  background-color: var(--background-primary);
-  color: var(--text-normal);
-  border-color: var(--background-modifier-border);
-}
-
-.bullet-journal-modal-tag-secondary:hover {
   background-color: var(--background-modifier-hover);
   border-color: var(--interactive-accent);
-  color: var(--interactive-accent);
 }
 
 /* Time Row with Icons */
