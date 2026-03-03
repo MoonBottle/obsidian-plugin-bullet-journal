@@ -106,6 +106,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
       taskLinks: info.event.extendedProps.taskLinks,
       level: info.event.extendedProps.level,
       item: info.event.extendedProps.item,
+      itemLinks: info.event.extendedProps.itemLinks,
       hasItems: info.event.extendedProps.hasItems,
       filePath: info.event.extendedProps.filePath,
       lineNumber: info.event.extendedProps.lineNumber
@@ -364,6 +365,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
           taskLinks: extendedProps.taskLinks,
           level: extendedProps.level,
           item: extendedProps.item,
+          itemLinks: extendedProps.itemLinks,
           hasItems: extendedProps.hasItems,
           filePath: extendedProps.filePath,
           lineNumber: extendedProps.lineNumber
