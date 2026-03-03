@@ -234,8 +234,9 @@ export const GanttViewComponent = () => {
         .filter(d => d.enabled && d.path)
         .map(d => ({ path: d.path, groupId: d.groupId }));
 
-      const parser = new MarkdownParser(enabledDirs, dirConfigs);
-      const projects = parser.parseAllProjects();
+      const vault = app?.vault;
+      const parser = new MarkdownParser(enabledDirs, dirConfigs, vault);
+      const projects = await parser.parseAllProjects();
       setProjectsData(projects);
     } catch (error) {
       console.error('Error loading data:', error);

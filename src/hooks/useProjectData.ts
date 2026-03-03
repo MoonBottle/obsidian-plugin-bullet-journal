@@ -80,9 +80,9 @@ export const useProjectData = (options: UseProjectDataOptions = {}): UseProjectD
         .filter(d => d.enabled && d.path)
         .map(d => ({ path: d.path, groupId: d.groupId }));
 
-      const vaultRoot = app ? (app.vault as any).adapter?.basePath : undefined;
-      const parser = new MarkdownParser(enabledDirs, dirConfigs, vaultRoot);
-      const loadedProjects = parser.parseAllProjects();
+      const vault = app?.vault;
+      const parser = new MarkdownParser(enabledDirs, dirConfigs, vault);
+      const loadedProjects = await parser.parseAllProjects();
       setProjects(loadedProjects);
     } catch (error) {
       console.error('Error loading projects:', error);

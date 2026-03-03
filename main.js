@@ -1555,10 +1555,10 @@ var require_react_dom_client_development = __commonJS({
           fiber = fiber.next, id--;
         return fiber;
       }
-      function copyWithSetImpl(obj, path2, index5, value) {
-        if (index5 >= path2.length) return value;
-        var key = path2[index5], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        updated[key] = copyWithSetImpl(obj[key], path2, index5 + 1, value);
+      function copyWithSetImpl(obj, path, index5, value) {
+        if (index5 >= path.length) return value;
+        var key = path[index5], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        updated[key] = copyWithSetImpl(obj[key], path, index5 + 1, value);
         return updated;
       }
       function copyWithRename(obj, oldPath, newPath) {
@@ -1585,11 +1585,11 @@ var require_react_dom_client_development = __commonJS({
         );
         return updated;
       }
-      function copyWithDeleteImpl(obj, path2, index5) {
-        var key = path2[index5], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        if (index5 + 1 === path2.length)
+      function copyWithDeleteImpl(obj, path, index5) {
+        var key = path[index5], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        if (index5 + 1 === path.length)
           return isArrayImpl(updated) ? updated.splice(key, 1) : delete updated[key], updated;
-        updated[key] = copyWithDeleteImpl(obj[key], path2, index5 + 1);
+        updated[key] = copyWithDeleteImpl(obj[key], path, index5 + 1);
         return updated;
       }
       function shouldSuspendImpl() {
@@ -21224,29 +21224,29 @@ var require_react_dom_client_development = __commonJS({
       }, badgeFormat = "%c%s%c", badgeStyle = "background: #e6e6e6;background: light-dark(rgba(0,0,0,0.1), rgba(255,255,255,0.25));color: #000000;color: light-dark(#000000, #ffffff);border-radius: 2px", resetStyle = "", pad = " ", bind = Function.prototype.bind;
       var didWarnAboutNestedUpdates = false;
       var overrideHookState = null, overrideHookStateDeletePath = null, overrideHookStateRenamePath = null, overrideProps = null, overridePropsDeletePath = null, overridePropsRenamePath = null, scheduleUpdate = null, scheduleRetry = null, setErrorHandler = null, setSuspenseHandler = null;
-      overrideHookState = function(fiber, id, path2, value) {
+      overrideHookState = function(fiber, id, path, value) {
         id = findHook(fiber, id);
-        null !== id && (path2 = copyWithSetImpl(id.memoizedState, path2, 0, value), id.memoizedState = path2, id.baseState = path2, fiber.memoizedProps = assign({}, fiber.memoizedProps), path2 = enqueueConcurrentRenderForLane(fiber, 2), null !== path2 && scheduleUpdateOnFiber(path2, fiber, 2));
+        null !== id && (path = copyWithSetImpl(id.memoizedState, path, 0, value), id.memoizedState = path, id.baseState = path, fiber.memoizedProps = assign({}, fiber.memoizedProps), path = enqueueConcurrentRenderForLane(fiber, 2), null !== path && scheduleUpdateOnFiber(path, fiber, 2));
       };
-      overrideHookStateDeletePath = function(fiber, id, path2) {
+      overrideHookStateDeletePath = function(fiber, id, path) {
         id = findHook(fiber, id);
-        null !== id && (path2 = copyWithDeleteImpl(id.memoizedState, path2, 0), id.memoizedState = path2, id.baseState = path2, fiber.memoizedProps = assign({}, fiber.memoizedProps), path2 = enqueueConcurrentRenderForLane(fiber, 2), null !== path2 && scheduleUpdateOnFiber(path2, fiber, 2));
+        null !== id && (path = copyWithDeleteImpl(id.memoizedState, path, 0), id.memoizedState = path, id.baseState = path, fiber.memoizedProps = assign({}, fiber.memoizedProps), path = enqueueConcurrentRenderForLane(fiber, 2), null !== path && scheduleUpdateOnFiber(path, fiber, 2));
       };
       overrideHookStateRenamePath = function(fiber, id, oldPath, newPath) {
         id = findHook(fiber, id);
         null !== id && (oldPath = copyWithRename(id.memoizedState, oldPath, newPath), id.memoizedState = oldPath, id.baseState = oldPath, fiber.memoizedProps = assign({}, fiber.memoizedProps), oldPath = enqueueConcurrentRenderForLane(fiber, 2), null !== oldPath && scheduleUpdateOnFiber(oldPath, fiber, 2));
       };
-      overrideProps = function(fiber, path2, value) {
-        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path2, 0, value);
+      overrideProps = function(fiber, path, value) {
+        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path, 0, value);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path2 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path2 && scheduleUpdateOnFiber(path2, fiber, 2);
+        path = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path && scheduleUpdateOnFiber(path, fiber, 2);
       };
-      overridePropsDeletePath = function(fiber, path2) {
-        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path2, 0);
+      overridePropsDeletePath = function(fiber, path) {
+        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path, 0);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path2 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path2 && scheduleUpdateOnFiber(path2, fiber, 2);
+        path = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path && scheduleUpdateOnFiber(path, fiber, 2);
       };
       overridePropsRenamePath = function(fiber, oldPath, newPath) {
         fiber.pendingProps = copyWithRename(
@@ -21735,12 +21735,12 @@ __export(fileUtils_exports, {
   updateItemDate: () => updateItemDate,
   updateItemStatus: () => updateItemStatus
 });
-async function openFileAtLine(app, filePath, lineNumber) {
-  const file = app.vault.getAbstractFileByPath(filePath);
+async function openFileAtLine(app2, filePath, lineNumber) {
+  const file = app2.vault.getAbstractFileByPath(filePath);
   if (!(file instanceof import_obsidian3.TFile)) {
     return false;
   }
-  const leaves = app.workspace.getLeavesOfType("markdown");
+  const leaves = app2.workspace.getLeavesOfType("markdown");
   let targetLeaf = leaves.find((leaf) => {
     const viewState = leaf.getViewState();
     return viewState.state?.file === file.path;
@@ -21751,20 +21751,20 @@ async function openFileAtLine(app, filePath, lineNumber) {
       eState: lineNumber ? { line: lineNumber - 1 } : void 0
     });
   } else {
-    await app.workspace.openLinkText(file.path, "", false, {
+    await app2.workspace.openLinkText(file.path, "", false, {
       eState: lineNumber ? { line: lineNumber - 1 } : void 0
     });
   }
   return true;
 }
-async function updateItemDate(app, filePath, lineNumber, newDate, newTime) {
+async function updateItemDate(app2, filePath, lineNumber, newDate, newTime) {
   try {
-    const file = app.vault.getAbstractFileByPath(filePath);
+    const file = app2.vault.getAbstractFileByPath(filePath);
     if (!(file instanceof import_obsidian3.TFile)) {
       console.error("[Bullet Journal] File not found:", filePath);
       return false;
     }
-    const content = await app.vault.read(file);
+    const content = await app2.vault.read(file);
     const lines = content.split("\n");
     if (lineNumber < 1 || lineNumber > lines.length) {
       console.error("[Bullet Journal] Line number out of range:", lineNumber);
@@ -21797,21 +21797,21 @@ async function updateItemDate(app, filePath, lineNumber, newDate, newTime) {
       newLine = currentLine.replace(/@(\d{4}-\d{2}-\d{2})?/, `@${newDate}${newTime ? " " + newTime : ""}`);
     }
     lines[lineNumber - 1] = newLine;
-    await app.vault.modify(file, lines.join("\n"));
+    await app2.vault.modify(file, lines.join("\n"));
     return true;
   } catch (error) {
     console.error("[Bullet Journal] Failed to update item date:", error);
     return false;
   }
 }
-async function updateItemStatus(app, filePath, lineNumber, status) {
+async function updateItemStatus(app2, filePath, lineNumber, status) {
   try {
-    const file = app.vault.getAbstractFileByPath(filePath);
+    const file = app2.vault.getAbstractFileByPath(filePath);
     if (!(file instanceof import_obsidian3.TFile)) {
       console.error("[Bullet Journal] File not found:", filePath);
       return false;
     }
-    const content = await app.vault.read(file);
+    const content = await app2.vault.read(file);
     const lines = content.split("\n");
     if (lineNumber < 1 || lineNumber > lines.length) {
       console.error("[Bullet Journal] Line number out of range:", lineNumber);
@@ -21830,7 +21830,7 @@ async function updateItemStatus(app, filePath, lineNumber, status) {
       currentLine = currentLine.trim() + " " + statusTag;
     }
     lines[lineNumber - 1] = currentLine;
-    await app.vault.modify(file, lines.join("\n"));
+    await app2.vault.modify(file, lines.join("\n"));
     return true;
   } catch (error) {
     console.error("[Bullet Journal] Failed to update item status:", error);
@@ -21889,8 +21889,8 @@ var zhCN = {
     },
     projectDirectories: {
       title: "\u9879\u76EE\u76EE\u5F55",
-      description: "\u914D\u7F6E\u8981\u626B\u63CF\u7684\u9879\u76EE\u76EE\u5F55",
-      emptyMessage: "\u6682\u65E0\u914D\u7F6E\u7684\u76EE\u5F55\uFF0C\u70B9\u51FB\u4E0B\u65B9\u6309\u94AE\u6DFB\u52A0",
+      description: '\u5728\u6587\u4EF6\u6811\u4E2D\u53F3\u952E\u70B9\u51FB\u6587\u4EF6\u5939\uFF0C\u9009\u62E9"\u6DFB\u52A0\u4E3A\u9879\u76EE\u76EE\u5F55"\u6765\u914D\u7F6E',
+      emptyMessage: "\u6682\u65E0\u914D\u7F6E\u7684\u76EE\u5F55\uFF0C\u8BF7\u5728\u6587\u4EF6\u6811\u4E2D\u53F3\u952E\u70B9\u51FB\u6587\u4EF6\u5939\u6DFB\u52A0",
       addButton: "\u6DFB\u52A0\u76EE\u5F55",
       selectButton: "\u9009\u62E9",
       deleteButton: "\u5220\u9664",
@@ -22077,8 +22077,8 @@ var en = {
     },
     projectDirectories: {
       title: "Project Directories",
-      description: "Configure directories to scan for projects",
-      emptyMessage: "No directories configured, click the button below to add",
+      description: 'Right-click a folder in the file tree and select "Add as Project Directory" to configure',
+      emptyMessage: "No directories configured. Right-click a folder in the file tree to add",
       addButton: "Add Directory",
       selectButton: "Select",
       deleteButton: "Delete",
@@ -22353,8 +22353,6 @@ var LineParser = class {
 };
 
 // src/parser/markdownParser.ts
-var fs = __toESM(require("fs"));
-var path = __toESM(require("path"));
 function generateItemId() {
   return Math.random().toString(36).substring(2, 11);
 }
@@ -22370,11 +22368,11 @@ function detectItemStatus(line) {
 var MarkdownParser = class {
   projectDirectories;
   directoryConfigs;
-  vaultRoot;
-  constructor(projectDirectories, directoryConfigs, vaultRoot) {
-    this.projectDirectories = projectDirectories;
+  vault;
+  constructor(projectDirectories, directoryConfigs, vault) {
+    this.projectDirectories = projectDirectories.map((p3) => p3.replace(/\\/g, "/"));
     this.directoryConfigs = /* @__PURE__ */ new Map();
-    this.vaultRoot = vaultRoot ? vaultRoot.replace(/\\/g, "/") : null;
+    this.vault = vault || null;
     if (directoryConfigs) {
       directoryConfigs.forEach((config2) => {
         this.directoryConfigs.set(config2.path.replace(/\\/g, "/"), config2);
@@ -22384,12 +22382,12 @@ var MarkdownParser = class {
   /**
    * Parse all project files in all project directories
    */
-  parseAllProjects() {
+  async parseAllProjects() {
     const projects = [];
-    const projectFiles = this.findProjectFiles();
-    for (const { filePath, dataDir, groupId } of projectFiles) {
+    const projectFiles = await this.findProjectFiles();
+    for (const { filePath, dataDir, groupId, file } of projectFiles) {
       try {
-        const project = this.parseProjectFile(filePath, dataDir, groupId);
+        const project = await this.parseProjectFile(filePath, dataDir, groupId, file);
         if (project) {
           projects.push(project);
         }
@@ -22401,24 +22399,28 @@ var MarkdownParser = class {
   }
   /**
    * Find all project Markdown files in all project directories
-   * Note: projectDirectories already point to the '项目' folder
+   * Note: projectDirectories are relative paths from vault root
    */
-  findProjectFiles() {
+  async findProjectFiles() {
     const projectFiles = [];
+    if (!this.vault) {
+      console.error("[BulletJournal] Vault not available");
+      return projectFiles;
+    }
+    const allFiles = this.vault.getMarkdownFiles();
     for (const dataDirectory of this.projectDirectories) {
-      if (!fs.existsSync(dataDirectory)) {
-        continue;
-      }
       const normalizedDataDir = dataDirectory.replace(/\\/g, "/");
       const dirConfig = this.directoryConfigs.get(normalizedDataDir);
       const groupId = dirConfig?.groupId;
-      const files = fs.readdirSync(dataDirectory);
-      for (const file of files) {
-        if (file.endsWith(".md")) {
+      for (const file of allFiles) {
+        const normalizedFilePath = file.path.replace(/\\/g, "/");
+        const fileDir = normalizedFilePath.substring(0, normalizedFilePath.lastIndexOf("/"));
+        if (fileDir === normalizedDataDir || fileDir.startsWith(normalizedDataDir + "/")) {
           projectFiles.push({
-            filePath: path.join(dataDirectory, file),
+            filePath: file.path,
             dataDir: dataDirectory,
-            groupId
+            groupId,
+            file
           });
         }
       }
@@ -22428,10 +22430,21 @@ var MarkdownParser = class {
   /**
    * Parse a single project file
    */
-  parseProjectFile(filePath, dataDirectory, groupId) {
-    const content = fs.readFileSync(filePath, "utf-8");
+  async parseProjectFile(filePath, dataDirectory, groupId, file) {
+    let content;
+    if (file && this.vault) {
+      content = await this.vault.read(file);
+    } else {
+      try {
+        const fs = require("fs");
+        content = fs.readFileSync(filePath, "utf-8");
+      } catch (e3) {
+        console.error(`[BulletJournal] Failed to read file: ${filePath}`);
+        return null;
+      }
+    }
     const lines = content.split("\n");
-    const relativePath = this.toRelativePath(filePath, dataDirectory);
+    const relativePath = filePath.replace(/\\/g, "/");
     const directoryPath = relativePath.substring(0, relativePath.lastIndexOf("/"));
     let project = {
       name: "",
@@ -22515,28 +22528,10 @@ var MarkdownParser = class {
     return project.name ? project : null;
   }
   /**
-   * Convert absolute file path to relative path from vault root
-   */
-  toRelativePath(absolutePath, dataDirectory) {
-    const normalizedPath = absolutePath.replace(/\\/g, "/");
-    const normalizedDataDir = dataDirectory.replace(/\\/g, "/");
-    if (this.vaultRoot && normalizedPath.startsWith(this.vaultRoot)) {
-      return normalizedPath.substring(this.vaultRoot.length).replace(/^\//, "");
-    }
-    if (this.vaultRoot && normalizedDataDir.startsWith(this.vaultRoot)) {
-      const relativeDataDir = normalizedDataDir.substring(this.vaultRoot.length).replace(/^\//, "");
-      const fileName2 = normalizedPath.split("/").pop() || "";
-      return relativeDataDir + "/" + fileName2;
-    }
-    const fileName = normalizedPath.split("/").pop() || "";
-    const dataDirName = normalizedDataDir.split("/").pop() || "";
-    return dataDirName + "/" + fileName;
-  }
-  /**
    * Get all items from all projects
    */
-  getAllItems() {
-    const projects = this.parseAllProjects();
+  async getAllItems() {
+    const projects = await this.parseAllProjects();
     const items = [];
     for (const project of projects) {
       for (const task of project.tasks) {
@@ -22552,20 +22547,20 @@ var MarkdownParser = class {
   /**
    * Get items by date range
    */
-  getItemsByDateRange(startDate, endDate) {
-    const allItems = this.getAllItems();
+  async getItemsByDateRange(startDate, endDate) {
+    const allItems = await this.getAllItems();
     return allItems.filter((item) => {
       return item.date >= startDate && item.date <= endDate;
     });
   }
-  getPendingItems() {
-    return this.getAllItems().filter((item) => item.status === "pending");
+  async getPendingItems() {
+    return (await this.getAllItems()).filter((item) => item.status === "pending");
   }
-  getCompletedItems() {
-    return this.getAllItems().filter((item) => item.status === "completed");
+  async getCompletedItems() {
+    return (await this.getAllItems()).filter((item) => item.status === "completed");
   }
-  getAbandonedItems() {
-    return this.getAllItems().filter((item) => item.status === "abandoned");
+  async getAbandonedItems() {
+    return (await this.getAllItems()).filter((item) => item.status === "abandoned");
   }
 };
 
@@ -22637,7 +22632,7 @@ var useApp = () => {
 var useProjectData = (options = {}) => {
   const { loadOnMount = true } = options;
   const pluginContext = usePlugin();
-  const app = useApp();
+  const app2 = useApp();
   const plugin = pluginContext?.plugin;
   const refreshKey = pluginContext?.refreshKey ?? 0;
   const refresh = pluginContext?.refresh;
@@ -22661,9 +22656,9 @@ var useProjectData = (options = {}) => {
         return;
       }
       const dirConfigs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => ({ path: d2.path, groupId: d2.groupId }));
-      const vaultRoot = app ? app.vault.adapter?.basePath : void 0;
-      const parser = new MarkdownParser(enabledDirs, dirConfigs, vaultRoot);
-      const loadedProjects = parser.parseAllProjects();
+      const vault = app2?.vault;
+      const parser = new MarkdownParser(enabledDirs, dirConfigs, vault);
+      const loadedProjects = await parser.parseAllProjects();
       setProjects(loadedProjects);
     } catch (error) {
       console.error("Error loading projects:", error);
@@ -22671,7 +22666,7 @@ var useProjectData = (options = {}) => {
     } finally {
       setIsLoading(false);
     }
-  }, [plugin, app]);
+  }, [plugin, app2]);
   (0, import_react3.useEffect)(() => {
     if (!loadOnMount) return;
     let isMounted = true;
@@ -36743,8 +36738,8 @@ var createCopyButton = (container, value) => {
   return copyBtn;
 };
 var EventDetailsModal = class extends import_obsidian4.Modal {
-  constructor(app, details, plugin) {
-    super(app);
+  constructor(app2, details, plugin) {
+    super(app2);
     this.details = details;
     this.plugin = plugin;
   }
@@ -36954,8 +36949,8 @@ var DatePickerModal = class extends import_obsidian5.Modal {
   onConfirm;
   title;
   contentEl_div;
-  constructor(app, title, initialDate, onConfirm) {
-    super(app);
+  constructor(app2, title, initialDate, onConfirm) {
+    super(app2);
     this.title = title;
     this.selectedDate = initialDate;
     this.onConfirm = onConfirm;
@@ -37220,8 +37215,8 @@ var import_jsx_runtime7 = __toESM(require_jsx_runtime());
 var LIST_VIEW_TYPES = /* @__PURE__ */ new Set(["listWeek", "listDay", "listMonth", "listYear"]);
 var isListView = (viewType) => LIST_VIEW_TYPES.has(viewType);
 var DateDetailsModal = class extends import_obsidian7.Modal {
-  constructor(app, dateStr, dateItems) {
-    super(app);
+  constructor(app2, dateStr, dateItems) {
+    super(app2);
     this.dateStr = dateStr;
     this.dateItems = dateItems;
   }
@@ -37260,7 +37255,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
   const selectedGroup = pluginContext?.selectedGroup ?? "";
   const setSelectedGroup = pluginContext?.setSelectedGroup;
   const availableGroups = pluginContext?.availableGroups ?? [];
-  const app = useApp();
+  const app2 = useApp();
   const calendarRef = (0, import_react9.useRef)(null);
   const calendarInstanceRef = (0, import_react9.useRef)(null);
   const parserRef = (0, import_react9.useRef)(null);
@@ -37276,7 +37271,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
     getCalendarInstance: () => calendarInstanceRef.current
   }));
   const handleEventClick = (0, import_react9.useCallback)((info) => {
-    if (!app || !plugin) return;
+    if (!app2 || !plugin) return;
     const details = {
       title: info.event.title,
       start: info.event.startStr,
@@ -37293,10 +37288,10 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       filePath: info.event.extendedProps.filePath,
       lineNumber: info.event.extendedProps.lineNumber
     };
-    new EventDetailsModal(app, details, plugin).open();
-  }, [app, plugin]);
+    new EventDetailsModal(app2, details, plugin).open();
+  }, [app2, plugin]);
   const handleDateClick = (0, import_react9.useCallback)((info) => {
-    if (!app || !parserRef.current) return;
+    if (!app2 || !parserRef.current) return;
     const items = parserRef.current.getAllItems();
     const dateItems = items.filter((item) => {
       if (item.date === info.dateStr) return true;
@@ -37311,8 +37306,8 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       if (b3.startDateTime) return 1;
       return 0;
     });
-    new DateDetailsModal(app, info.dateStr, dateItems).open();
-  }, [app]);
+    new DateDetailsModal(app2, info.dateStr, dateItems).open();
+  }, [app2]);
   const handleEventContent = (0, import_react9.useCallback)((info) => {
     const task = info.event.extendedProps.task;
     const viewType = info.view.type;
@@ -37361,7 +37356,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
     return snapped;
   }, []);
   const updateEventTimeInMarkdown = (0, import_react9.useCallback)(async (info) => {
-    if (!plugin || !app) {
+    if (!plugin || !app2) {
       console.log("[BulletJournal] Plugin or app is null");
       return;
     }
@@ -37381,7 +37376,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       eventEnd = snapTo15Minutes(eventEnd);
     }
     try {
-      const file = app.vault.getAbstractFileByPath(filePath);
+      const file = app2.vault.getAbstractFileByPath(filePath);
       if (!file) {
         new Notice(t("calendar").fileNotFound);
         return;
@@ -37397,7 +37392,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
         const endTime = endDateTime.split(" ")[1];
         newTimeStr = `@${date} ${startTime}~${endTime}`;
       }
-      await app.vault.process(file, (content) => {
+      await app2.vault.process(file, (content) => {
         const lines = content.split("\n");
         if (lineNumber <= 0 || lineNumber > lines.length) {
           new Notice(t("calendar").lineOutOfRange);
@@ -37425,7 +37420,7 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       console.error("[BulletJournal] Error updating event time:", error);
       new Notice(t("calendar").updateTimeFailed);
     }
-  }, [plugin, app, snapTo15Minutes]);
+  }, [plugin, app2, snapTo15Minutes]);
   const handleEventDrop = (0, import_react9.useCallback)((info) => {
     updateEventTimeInMarkdown(info);
   }, [updateEventTimeInMarkdown]);
@@ -37453,43 +37448,43 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
     };
     showCalendarEventContextMenu(mouseEvent, eventData, {
       onComplete: async () => {
-        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
-        const success = await updateItemStatus(app, extendedProps.filePath, extendedProps.lineNumber, "completed");
+        if (!app2 || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const success = await updateItemStatus(app2, extendedProps.filePath, extendedProps.lineNumber, "completed");
         if (success && refresh) refresh();
       },
       onMigrateToday: async () => {
-        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        if (!app2 || !extendedProps.filePath || !extendedProps.lineNumber) return;
         const todayDate = getTodayDate();
-        const success = await updateItemDate(app, extendedProps.filePath, extendedProps.lineNumber, todayDate);
+        const success = await updateItemDate(app2, extendedProps.filePath, extendedProps.lineNumber, todayDate);
         if (success && refresh) refresh();
       },
       onMigrateTomorrow: async () => {
-        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        if (!app2 || !extendedProps.filePath || !extendedProps.lineNumber) return;
         const tomorrowDate = getTomorrowDate();
-        const success = await updateItemDate(app, extendedProps.filePath, extendedProps.lineNumber, tomorrowDate);
+        const success = await updateItemDate(app2, extendedProps.filePath, extendedProps.lineNumber, tomorrowDate);
         if (success && refresh) refresh();
       },
       onMigrateCustom: () => {
-        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        if (!app2 || !extendedProps.filePath || !extendedProps.lineNumber) return;
         const dateStr = info.event.startStr.split("T")[0];
-        const modal = new DatePickerModal(app, "\u9009\u62E9\u8FC1\u79FB\u65E5\u671F", dateStr, async (newDate) => {
-          const success = await updateItemDate(app, extendedProps.filePath, extendedProps.lineNumber, newDate);
+        const modal = new DatePickerModal(app2, "\u9009\u62E9\u8FC1\u79FB\u65E5\u671F", dateStr, async (newDate) => {
+          const success = await updateItemDate(app2, extendedProps.filePath, extendedProps.lineNumber, newDate);
           if (success && refresh) refresh();
         });
         modal.open();
       },
       onAbandon: async () => {
-        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
-        const success = await updateItemStatus(app, extendedProps.filePath, extendedProps.lineNumber, "abandoned");
+        if (!app2 || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        const success = await updateItemStatus(app2, extendedProps.filePath, extendedProps.lineNumber, "abandoned");
         if (success && refresh) refresh();
       },
       onOpenDoc: async () => {
-        if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
+        if (!app2 || !extendedProps.filePath || !extendedProps.lineNumber) return;
         const { openFileAtLine: openFileAtLine2 } = await Promise.resolve().then(() => (init_fileUtils(), fileUtils_exports));
-        await openFileAtLine2(app, extendedProps.filePath, extendedProps.lineNumber);
+        await openFileAtLine2(app2, extendedProps.filePath, extendedProps.lineNumber);
       },
       onShowDetail: () => {
-        if (!app || !plugin) return;
+        if (!app2 || !plugin) return;
         const details = {
           title: info.event.title,
           start: info.event.startStr,
@@ -37506,10 +37501,10 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
           filePath: extendedProps.filePath,
           lineNumber: extendedProps.lineNumber
         };
-        new EventDetailsModal(app, details, plugin).open();
+        new EventDetailsModal(app2, details, plugin).open();
       }
     });
-  }, [app, plugin, refresh]);
+  }, [app2, plugin, refresh]);
   const handleEventDidMount = (0, import_react9.useCallback)((info) => {
     info.el.addEventListener("contextmenu", (e3) => {
       handleCalendarEventContextMenu(info, e3);
@@ -37582,10 +37577,10 @@ var CalendarViewComponent = (0, import_react9.forwardRef)((_3, ref) => {
       }
       setMissingConfig(false);
       const dirConfigs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => ({ path: d2.path, groupId: d2.groupId }));
-      const vaultRoot = app ? app.vault.adapter?.basePath : void 0;
-      const parser = new MarkdownParser(enabledDirs, dirConfigs, vaultRoot);
+      const vault = app2?.vault;
+      const parser = new MarkdownParser(enabledDirs, dirConfigs, vault);
       parserRef.current = parser;
-      const projects = parser.parseAllProjects();
+      const projects = await parser.parseAllProjects();
       const events = DataConverter.projectsToCalendarEvents(projects);
       setAllEvents(events);
       if (calendarInstanceRef.current) {
@@ -50714,8 +50709,9 @@ var GanttViewComponent = () => {
         return;
       }
       const dirConfigs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => ({ path: d2.path, groupId: d2.groupId }));
-      const parser = new MarkdownParser(enabledDirs, dirConfigs);
-      const projects = parser.parseAllProjects();
+      const vault = app?.vault;
+      const parser = new MarkdownParser(enabledDirs, dirConfigs, vault);
+      const projects = await parser.parseAllProjects();
       setProjectsData(projects);
     } catch (error) {
       console.error("Error loading data:", error);
@@ -50960,7 +50956,7 @@ var import_obsidian10 = require("obsidian");
 var import_jsx_runtime11 = __toESM(require_jsx_runtime());
 var TodoSidebar = ({ onItemClick }) => {
   const pluginContext = usePlugin();
-  const app = useApp();
+  const app2 = useApp();
   const plugin = pluginContext?.plugin;
   const selectedGroup = pluginContext?.selectedGroup ?? "";
   const setSelectedGroup = pluginContext?.setSelectedGroup;
@@ -50989,7 +50985,7 @@ var TodoSidebar = ({ onItemClick }) => {
       setHideAbandoned(plugin.settings.todoDock.hideAbandoned);
     }
   }, [plugin]);
-  const loadItems = (0, import_react12.useCallback)(() => {
+  const loadItems = (0, import_react12.useCallback)(async () => {
     if (!pluginContext?.plugin?.settings) {
       setGroupedItems({});
       setTodayItems([]);
@@ -51012,9 +51008,9 @@ var TodoSidebar = ({ onItemClick }) => {
       return;
     }
     const dirConfigs = pluginContext.plugin.settings.projectDirectories.filter((dir) => dir.enabled && dir.path).map((dir) => ({ path: dir.path, groupId: dir.groupId }));
-    const vaultRoot = app ? app.vault.adapter?.basePath : void 0;
-    const parser = new MarkdownParser(projectDirectories, dirConfigs, vaultRoot);
-    const allItems = parser.getAllItems();
+    const vault = app2?.vault;
+    const parser = new MarkdownParser(projectDirectories, dirConfigs, vault);
+    const allItems = await parser.getAllItems();
     const filteredItems = selectedGroup ? allItems.filter((item) => item.project?.groupId === selectedGroup) : allItems;
     const pendingItems = filteredItems.filter((item) => item.status === "pending");
     const completed = filteredItems.filter((item) => item.status === "completed");
@@ -51064,16 +51060,16 @@ var TodoSidebar = ({ onItemClick }) => {
     console.log("[BulletJournal TodoSidebar] Debug - item:", item);
     console.log("[BulletJournal TodoSidebar] Debug - item.project?.filePath:", item.project?.filePath);
     console.log("[BulletJournal TodoSidebar] Debug - item.lineNumber:", item.lineNumber);
-    if (!app || !item.project?.filePath) return;
-    await openFileAtLine(app, item.project.filePath, item.lineNumber);
+    if (!app2 || !item.project?.filePath) return;
+    await openFileAtLine(app2, item.project.filePath, item.lineNumber);
     if (onItemClick) {
       onItemClick(item);
     }
   };
   const handleOpenModal = (item, e3) => {
     e3.stopPropagation();
-    if (app && pluginContext?.plugin) {
-      const modal = new EventDetailsModal(app, {
+    if (app2 && pluginContext?.plugin) {
+      const modal = new EventDetailsModal(app2, {
         title: item.task?.name || item.content,
         start: item.startDateTime || item.date,
         end: item.endDateTime,
@@ -51094,14 +51090,14 @@ var TodoSidebar = ({ onItemClick }) => {
   };
   const handleOpenCalendar = async (item, e3) => {
     e3.stopPropagation();
-    if (!app) return;
+    if (!app2) return;
     const dateStr = item.date;
-    let leaf = app.workspace.getLeavesOfType(CALENDAR_VIEW_TYPE)[0];
+    let leaf = app2.workspace.getLeavesOfType(CALENDAR_VIEW_TYPE)[0];
     if (!leaf) {
-      leaf = app.workspace.getLeaf(false);
+      leaf = app2.workspace.getLeaf(false);
       await leaf.setViewState({ type: CALENDAR_VIEW_TYPE });
     }
-    app.workspace.revealLeaf(leaf);
+    app2.workspace.revealLeaf(leaf);
     const view = leaf.view;
     if (view?.componentRef?.current) {
       const calendarInstance = view.componentRef.current.getCalendarInstance();
@@ -51113,49 +51109,49 @@ var TodoSidebar = ({ onItemClick }) => {
   };
   const handleDone = async (item, e3) => {
     e3.stopPropagation();
-    if (!app || !item.project?.filePath || !item.lineNumber) return;
-    const success = await updateItemStatus(app, item.project.filePath, item.lineNumber, "completed");
+    if (!app2 || !item.project?.filePath || !item.lineNumber) return;
+    const success = await updateItemStatus(app2, item.project.filePath, item.lineNumber, "completed");
     if (success) {
       loadItems();
     }
   };
   const handleMigrate = async (item, e3) => {
     e3.stopPropagation();
-    if (!app || !item.project?.filePath || !item.lineNumber) return;
+    if (!app2 || !item.project?.filePath || !item.lineNumber) return;
     const tomorrowDate = getTomorrowDate();
     const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
     const newTime = timeMatch ? timeMatch[1] : void 0;
-    const success = await updateItemDate(app, item.project.filePath, item.lineNumber, tomorrowDate, newTime);
+    const success = await updateItemDate(app2, item.project.filePath, item.lineNumber, tomorrowDate, newTime);
     if (success) {
       loadItems();
     }
   };
   const handleMigrateToday = async (item, e3) => {
     e3.stopPropagation();
-    if (!app || !item.project?.filePath || !item.lineNumber) return;
+    if (!app2 || !item.project?.filePath || !item.lineNumber) return;
     const todayDate = getTodayDate();
     const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
     const newTime = timeMatch ? timeMatch[1] : void 0;
-    const success = await updateItemDate(app, item.project.filePath, item.lineNumber, todayDate, newTime);
+    const success = await updateItemDate(app2, item.project.filePath, item.lineNumber, todayDate, newTime);
     if (success) {
       loadItems();
     }
   };
   const handleAbandon = async (item, e3) => {
     e3.stopPropagation();
-    if (!app || !item.project?.filePath || !item.lineNumber) return;
-    const success = await updateItemStatus(app, item.project.filePath, item.lineNumber, "abandoned");
+    if (!app2 || !item.project?.filePath || !item.lineNumber) return;
+    const success = await updateItemStatus(app2, item.project.filePath, item.lineNumber, "abandoned");
     if (success) {
       loadItems();
     }
   };
   const handleMigrateCustom = (item) => {
-    if (!app) return;
-    const modal = new DatePickerModal(app, "\u9009\u62E9\u8FC1\u79FB\u65E5\u671F", item.date, async (newDate) => {
+    if (!app2) return;
+    const modal = new DatePickerModal(app2, "\u9009\u62E9\u8FC1\u79FB\u65E5\u671F", item.date, async (newDate) => {
       if (!item.project?.filePath || !item.lineNumber) return;
       const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
       const newTime = timeMatch ? timeMatch[1] : void 0;
-      const success = await updateItemDate(app, item.project.filePath, item.lineNumber, newDate, newTime);
+      const success = await updateItemDate(app2, item.project.filePath, item.lineNumber, newDate, newTime);
       if (success) {
         loadItems();
       }
@@ -51167,36 +51163,36 @@ var TodoSidebar = ({ onItemClick }) => {
     e3.stopPropagation();
     showItemContextMenu(e3, item, {
       onComplete: async () => {
-        if (!app || !item.project?.filePath || !item.lineNumber) return;
-        const success = await updateItemStatus(app, item.project.filePath, item.lineNumber, "completed");
+        if (!app2 || !item.project?.filePath || !item.lineNumber) return;
+        const success = await updateItemStatus(app2, item.project.filePath, item.lineNumber, "completed");
         if (success) loadItems();
       },
       onMigrateToday: async () => {
-        if (!app || !item.project?.filePath || !item.lineNumber) return;
+        if (!app2 || !item.project?.filePath || !item.lineNumber) return;
         const todayDate = getTodayDate();
         const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
         const newTime = timeMatch ? timeMatch[1] : void 0;
-        const success = await updateItemDate(app, item.project.filePath, item.lineNumber, todayDate, newTime);
+        const success = await updateItemDate(app2, item.project.filePath, item.lineNumber, todayDate, newTime);
         if (success) loadItems();
       },
       onMigrateTomorrow: async () => {
-        if (!app || !item.project?.filePath || !item.lineNumber) return;
+        if (!app2 || !item.project?.filePath || !item.lineNumber) return;
         const tomorrowDate = getTomorrowDate();
         const timeMatch = item.startDateTime?.match(/(\d{2}:\d{2})/);
         const newTime = timeMatch ? timeMatch[1] : void 0;
-        const success = await updateItemDate(app, item.project.filePath, item.lineNumber, tomorrowDate, newTime);
+        const success = await updateItemDate(app2, item.project.filePath, item.lineNumber, tomorrowDate, newTime);
         if (success) loadItems();
       },
       onMigrateCustom: () => handleMigrateCustom(item),
       onAbandon: async () => {
-        if (!app || !item.project?.filePath || !item.lineNumber) return;
-        const success = await updateItemStatus(app, item.project.filePath, item.lineNumber, "abandoned");
+        if (!app2 || !item.project?.filePath || !item.lineNumber) return;
+        const success = await updateItemStatus(app2, item.project.filePath, item.lineNumber, "abandoned");
         if (success) loadItems();
       },
       onOpenDoc: () => handleItemClick(item),
       onShowDetail: () => {
-        if (app && pluginContext?.plugin) {
-          const modal = new EventDetailsModal(app, {
+        if (app2 && pluginContext?.plugin) {
+          const modal = new EventDetailsModal(app2, {
             title: item.task?.name || item.content,
             start: item.startDateTime || item.date,
             end: item.endDateTime,
@@ -51216,10 +51212,10 @@ var TodoSidebar = ({ onItemClick }) => {
         }
       },
       onShowCalendar: () => {
-        if (!app) return;
+        if (!app2) return;
         const dateStr = item.date;
-        app.workspace.getLeavesOfType(CALENDAR_VIEW_TYPE).forEach(async (leaf) => {
-          app.workspace.revealLeaf(leaf);
+        app2.workspace.getLeavesOfType(CALENDAR_VIEW_TYPE).forEach(async (leaf) => {
+          app2.workspace.revealLeaf(leaf);
           const view = leaf.view;
           if (view?.componentRef?.current) {
             const calendarInstance = view.componentRef.current.getCalendarInstance();
@@ -51525,13 +51521,13 @@ var TaskButtonWidget = class extends import_view.WidgetType {
     return span;
   }
   openModal(view) {
-    const app = getApp();
-    const activeLeaf = app.workspace.getLeaf(false);
+    const app2 = getApp();
+    const activeLeaf = app2.workspace.getLeaf(false);
     let file = null;
     if (activeLeaf.view instanceof import_obsidian12.MarkdownView) {
       file = activeLeaf.view.file;
     } else {
-      file = app.workspace.getActiveFile();
+      file = app2.workspace.getActiveFile();
     }
     if (!file) return;
     const item = LineParser.parseItemLine(this.lineText, this.lineNumber);
@@ -51539,7 +51535,7 @@ var TaskButtonWidget = class extends import_view.WidgetType {
     const context = this.scanContext(view, this.lineNumber);
     const isTaskLine = LineParser.isTaskLine(this.lineText);
     const plugin = window.hkWorkPlugin;
-    new EventDetailsModal(app, {
+    new EventDetailsModal(app2, {
       title: item.content,
       start: item.startDateTime || item.date || "",
       end: item.endDateTime || item.date || "",
@@ -51712,8 +51708,8 @@ var BulletJournalPlugin = class extends import_obsidian13.Plugin {
   refreshCallbacks = /* @__PURE__ */ new Set();
   debouncedRefresh;
   normalizedProjectDirectories = [];
-  constructor(app, manifest) {
-    super(app, manifest);
+  constructor(app2, manifest) {
+    super(app2, manifest);
     this.settings = { ...DEFAULT_SETTINGS };
     this.debouncedRefresh = (0, import_obsidian13.debounce)(this.triggerRefresh.bind(this), 500, true);
   }
@@ -51890,14 +51886,7 @@ var BulletJournalPlugin = class extends import_obsidian13.Plugin {
     }
     const normalizedFilePath = filePath.replace(/\\/g, "/");
     return this.normalizedProjectDirectories.some((dir) => {
-      const workIndex = dir.indexOf("\u5DE5\u4F5C\u5B89\u6392/");
-      if (workIndex !== -1) {
-        const dirRelative = dir.substring(workIndex);
-        return normalizedFilePath.startsWith(dirRelative);
-      }
-      const dirParts = dir.split("/");
-      const lastTwoParts = dirParts.slice(-2).join("/");
-      return normalizedFilePath.includes(lastTwoParts);
+      return normalizedFilePath.startsWith(dir);
     });
   }
   /**
@@ -51977,8 +51966,8 @@ var BulletJournalPlugin = class extends import_obsidian13.Plugin {
 };
 var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
   plugin;
-  constructor(app, plugin) {
-    super(app, plugin);
+  constructor(app2, plugin) {
+    super(app2, plugin);
     this.plugin = plugin;
   }
   display() {
@@ -52017,11 +52006,7 @@ var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
     this.renderProjectGroups(groupsContainer, containerEl);
     const defaultGroupContainer = containerEl.createDiv({ cls: "bullet-journal-default-group-container" });
     this.renderDefaultGroupDropdown(defaultGroupContainer);
-    new import_obsidian13.Setting(containerEl).setName(t("settings").projectDirectories.title).setHeading().addButton((button) => button.setButtonText(t("settings").projectDirectories.addButton).setCta().onClick(() => {
-      this.plugin.settings.projectDirectories.push({ path: "", enabled: true });
-      this.plugin.saveSettings();
-      this.renderProjectDirectories(containerEl);
-    }));
+    new import_obsidian13.Setting(containerEl).setName(t("settings").projectDirectories.title).setDesc(t("settings").projectDirectories.description).setHeading();
     this.renderProjectDirectories(containerEl);
   }
   renderDefaultGroupDropdown(container) {
@@ -52096,17 +52081,6 @@ var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
         this.plugin.settings.projectDirectories[index5].enabled = value;
         await this.plugin.saveSettings();
         this.renderProjectDirectories(containerEl);
-      })).addButton((button) => button.setButtonText(t("settings").projectDirectories.selectButton).onClick(async () => {
-        const electron = require("electron");
-        const result = await electron.remote.dialog.showOpenDialog({
-          properties: ["openDirectory"],
-          title: t("settings").projectDirectories.dialogTitle
-        });
-        if (!result.canceled && result.filePaths.length > 0) {
-          this.plugin.settings.projectDirectories[index5].path = result.filePaths[0];
-          await this.plugin.saveSettings();
-          this.renderProjectDirectories(containerEl);
-        }
       })).addButton((button) => button.setButtonText(t("settings").projectDirectories.deleteButton).setWarning().onClick(async () => {
         this.plugin.settings.projectDirectories.splice(index5, 1);
         await this.plugin.saveSettings();

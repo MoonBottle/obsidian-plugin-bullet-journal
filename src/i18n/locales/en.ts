@@ -19,8 +19,8 @@ export const en: Translations = {
     },
     projectDirectories: {
       title: 'Project Directories',
-      description: 'Configure directories to scan for projects',
-      emptyMessage: 'No directories configured, click the button below to add',
+      description: 'Right-click a folder in the file tree and select "Add as Project Directory" to configure',
+      emptyMessage: 'No directories configured. Right-click a folder in the file tree to add',
       addButton: 'Add Directory',
       selectButton: 'Select',
       deleteButton: 'Delete',

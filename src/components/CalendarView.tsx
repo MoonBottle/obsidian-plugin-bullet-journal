@@ -462,11 +462,11 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
         .filter(d => d.enabled && d.path)
         .map(d => ({ path: d.path, groupId: d.groupId }));
 
-      const vaultRoot = app ? (app.vault as any).adapter?.basePath : undefined;
-      const parser = new MarkdownParser(enabledDirs, dirConfigs, vaultRoot);
+      const vault = app?.vault;
+      const parser = new MarkdownParser(enabledDirs, dirConfigs, vault);
       parserRef.current = parser;
 
-      const projects = parser.parseAllProjects();
+      const projects = await parser.parseAllProjects();
       const events = DataConverter.projectsToCalendarEvents(projects);
       setAllEvents(events);
 

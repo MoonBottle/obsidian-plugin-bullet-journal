@@ -1,7 +1,6 @@
 import { Project, Task, Item, ItemStatus } from '../models/types';
 import { LineParser } from '../utils/lineParser';
-import * as fs from 'fs';
-import * as path from 'path';
+import { Vault, TFile } from 'obsidian';
 
 interface ProjectDirectoryConfig {
   path: string;
@@ -25,12 +24,12 @@ function detectItemStatus(line: string): ItemStatus {
 export class MarkdownParser {
   private projectDirectories: string[];
   private directoryConfigs: Map<string, ProjectDirectoryConfig>;
-  private vaultRoot: string | null;
+  private vault: Vault | null;
 
-  constructor(projectDirectories: string[], directoryConfigs?: ProjectDirectoryConfig[], vaultRoot?: string) {
-    this.projectDirectories = projectDirectories;
+  constructor(projectDirectories: string[], directoryConfigs?: ProjectDirectoryConfig[], vault?: Vault) {
+    this.projectDirectories = projectDirectories.map(p => p.replace(/\\/g, '/'));
     this.directoryConfigs = new Map();
-    this.vaultRoot = vaultRoot ? vaultRoot.replace(/\\/g, '/') : null;
+    this.vault = vault || null;
     if (directoryConfigs) {
       directoryConfigs.forEach(config => {
         this.directoryConfigs.set(config.path.replace(/\\/g, '/'), config);
@@ -41,13 +40,13 @@ export class MarkdownParser {
   /**
    * Parse all project files in all project directories
    */
-  public parseAllProjects(): Project[] {
+  public async parseAllProjects(): Promise<Project[]> {
     const projects: Project[] = [];
-    const projectFiles = this.findProjectFiles();
+    const projectFiles = await this.findProjectFiles();
 
-    for (const { filePath, dataDir, groupId } of projectFiles) {
+    for (const { filePath, dataDir, groupId, file } of projectFiles) {
       try {
-        const project = this.parseProjectFile(filePath, dataDir, groupId);
+        const project = await this.parseProjectFile(filePath, dataDir, groupId, file);
         if (project) {
           projects.push(project);
         }
@@ -61,28 +60,36 @@ export class MarkdownParser {
 
   /**
    * Find all project Markdown files in all project directories
-   * Note: projectDirectories already point to the '项目' folder
+   * Note: projectDirectories are relative paths from vault root
    */
-  private findProjectFiles(): { filePath: string; dataDir: string; groupId?: string }[] {
-    const projectFiles: { filePath: string; dataDir: string; groupId?: string }[] = [];
+  private async findProjectFiles(): Promise<{ filePath: string; dataDir: string; groupId?: string; file: TFile }[]> {
+    const projectFiles: { filePath: string; dataDir: string; groupId?: string; file: TFile }[] = [];
+
+    if (!this.vault) {
+      console.error('[BulletJournal] Vault not available');
+      return projectFiles;
+    }
+
+    // Get all markdown files from vault
+    const allFiles = this.vault.getMarkdownFiles();
 
     for (const dataDirectory of this.projectDirectories) {
-      // dataDirectory already points to the '项目' folder (e.g., ".../工作安排/2026/项目")
-      if (!fs.existsSync(dataDirectory)) {
-        continue;
-      }
-
       const normalizedDataDir = dataDirectory.replace(/\\/g, '/');
       const dirConfig = this.directoryConfigs.get(normalizedDataDir);
       const groupId = dirConfig?.groupId;
 
-      const files = fs.readdirSync(dataDirectory);
-      for (const file of files) {
-        if (file.endsWith('.md')) {
+      // Filter files that are in this directory
+      for (const file of allFiles) {
+        const normalizedFilePath = file.path.replace(/\\/g, '/');
+        
+        // Check if file is directly in the project directory
+        const fileDir = normalizedFilePath.substring(0, normalizedFilePath.lastIndexOf('/'));
+        if (fileDir === normalizedDataDir || fileDir.startsWith(normalizedDataDir + '/')) {
           projectFiles.push({
-            filePath: path.join(dataDirectory, file),
+            filePath: file.path,
             dataDir: dataDirectory,
-            groupId: groupId
+            groupId: groupId,
+            file: file
           });
         }
       }
@@ -94,14 +101,26 @@ export class MarkdownParser {
   /**
    * Parse a single project file
    */
-  public parseProjectFile(filePath: string, dataDirectory: string, groupId?: string): Project | null {
-    const content = fs.readFileSync(filePath, 'utf-8');
+  public async parseProjectFile(filePath: string, dataDirectory: string, groupId?: string, file?: TFile): Promise<Project | null> {
+    let content: string;
+    
+    if (file && this.vault) {
+      content = await this.vault.read(file);
+    } else {
+      // Fallback: try to read directly (for backwards compatibility)
+      try {
+        const fs = require('fs');
+        content = fs.readFileSync(filePath, 'utf-8');
+      } catch (e) {
+        console.error(`[BulletJournal] Failed to read file: ${filePath}`);
+        return null;
+      }
+    }
+    
     const lines = content.split('\n');
 
-    // Convert absolute path to relative path from vault root
-    // dataDirectory is like "c:\project\code\bullet-journal\工作安排\2026\项目"
-    // We need relative path like "工作安排/2026/项目/xxx.md"
-    const relativePath = this.toRelativePath(filePath, dataDirectory);
+    // Use the relative path as is (already relative to vault root)
+    const relativePath = filePath.replace(/\\/g, '/');
 
     // Extract directory path from file path (e.g., "工作安排/2026/项目/xxx.md" -> "工作安排/2026/项目")
     const directoryPath = relativePath.substring(0, relativePath.lastIndexOf('/'));
@@ -219,32 +238,10 @@ export class MarkdownParser {
   }
 
   /**
-   * Convert absolute file path to relative path from vault root
-   */
-  private toRelativePath(absolutePath: string, dataDirectory: string): string {
-    const normalizedPath = absolutePath.replace(/\\/g, '/');
-    const normalizedDataDir = dataDirectory.replace(/\\/g, '/');
-
-    if (this.vaultRoot && normalizedPath.startsWith(this.vaultRoot)) {
-      return normalizedPath.substring(this.vaultRoot.length).replace(/^\//, '');
-    }
-
-    if (this.vaultRoot && normalizedDataDir.startsWith(this.vaultRoot)) {
-      const relativeDataDir = normalizedDataDir.substring(this.vaultRoot.length).replace(/^\//, '');
-      const fileName = normalizedPath.split('/').pop() || '';
-      return relativeDataDir + '/' + fileName;
-    }
-
-    const fileName = normalizedPath.split('/').pop() || '';
-    const dataDirName = normalizedDataDir.split('/').pop() || '';
-    return dataDirName + '/' + fileName;
-  }
-
-  /**
    * Get all items from all projects
    */
-  public getAllItems(): Item[] {
-    const projects = this.parseAllProjects();
+  public async getAllItems(): Promise<Item[]> {
+    const projects = await this.parseAllProjects();
     const items: Item[] = [];
 
     for (const project of projects) {
@@ -264,22 +261,22 @@ export class MarkdownParser {
   /**
    * Get items by date range
    */
-  public getItemsByDateRange(startDate: string, endDate: string): Item[] {
-    const allItems = this.getAllItems();
+  public async getItemsByDateRange(startDate: string, endDate: string): Promise<Item[]> {
+    const allItems = await this.getAllItems();
     return allItems.filter(item => {
       return item.date >= startDate && item.date <= endDate;
     });
   }
 
-  public getPendingItems(): Item[] {
-    return this.getAllItems().filter(item => item.status === 'pending');
+  public async getPendingItems(): Promise<Item[]> {
+    return (await this.getAllItems()).filter(item => item.status === 'pending');
   }
 
-  public getCompletedItems(): Item[] {
-    return this.getAllItems().filter(item => item.status === 'completed');
+  public async getCompletedItems(): Promise<Item[]> {
+    return (await this.getAllItems()).filter(item => item.status === 'completed');
   }
 
-  public getAbandonedItems(): Item[] {
-    return this.getAllItems().filter(item => item.status === 'abandoned');
+  public async getAbandonedItems(): Promise<Item[]> {
+    return (await this.getAllItems()).filter(item => item.status === 'abandoned');
   }
 }

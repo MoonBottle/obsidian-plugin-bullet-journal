@@ -17,8 +17,8 @@ export const zhCN = {
     },
     projectDirectories: {
       title: '项目目录',
-      description: '配置要扫描的项目目录',
-      emptyMessage: '暂无配置的目录，点击下方按钮添加',
+      description: '在文件树中右键点击文件夹，选择"添加为项目目录"来配置',
+      emptyMessage: '暂无配置的目录，请在文件树中右键点击文件夹添加',
       addButton: '添加目录',
       selectButton: '选择',
       deleteButton: '删除',

@@ -55,7 +55,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     }
   }, [plugin]);
 
-  const loadItems = useCallback(() => {
+  const loadItems = useCallback(async () => {
     if (!pluginContext?.plugin?.settings) {
       setGroupedItems({});
       setTodayItems([]);
@@ -86,9 +86,9 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
       .filter(dir => dir.enabled && dir.path)
       .map(dir => ({ path: dir.path, groupId: dir.groupId }));
 
-    const vaultRoot = app ? (app.vault as any).adapter?.basePath : undefined;
-    const parser = new MarkdownParser(projectDirectories, dirConfigs, vaultRoot);
-    const allItems = parser.getAllItems();
+    const vault = app?.vault;
+    const parser = new MarkdownParser(projectDirectories, dirConfigs, vault);
+    const allItems = await parser.getAllItems();
 
     const filteredItems = selectedGroup
       ? allItems.filter(item => item.project?.groupId === selectedGroup)

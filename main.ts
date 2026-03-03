@@ -292,17 +292,7 @@ export default class BulletJournalPlugin extends Plugin {
 
     // Check if the file path starts with any of the enabled project directories
     return this.normalizedProjectDirectories.some(dir => {
-      // Extract the relevant part from project directory (e.g., "工作安排/2026/项目" from "c:/.../工作安排/2026/项目")
-      const workIndex = dir.indexOf('工作安排/');
-      if (workIndex !== -1) {
-        const dirRelative = dir.substring(workIndex);
-        return normalizedFilePath.startsWith(dirRelative);
-      }
-
-      // Fallback: check if file path contains the last part of directory
-      const dirParts = dir.split('/');
-      const lastTwoParts = dirParts.slice(-2).join('/');
-      return normalizedFilePath.includes(lastTwoParts);
+      return normalizedFilePath.startsWith(dir);
     });
   }
 
@@ -500,15 +490,8 @@ class BulletJournalSettingTab extends PluginSettingTab {
     // Project Directories Section
     new Setting(containerEl)
       .setName(t('settings').projectDirectories.title)
-      .setHeading()
-      .addButton(button => button
-        .setButtonText(t('settings').projectDirectories.addButton)
-        .setCta()
-        .onClick(() => {
-          this.plugin.settings.projectDirectories.push({ path: '', enabled: true });
-          this.plugin.saveSettings();
-          this.renderProjectDirectories(containerEl);
-        }));
+      .setDesc(t('settings').projectDirectories.description)
+      .setHeading();
 
     this.renderProjectDirectories(containerEl);
   }
@@ -619,22 +602,6 @@ class BulletJournalSettingTab extends PluginSettingTab {
             this.plugin.settings.projectDirectories[index].enabled = value;
             await this.plugin.saveSettings();
             this.renderProjectDirectories(containerEl);
-          }))
-        .addButton(button => button
-          .setButtonText(t('settings').projectDirectories.selectButton)
-          .onClick(async () => {
-            // @ts-ignore
-            const electron = require('electron');
-            const result = await electron.remote.dialog.showOpenDialog({
-              properties: ['openDirectory'],
-              title: t('settings').projectDirectories.dialogTitle
-            });
-
-            if (!result.canceled && result.filePaths.length > 0) {
-              this.plugin.settings.projectDirectories[index].path = result.filePaths[0];
-              await this.plugin.saveSettings();
-              this.renderProjectDirectories(containerEl);
-            }
           }))
         .addButton(button => button
           .setButtonText(t('settings').projectDirectories.deleteButton)
