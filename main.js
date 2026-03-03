@@ -22284,7 +22284,6 @@ var LineParser = class {
    * - @YYYY-MM-DD (single date, all-day event)
    * - @YYYY-MM-DD HH:mm:ss (single datetime)
    * - @YYYY-MM-DD HH:mm:ss~HH:mm:ss (time range format)
-   * - Supports markdown links: [name](url)
    */
   static parseItemLine(line, lineNumber) {
     const timeRangeRegex = /@(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})~(\d{2}:\d{2}:\d{2})/;
@@ -22309,22 +22308,14 @@ var LineParser = class {
         endDateTime = match;
       }
     }
-    const links = [];
-    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-    let linkMatch;
-    while ((linkMatch = linkRegex.exec(line)) !== null) {
-      links.push({ name: linkMatch[1], url: linkMatch[2] });
-    }
     let content = line.replace(timeRangeRegex, "").replace(/@(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2})?)/, "").trim();
     content = content.replace(/#done|#已完成|#abandoned|#已放弃/g, "").trim();
-    content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, "").trim();
     return {
       content,
       date,
       startDateTime,
       endDateTime,
-      lineNumber,
-      links: links.length > 0 ? links : void 0
+      lineNumber
     };
   }
   /**
@@ -22452,6 +22443,7 @@ var MarkdownParser = class {
       links: []
     };
     let currentTask = null;
+    let currentItem = null;
     let hasTaskItemStarted = false;
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
       const line = lines[lineIndex];
@@ -22480,6 +22472,7 @@ var MarkdownParser = class {
         currentTask = LineParser.parseTaskLine(trimmedLine, lineNumber);
         currentTask.links = [];
         hasTaskItemStarted = false;
+        currentItem = null;
         continue;
       }
       if (currentTask && trimmedLine.includes("@") && !LineParser.isTaskLine(trimmedLine)) {
@@ -22488,7 +22481,9 @@ var MarkdownParser = class {
           hasTaskItemStarted = true;
           item.id = generateItemId();
           item.status = detectItemStatus(trimmedLine);
+          item.links = [];
           currentTask.items.push(item);
+          currentItem = item;
         }
         continue;
       }
@@ -22496,6 +22491,13 @@ var MarkdownParser = class {
         const link = LineParser.parseMarkdownLink(trimmedLine);
         if (link) {
           currentTask.links.push(link);
+        }
+        continue;
+      }
+      if (currentItem && LineParser.isLinkLine(trimmedLine)) {
+        const link = LineParser.parseMarkdownLink(trimmedLine);
+        if (link) {
+          currentItem.links.push(link);
         }
         continue;
       }
@@ -36832,6 +36834,20 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
       const descRow = itemContent.createEl("div", { cls: "bullet-journal-modal-desc-row" });
       descRow.createEl("span", { text: this.details.item, cls: "bullet-journal-modal-card-value" });
       createCopyButton(descRow, this.details.item);
+    }
+    if (this.details.itemLinks && this.details.itemLinks.length > 0) {
+      const itemLinksRow = itemContent.createEl("div", { cls: "bullet-journal-modal-card-row" });
+      itemLinksRow.createEl("span", { text: "\u94FE\u63A5:", cls: "bullet-journal-modal-card-label" });
+      this.details.itemLinks.forEach((link) => {
+        const tag = itemLinksRow.createEl("a", {
+          text: link.name,
+          cls: "bullet-journal-modal-tag"
+        });
+        tag.addEventListener("click", (e3) => {
+          e3.preventDefault();
+          window.open(link.url, "_blank");
+        });
+      });
     }
     const buttonsContainer = contentEl.createEl("div", { cls: "bullet-journal-modal-buttons" });
     const cancelBtn = buttonsContainer.createEl("button", {
@@ -51531,6 +51547,7 @@ var TaskButtonWidget = class extends import_view.WidgetType {
       taskLinks: context.taskLinks,
       level: context.level,
       item: item.content,
+      itemLinks: context.itemLinks,
       hasItems: !isTaskLine,
       filePath: file.path,
       lineNumber: item.lineNumber,
@@ -51542,8 +51559,10 @@ var TaskButtonWidget = class extends import_view.WidgetType {
     let level = "";
     const projectLinks = [];
     let taskLinks;
+    let itemLinks;
     const doc = view.state.doc;
     let taskLineNumber = -1;
+    let itemLineNumber = -1;
     const currentLine = doc.line(currentLineNumber);
     const currentText = currentLine.text;
     if (LineParser.isTaskLine(currentText)) {
@@ -51553,6 +51572,21 @@ var TaskButtonWidget = class extends import_view.WidgetType {
       taskName = task.name;
       level = task.level;
       taskLineNumber = currentLineNumber;
+    } else if (LineParser.isItemLine(currentText)) {
+      itemLineNumber = currentLineNumber;
+      for (let i3 = currentLineNumber - 1; i3 >= 1; i3--) {
+        const line = doc.line(i3);
+        const text = line.text;
+        if (LineParser.isTaskLine(text)) {
+          const task = LineParser.parseTaskLine(text, i3);
+          console.log("[TaskGutter] Found task line:", text);
+          console.log("[TaskGutter] Parsed task:", task);
+          taskName = task.name;
+          level = task.level;
+          taskLineNumber = i3;
+          break;
+        }
+      }
     } else {
       for (let i3 = currentLineNumber - 1; i3 >= 1; i3--) {
         const line = doc.line(i3);
@@ -51585,6 +51619,23 @@ var TaskButtonWidget = class extends import_view.WidgetType {
         }
       }
     }
+    if (itemLineNumber > 0) {
+      itemLinks = [];
+      for (let i3 = itemLineNumber + 1; i3 <= doc.lines; i3++) {
+        const line = doc.line(i3);
+        const text = line.text.trim();
+        if (LineParser.isTaskLine(text)) {
+          break;
+        }
+        if (LineParser.isItemLine(text)) {
+          break;
+        }
+        const link = LineParser.parseMarkdownLink(text);
+        if (link) {
+          itemLinks.push(link);
+        }
+      }
+    }
     for (let i3 = 1; i3 <= doc.lines; i3++) {
       const line = doc.line(i3);
       const text = line.text.trim();
@@ -51599,7 +51650,7 @@ var TaskButtonWidget = class extends import_view.WidgetType {
         projectLinks.push(link);
       }
     }
-    return { taskName, level, projectLinks, taskLinks };
+    return { taskName, level, projectLinks, taskLinks, itemLinks };
   }
 };
 var taskGutterPlugin = import_view.ViewPlugin.fromClass(class {

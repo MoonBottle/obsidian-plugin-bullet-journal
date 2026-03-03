@@ -41,7 +41,6 @@ export class LineParser {
    * - @YYYY-MM-DD (single date, all-day event)
    * - @YYYY-MM-DD HH:mm:ss (single datetime)
    * - @YYYY-MM-DD HH:mm:ss~HH:mm:ss (time range format)
-   * - Supports markdown links: [name](url)
    */
   public static parseItemLine(line: string, lineNumber: number): Item | null {
     // Match time range format: @YYYY-MM-DD HH:mm:ss~HH:mm:ss
@@ -75,30 +74,18 @@ export class LineParser {
       }
     }
 
-    // Parse all markdown links from the line
-    const links: Array<{ name: string; url: string }> = [];
-    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-    let linkMatch;
-    while ((linkMatch = linkRegex.exec(line)) !== null) {
-      links.push({ name: linkMatch[1], url: linkMatch[2] });
-    }
-
     // Remove all datetime patterns from content
     let content = line.replace(timeRangeRegex, '').replace(/@(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2})?)/, '').trim();
 
     // Remove status tags from content
     content = content.replace(/#done|#已完成|#abandoned|#已放弃/g, '').trim();
 
-    // Remove markdown links from content
-    content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '').trim();
-
     return {
       content,
       date,
       startDateTime,
       endDateTime,
-      lineNumber,
-      links: links.length > 0 ? links : undefined
+      lineNumber
     };
   }
 

@@ -21,6 +21,7 @@ export interface EventDetails {
   taskLinks?: Array<{ name: string; url: string }>;
   level?: string;
   item?: string;
+  itemLinks?: Array<{ name: string; url: string }>;
   hasItems?: boolean;
   filePath?: string;
   lineNumber?: number;
@@ -183,6 +184,22 @@ export class EventDetailsModal extends Modal {
       const descRow = itemContent.createEl('div', { cls: 'bullet-journal-modal-desc-row' });
       descRow.createEl('span', { text: this.details.item, cls: 'bullet-journal-modal-card-value' });
       createCopyButton(descRow, this.details.item);
+    }
+
+    // 事项链接
+    if (this.details.itemLinks && this.details.itemLinks.length > 0) {
+      const itemLinksRow = itemContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
+      itemLinksRow.createEl('span', { text: '链接:', cls: 'bullet-journal-modal-card-label' });
+      this.details.itemLinks.forEach(link => {
+        const tag = itemLinksRow.createEl('a', {
+          text: link.name,
+          cls: 'bullet-journal-modal-tag'
+        });
+        tag.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.open(link.url, '_blank');
+        });
+      });
     }
 
     // 按钮区域

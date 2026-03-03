@@ -77,6 +77,7 @@ class TaskButtonWidget extends WidgetType {
       taskLinks: context.taskLinks,
       level: context.level,
       item: item.content,
+      itemLinks: context.itemLinks,
       hasItems: !isTaskLine,
       filePath: file.path,
       lineNumber: item.lineNumber,
@@ -84,15 +85,17 @@ class TaskButtonWidget extends WidgetType {
     }, plugin).open();
   }
 
-  private scanContext(view: EditorView, currentLineNumber: number): { taskName: string, level: string, projectLinks: Array<{ name: string; url: string }>, taskLinks?: Array<{ name: string; url: string }> } {
+  private scanContext(view: EditorView, currentLineNumber: number): { taskName: string, level: string, projectLinks: Array<{ name: string; url: string }>, taskLinks?: Array<{ name: string; url: string }>, itemLinks?: Array<{ name: string; url: string }> } {
     let taskName = '';
     let level = '';
     const projectLinks: Array<{ name: string; url: string }> = [];
     let taskLinks: Array<{ name: string; url: string }> | undefined;
+    let itemLinks: Array<{ name: string; url: string }> | undefined;
 
     const doc = view.state.doc;
     let taskLineNumber = -1;
-    
+    let itemLineNumber = -1;
+
     // First check if current line is a task line
     const currentLine = doc.line(currentLineNumber);
     const currentText = currentLine.text;
@@ -103,6 +106,25 @@ class TaskButtonWidget extends WidgetType {
       taskName = task.name;
       level = task.level;
       taskLineNumber = currentLineNumber;
+    } else if (LineParser.isItemLine(currentText)) {
+      // Current line is an item line
+      itemLineNumber = currentLineNumber;
+
+      // Scan upwards for Task
+      for (let i = currentLineNumber - 1; i >= 1; i--) {
+        const line = doc.line(i);
+        const text = line.text;
+
+        if (LineParser.isTaskLine(text)) {
+          const task = LineParser.parseTaskLine(text, i);
+          console.log('[TaskGutter] Found task line:', text);
+          console.log('[TaskGutter] Parsed task:', task);
+          taskName = task.name;
+          level = task.level;
+          taskLineNumber = i;
+          break;
+        }
+      }
     } else {
       // Scan upwards for Task
       // currentLineNumber is 1-based.
@@ -148,6 +170,31 @@ class TaskButtonWidget extends WidgetType {
       }
     }
 
+    // Scan item-level links (between current item line and next item/task line)
+    if (itemLineNumber > 0) {
+      itemLinks = [];
+      for (let i = itemLineNumber + 1; i <= doc.lines; i++) {
+        const line = doc.line(i);
+        const text = line.text.trim();
+
+        // Stop scanning if we hit a task line
+        if (LineParser.isTaskLine(text)) {
+          break;
+        }
+
+        // Stop scanning if we hit another item line
+        if (LineParser.isItemLine(text)) {
+          break;
+        }
+
+        // Parse markdown links [name](url)
+        const link = LineParser.parseMarkdownLink(text);
+        if (link) {
+          itemLinks.push(link);
+        }
+      }
+    }
+
     // Scan file header for Project Links (from start until first task line)
     // Supports: [name](url)
     for (let i = 1; i <= doc.lines; i++) {
@@ -171,7 +218,7 @@ class TaskButtonWidget extends WidgetType {
       }
     }
 
-    return { taskName, level, projectLinks, taskLinks };
+    return { taskName, level, projectLinks, taskLinks, itemLinks };
   }
 }
 

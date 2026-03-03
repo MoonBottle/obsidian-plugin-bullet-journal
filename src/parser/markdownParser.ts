@@ -117,6 +117,7 @@ export class MarkdownParser {
     };
 
     let currentTask: Task | null = null;
+    let currentItem: Item | null = null;
     let hasTaskItemStarted = false;
 
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
@@ -159,6 +160,7 @@ export class MarkdownParser {
         currentTask = LineParser.parseTaskLine(trimmedLine, lineNumber);
         currentTask.links = [];
         hasTaskItemStarted = false;
+        currentItem = null;
         continue;
       }
 
@@ -169,7 +171,9 @@ export class MarkdownParser {
           hasTaskItemStarted = true;
           item.id = generateItemId();
           item.status = detectItemStatus(trimmedLine);
+          item.links = [];
           currentTask.items.push(item);
+          currentItem = item;
         }
         continue;
       }
@@ -180,6 +184,16 @@ export class MarkdownParser {
         const link = LineParser.parseMarkdownLink(trimmedLine);
         if (link) {
           currentTask.links.push(link);
+        }
+        continue;
+      }
+
+      // Parse item-level links (markdown format: [name](url))
+      // Links must be between item line and next item/task line
+      if (currentItem && LineParser.isLinkLine(trimmedLine)) {
+        const link = LineParser.parseMarkdownLink(trimmedLine);
+        if (link) {
+          currentItem.links!.push(link);
         }
         continue;
       }
