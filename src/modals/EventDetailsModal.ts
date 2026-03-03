@@ -33,6 +33,7 @@ const createCopyButton = (container: HTMLElement, value: string): HTMLButtonElem
     attr: { 'aria-label': '复制' }
   });
   copyBtn.style.cssText = `
+    display: inline-flex !important;
     padding: 0 !important;
     margin-left: 6px !important;
     min-width: auto !important;
@@ -43,6 +44,7 @@ const createCopyButton = (container: HTMLElement, value: string): HTMLButtonElem
     color: var(--text-muted);
     cursor: pointer;
     transition: color 0.2s ease;
+    vertical-align: middle !important;
   `;
   copyBtn.addEventListener('mouseenter', () => copyBtn.style.color = 'var(--interactive-accent)');
   copyBtn.addEventListener('mouseleave', () => copyBtn.style.color = 'var(--text-muted)');
@@ -72,17 +74,90 @@ export class EventDetailsModal extends Modal {
     const { contentEl } = this;
     contentEl.addClass('bullet-journal-event-modal');
 
-    const cleanTitle = this.details.title.replace(/#任务/g, '').trim();
-    contentEl.createEl('h2', { text: cleanTitle, cls: 'bullet-journal-modal-title' });
+    // 弹框标题
+    contentEl.createEl('h2', { text: '事项详情', cls: 'bullet-journal-modal-title' });
 
-    const infoGrid = contentEl.createEl('div', { cls: 'bullet-journal-modal-info-grid' });
+    // 项目卡片
+    if (this.details.project || (this.details.projectLinks && this.details.projectLinks.length > 0)) {
+      const projectCard = contentEl.createEl('div', { cls: 'bullet-journal-modal-card' });
+      projectCard.createEl('div', { text: '项目', cls: 'bullet-journal-modal-card-title' });
+      
+      const projectContent = projectCard.createEl('div', { cls: 'bullet-journal-modal-card-content' });
+      
+      if (this.details.project) {
+        projectContent.createEl('div', { 
+          text: this.details.project, 
+          cls: 'bullet-journal-modal-card-value' 
+        });
+      }
+      
+      if (this.details.projectLinks && this.details.projectLinks.length > 0) {
+        const linksContainer = projectContent.createEl('div', { cls: 'bullet-journal-modal-tags' });
+        this.details.projectLinks.forEach(link => {
+          const tag = linksContainer.createEl('a', {
+            text: link.name,
+            cls: 'bullet-journal-modal-tag'
+          });
+          tag.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.open(link.url, '_blank');
+          });
+        });
+      }
+    }
+
+    // 任务卡片
+    if (this.details.task || this.details.level || (this.details.taskLinks && this.details.taskLinks.length > 0)) {
+      const taskCard = contentEl.createEl('div', { cls: 'bullet-journal-modal-card' });
+      taskCard.createEl('div', { text: '任务', cls: 'bullet-journal-modal-card-title' });
+      
+      const taskContent = taskCard.createEl('div', { cls: 'bullet-journal-modal-card-content' });
+      
+      if (this.details.task) {
+        const taskRow = taskContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
+        taskRow.createEl('span', { text: this.details.task, cls: 'bullet-journal-modal-card-value' });
+        createCopyButton(taskRow, this.details.task);
+      }
+      
+      if (this.details.level) {
+        const levelRow = taskContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
+        levelRow.createEl('span', { text: '级别:', cls: 'bullet-journal-modal-card-label' });
+        levelRow.createEl('span', { text: this.details.level, cls: 'bullet-journal-modal-card-value' });
+      }
+      
+      if (this.details.taskLinks && this.details.taskLinks.length > 0) {
+        const linksContainer = taskContent.createEl('div', { cls: 'bullet-journal-modal-tags' });
+        this.details.taskLinks.forEach(link => {
+          const tag = linksContainer.createEl('a', {
+            text: link.name,
+            cls: 'bullet-journal-modal-tag bullet-journal-modal-tag-secondary'
+          });
+          tag.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.open(link.url, '_blank');
+          });
+        });
+      }
+    }
+
+    // 事项卡片
+    const itemCard = contentEl.createEl('div', { cls: 'bullet-journal-modal-card' });
+    itemCard.createEl('div', { text: '事项', cls: 'bullet-journal-modal-card-title' });
+    
+    const itemContent = itemCard.createEl('div', { cls: 'bullet-journal-modal-card-content' });
+    
+    // 时间行（包含时间和耗时）
+    const timeRow = itemContent.createEl('div', { cls: 'bullet-journal-modal-time-row' });
+    const calendarIcon = timeRow.createEl('span', { cls: 'bullet-journal-modal-icon' });
+    setIcon(calendarIcon, 'calendar');
 
     const dateLabel = this.details.end && this.details.start !== this.details.end ? '时间' : '日期';
     const dateValue = this.details.end && this.details.start !== this.details.end
       ? `${formatDateTime(this.details.start, this.details.allDay)} - ${formatDateTime(this.details.end, this.details.allDay)}`
       : formatDateTime(this.details.start, this.details.allDay);
-    this.createInfoRow(infoGrid, dateLabel, dateValue);
+    timeRow.createEl('span', { text: dateValue, cls: 'bullet-journal-modal-time-text' });
 
+    // 耗时（合并到同一行）
     if (this.details.end && this.details.start !== this.details.end) {
       let lunchBreakStart: string | undefined;
       let lunchBreakEnd: string | undefined;
@@ -92,53 +167,36 @@ export class EventDetailsModal extends Modal {
       }
       const duration = calculateDuration(this.details.start, this.details.end, lunchBreakStart, lunchBreakEnd);
       if (duration) {
-        const durationRow = infoGrid.createEl('div', { cls: 'bullet-journal-modal-info-row' });
-        durationRow.createEl('span', { text: '耗时:', cls: 'bullet-journal-modal-info-label' });
-        const durationValueContainer = durationRow.createEl('div', { cls: 'bullet-journal-modal-desc-value' });
-        durationValueContainer.createEl('span', { text: duration, cls: 'bullet-journal-modal-info-value' });
-        createCopyButton(durationValueContainer, duration);
+        timeRow.createEl('span', { text: ' ', cls: 'bullet-journal-modal-time-spacer' });
+        const clockIcon = timeRow.createEl('span', { cls: 'bullet-journal-modal-icon' });
+        setIcon(clockIcon, 'clock');
+        const durationText = timeRow.createEl('span', { text: duration, cls: 'bullet-journal-modal-time-text' });
+        createCopyButton(timeRow, duration);
       }
     }
-
-    if (this.details.project) {
-      this.createInfoRow(infoGrid, '项目', this.details.project);
-    }
-
-    if (this.details.projectLinks && this.details.projectLinks.length > 0) {
-      this.createLinksRow(infoGrid, '项目链接', this.details.projectLinks);
-    }
-
-    if (this.details.task) {
-      const taskRow = infoGrid.createEl('div', { cls: 'bullet-journal-modal-info-row' });
-      taskRow.createEl('span', { text: '任务:', cls: 'bullet-journal-modal-info-label' });
-      const taskValueContainer = taskRow.createEl('div', { cls: 'bullet-journal-modal-desc-value' });
-      taskValueContainer.createEl('span', { text: this.details.task, cls: 'bullet-journal-modal-info-value' });
-      createCopyButton(taskValueContainer, this.details.task);
-    }
-
-    if (this.details.taskLinks && this.details.taskLinks.length > 0) {
-      this.createLinksRow(infoGrid, '任务链接', this.details.taskLinks);
-    }
-
-    if (this.details.level) {
-      this.createInfoRow(infoGrid, '级别', this.details.level);
-    }
-
+    
+    // 事项描述
     if (this.details.hasItems && this.details.item) {
-      const descRow = infoGrid.createEl('div', { cls: 'bullet-journal-modal-info-row' });
-      descRow.createEl('span', { text: '事项:', cls: 'bullet-journal-modal-info-label' });
-      const descValueContainer = descRow.createEl('div', { cls: 'bullet-journal-modal-desc-value' });
-      descValueContainer.createEl('span', { text: this.details.item, cls: 'bullet-journal-modal-info-value' });
-      createCopyButton(descValueContainer, this.details.item);
+      const descRow = itemContent.createEl('div', { cls: 'bullet-journal-modal-desc-row' });
+      descRow.createEl('span', { text: this.details.item, cls: 'bullet-journal-modal-card-value' });
+      createCopyButton(descRow, this.details.item);
     }
 
-    contentEl.createEl('hr', { cls: 'bullet-journal-modal-divider' });
-
+    // 按钮区域
     const buttonsContainer = contentEl.createEl('div', { cls: 'bullet-journal-modal-buttons' });
+
+    // 取消按钮
+    const cancelBtn = buttonsContainer.createEl('button', {
+      text: '取消',
+      cls: 'bullet-journal-cancel-btn'
+    });
+    cancelBtn.addEventListener('click', () => {
+      this.close();
+    });
 
     if (this.details.fromEditor) {
       const openCalendarBtn = buttonsContainer.createEl('button', {
-        text: '查看日历',
+        text: '在日历中查看',
         cls: 'bullet-journal-open-file-btn'
       });
       openCalendarBtn.addEventListener('click', async () => {
@@ -177,45 +235,6 @@ export class EventDetailsModal extends Modal {
         }
       });
     }
-  }
-
-  private createInfoRow(container: HTMLElement, label: string, value: string) {
-    const row = container.createEl('div', { cls: 'bullet-journal-modal-info-row' });
-    row.createEl('span', { text: `${label}:`, cls: 'bullet-journal-modal-info-label' });
-    row.createEl('span', { text: value, cls: 'bullet-journal-modal-info-value' });
-  }
-
-  private createLinkRow(container: HTMLElement, label: string, url: string, displayName?: string) {
-    const row = container.createEl('div', { cls: 'bullet-journal-modal-info-row' });
-    row.createEl('span', { text: `${label}:`, cls: 'bullet-journal-modal-info-label' });
-    const link = row.createEl('a', {
-      text: displayName || url,
-      cls: 'bullet-journal-modal-link'
-    });
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.open(url, '_blank');
-    });
-  }
-
-  private createLinksRow(container: HTMLElement, label: string, links: Array<{ name: string; url: string }>) {
-    const row = container.createEl('div', { cls: 'bullet-journal-modal-info-row' });
-    row.createEl('span', { text: `${label}:`, cls: 'bullet-journal-modal-info-label' });
-    const valueContainer = row.createEl('div', { cls: 'bullet-journal-modal-desc-value' });
-
-    links.forEach((link, index) => {
-      const linkEl = valueContainer.createEl('a', {
-        text: link.name,
-        cls: 'bullet-journal-modal-link'
-      });
-      linkEl.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.open(link.url, '_blank');
-      });
-      if (index < links.length - 1) {
-        valueContainer.createEl('span', { text: ' ' });
-      }
-    });
   }
 
   onClose() {

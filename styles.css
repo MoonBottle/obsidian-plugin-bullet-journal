@@ -626,89 +626,213 @@
   margin-bottom: 16px;
 }
 
-/* Event Modal Styles */
+/* Event Modal Styles - Three Card Design */
 .bullet-journal-event-modal {
-  padding: 20px;
+  padding: 24px;
+  background-color: var(--background-primary);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Modal overlay enhancement */
+.modal-container:has(.bullet-journal-event-modal) .modal-bg {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.modal-container:has(.bullet-journal-event-modal) .modal {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid var(--background-modifier-border) !important;
+  min-width: 520px !important;
+  max-width: 640px !important;
+  width: auto !important;
 }
 
 .bullet-journal-modal-title {
-  margin: 0 0 16px 0;
+  margin: 0 0 20px 0;
   font-size: 18px;
   font-weight: 600;
   line-height: 1.4;
+  color: var(--text-normal);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
 }
 
-.bullet-journal-modal-info-grid {
+/* Card Styles */
+.bullet-journal-modal-card {
+  background-color: var(--background-secondary);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.bullet-journal-modal-card:last-of-type {
+  margin-bottom: 20px;
+}
+
+.bullet-journal-modal-card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  letter-spacing: 0.3px;
+}
+
+.bullet-journal-modal-card-content {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 16px;
 }
 
-.bullet-journal-modal-info-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  line-height: 1.5;
-}
-
-.bullet-journal-modal-info-label {
-  color: var(--text-muted);
-  font-size: 13px;
-  flex-shrink: 0;
-  min-width: 70px;
-}
-
-.bullet-journal-modal-info-value {
-  color: var(--text-normal);
-  font-size: 13px;
-  word-break: break-word;
-}
-
-.bullet-journal-modal-link {
-  color: var(--interactive-accent);
-  font-size: 13px;
-  text-decoration: none;
-  word-break: break-all;
-  cursor: pointer;
-}
-
-.bullet-journal-modal-link:hover {
-  text-decoration: underline;
-}
-
-.bullet-journal-modal-desc-value {
+.bullet-journal-modal-card-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1;
+  flex-wrap: wrap;
 }
 
-.bullet-journal-modal-divider {
-  margin: 16px 0;
-  border: none;
+.bullet-journal-modal-card-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.bullet-journal-modal-card-value {
+  font-size: 14px;
+  color: var(--text-normal);
+  font-weight: 500;
+  word-break: break-word;
+}
+
+/* Tags Container */
+.bullet-journal-modal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Tag Style Links */
+.bullet-journal-modal-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background-color: rgba(var(--interactive-accent-rgb), 0.1);
+  color: var(--interactive-accent);
+  border: 1px solid rgba(var(--interactive-accent-rgb), 0.3);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bullet-journal-modal-tag:hover {
+  background-color: var(--interactive-accent);
+  color: white;
+  border-color: var(--interactive-accent);
+}
+
+.bullet-journal-modal-tag-secondary {
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  border-color: var(--background-modifier-border);
+}
+
+.bullet-journal-modal-tag-secondary:hover {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+  color: var(--interactive-accent);
+}
+
+/* Time Row with Icons */
+.bullet-journal-modal-time-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-normal);
+}
+
+.bullet-journal-modal-time-row > * {
+  flex-shrink: 0;
+}
+
+.bullet-journal-modal-time-text {
+  font-size: 14px;
+  color: var(--text-normal);
+  white-space: nowrap;
+}
+
+.bullet-journal-modal-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.bullet-journal-modal-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Description Row */
+.bullet-journal-modal-desc-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid var(--background-modifier-border);
 }
 
+/* Buttons */
 .bullet-journal-modal-buttons {
   display: flex;
-  gap: 8px;
-  justify-content: flex-start;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
 }
 
 .bullet-journal-open-file-btn {
-  padding: 6px 16px;
+  padding: 8px 20px;
   background-color: var(--interactive-accent);
   color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 13px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .bullet-journal-open-file-btn:hover {
   background-color: var(--interactive-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.bullet-journal-cancel-btn {
+  padding: 8px 20px;
+  background-color: transparent;
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bullet-journal-cancel-btn:hover {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
 }
 
 .bullet-journal-copy-btn {
