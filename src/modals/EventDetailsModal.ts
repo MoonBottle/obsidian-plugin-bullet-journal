@@ -111,36 +111,40 @@ export class EventDetailsModal extends Modal {
     if (this.details.task || this.details.level || (this.details.taskLinks && this.details.taskLinks.length > 0)) {
       const taskCard = contentEl.createEl('div', { cls: 'bullet-journal-modal-card' });
       taskCard.createEl('div', { text: '任务', cls: 'bullet-journal-modal-card-title' });
-      
+
       const taskContent = taskCard.createEl('div', { cls: 'bullet-journal-modal-card-content' });
-      
-      if (this.details.task) {
+
+      // 级别和任务名放在同一行
+      if (this.details.task || this.details.level) {
         const taskRow = taskContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
-        taskRow.createEl('span', { text: this.details.task, cls: 'bullet-journal-modal-card-value' });
-        createCopyButton(taskRow, this.details.task);
-      }
-      
-      // 级别和任务链接放在同一行
-      if (this.details.level || (this.details.taskLinks && this.details.taskLinks.length > 0)) {
-        const levelLinksRow = taskContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
 
+        // 级别作为 tag 放在左侧
         if (this.details.level) {
-          levelLinksRow.createEl('span', { text: '级别:', cls: 'bullet-journal-modal-card-label' });
-          levelLinksRow.createEl('span', { text: this.details.level, cls: 'bullet-journal-modal-card-value' });
-        }
-
-        if (this.details.taskLinks && this.details.taskLinks.length > 0) {
-          this.details.taskLinks.forEach(link => {
-            const tag = levelLinksRow.createEl('a', {
-              text: link.name,
-              cls: 'bullet-journal-modal-tag'
-            });
-            tag.addEventListener('click', (e) => {
-              e.preventDefault();
-              window.open(link.url, '_blank');
-            });
+          taskRow.createEl('span', {
+            text: this.details.level,
+            cls: 'bullet-journal-modal-tag'
           });
         }
+
+        if (this.details.task) {
+          taskRow.createEl('span', { text: this.details.task, cls: 'bullet-journal-modal-card-value' });
+          createCopyButton(taskRow, this.details.task);
+        }
+      }
+
+      // 任务链接单独一行
+      if (this.details.taskLinks && this.details.taskLinks.length > 0) {
+        const linksRow = taskContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
+        this.details.taskLinks.forEach(link => {
+          const tag = linksRow.createEl('a', {
+            text: link.name,
+            cls: 'bullet-journal-modal-tag'
+          });
+          tag.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.open(link.url, '_blank');
+          });
+        });
       }
     }
 
@@ -189,7 +193,6 @@ export class EventDetailsModal extends Modal {
     // 事项链接
     if (this.details.itemLinks && this.details.itemLinks.length > 0) {
       const itemLinksRow = itemContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
-      itemLinksRow.createEl('span', { text: '链接:', cls: 'bullet-journal-modal-card-label' });
       this.details.itemLinks.forEach(link => {
         const tag = itemLinksRow.createEl('a', {
           text: link.name,

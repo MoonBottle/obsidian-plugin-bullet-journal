@@ -36775,29 +36775,31 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
       const taskCard = contentEl.createEl("div", { cls: "bullet-journal-modal-card" });
       taskCard.createEl("div", { text: "\u4EFB\u52A1", cls: "bullet-journal-modal-card-title" });
       const taskContent = taskCard.createEl("div", { cls: "bullet-journal-modal-card-content" });
-      if (this.details.task) {
+      if (this.details.task || this.details.level) {
         const taskRow = taskContent.createEl("div", { cls: "bullet-journal-modal-card-row" });
-        taskRow.createEl("span", { text: this.details.task, cls: "bullet-journal-modal-card-value" });
-        createCopyButton(taskRow, this.details.task);
-      }
-      if (this.details.level || this.details.taskLinks && this.details.taskLinks.length > 0) {
-        const levelLinksRow = taskContent.createEl("div", { cls: "bullet-journal-modal-card-row" });
         if (this.details.level) {
-          levelLinksRow.createEl("span", { text: "\u7EA7\u522B:", cls: "bullet-journal-modal-card-label" });
-          levelLinksRow.createEl("span", { text: this.details.level, cls: "bullet-journal-modal-card-value" });
-        }
-        if (this.details.taskLinks && this.details.taskLinks.length > 0) {
-          this.details.taskLinks.forEach((link) => {
-            const tag = levelLinksRow.createEl("a", {
-              text: link.name,
-              cls: "bullet-journal-modal-tag"
-            });
-            tag.addEventListener("click", (e3) => {
-              e3.preventDefault();
-              window.open(link.url, "_blank");
-            });
+          taskRow.createEl("span", {
+            text: this.details.level,
+            cls: "bullet-journal-modal-tag"
           });
         }
+        if (this.details.task) {
+          taskRow.createEl("span", { text: this.details.task, cls: "bullet-journal-modal-card-value" });
+          createCopyButton(taskRow, this.details.task);
+        }
+      }
+      if (this.details.taskLinks && this.details.taskLinks.length > 0) {
+        const linksRow = taskContent.createEl("div", { cls: "bullet-journal-modal-card-row" });
+        this.details.taskLinks.forEach((link) => {
+          const tag = linksRow.createEl("a", {
+            text: link.name,
+            cls: "bullet-journal-modal-tag"
+          });
+          tag.addEventListener("click", (e3) => {
+            e3.preventDefault();
+            window.open(link.url, "_blank");
+          });
+        });
       }
     }
     const itemCard = contentEl.createEl("div", { cls: "bullet-journal-modal-card" });
@@ -36832,7 +36834,6 @@ var EventDetailsModal = class extends import_obsidian4.Modal {
     }
     if (this.details.itemLinks && this.details.itemLinks.length > 0) {
       const itemLinksRow = itemContent.createEl("div", { cls: "bullet-journal-modal-card-row" });
-      itemLinksRow.createEl("span", { text: "\u94FE\u63A5:", cls: "bullet-journal-modal-card-label" });
       this.details.itemLinks.forEach((link) => {
         const tag = itemLinksRow.createEl("a", {
           text: link.name,
