@@ -51962,18 +51962,18 @@ var BulletJournalPlugin = class extends import_obsidian13.Plugin {
   }
   async openTodoSidebar() {
     const { workspace } = this.app;
-    let leaf = workspace.getRightLeaf(false);
-    const existingLeaves = workspace.getLeavesOfType(TODO_SIDEBAR_VIEW_TYPE);
-    if (existingLeaves.length > 0) {
-      workspace.revealLeaf(existingLeaves[0]);
-      return;
+    let leaf = workspace.getLeavesOfType(TODO_SIDEBAR_VIEW_TYPE)[0];
+    if (!leaf) {
+      const newLeaf = workspace.getRightLeaf(false);
+      if (newLeaf) {
+        await newLeaf.setViewState({
+          type: TODO_SIDEBAR_VIEW_TYPE,
+          active: true
+        });
+        leaf = newLeaf;
+      }
     }
-    leaf = workspace.getRightLeaf(true);
     if (leaf) {
-      await leaf.setViewState({
-        type: TODO_SIDEBAR_VIEW_TYPE,
-        active: true
-      });
       workspace.revealLeaf(leaf);
     }
   }

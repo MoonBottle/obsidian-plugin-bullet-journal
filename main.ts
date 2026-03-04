@@ -397,23 +397,20 @@ export default class BulletJournalPlugin extends Plugin {
   private async openTodoSidebar() {
     const { workspace } = this.app;
 
-    // 尝试在右侧边栏找到已存在的待办侧栏
-    let leaf = workspace.getRightLeaf(false);
-    const existingLeaves = workspace.getLeavesOfType(TODO_SIDEBAR_VIEW_TYPE);
+    let leaf = workspace.getLeavesOfType(TODO_SIDEBAR_VIEW_TYPE)[0];
 
-    if (existingLeaves.length > 0) {
-      // 如果已存在，直接显示
-      workspace.revealLeaf(existingLeaves[0]);
-      return;
+    if (!leaf) {
+      const newLeaf = workspace.getRightLeaf(false);
+      if (newLeaf) {
+        await newLeaf.setViewState({
+          type: TODO_SIDEBAR_VIEW_TYPE,
+          active: true
+        });
+        leaf = newLeaf;
+      }
     }
 
-    // 在右侧边栏创建新的 leaf
-    leaf = workspace.getRightLeaf(true);
     if (leaf) {
-      await leaf.setViewState({
-        type: TODO_SIDEBAR_VIEW_TYPE,
-        active: true
-      });
       workspace.revealLeaf(leaf);
     }
   }
