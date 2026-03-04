@@ -116,6 +116,58 @@ Run `npm run build` to build the plugin for production
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## MCP Integration
+
+This plugin provides an MCP (Model Context Protocol) server that allows AI assistants like Cursor, Claude, and Windsurf to access your bullet journal data.
+
+### Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `list_groups` | Query all configured project groups |
+| `list_projects` | Query all projects with optional group filter |
+| `filter_items` | Filter bullet journal items by project, date range, group, or status |
+
+### Setup
+
+1. Run `npm run build` or `npm run build:mcp` to generate `mcp-server.js`
+2. Open Obsidian Settings → Bullet Journal → MCP Configuration
+3. Click "Copy MCP Config" to copy the configuration to clipboard
+4. Paste the configuration into your AI assistant's MCP settings file
+
+### AI Agent Prompt
+
+When using this MCP server with AI assistants, you can use the following prompt to help the AI understand how to work with your bullet journal data:
+
+```
+You have access to a bullet journal MCP server with the following tools:
+
+1. **list_groups**: Lists all project groups. Use this first to understand the project organization.
+2. **list_projects**: Lists all projects with optional groupId filter. Each project has id, name, description, path, groupId, and taskCount.
+3. **filter_items**: Filters bullet journal items with parameters:
+   - projectId/projectIds: Filter by specific project(s)
+   - groupId: Filter by project group
+   - startDate/endDate: Filter by date range (YYYY-MM-DD format)
+   - status: Filter by status ('pending', 'completed', 'abandoned')
+
+**When to use these tools:**
+- When the user asks about their tasks, projects, or schedule
+- When the user wants to track progress or review completed work
+- When the user needs to plan or organize their work
+- When the user asks for summaries or reports of their bullet journal data
+
+**Best practices:**
+1. Always start with `list_groups` to understand the project structure
+2. Use `list_projects` to get an overview of all projects
+3. Use `filter_items` with appropriate filters to get specific task items
+4. Combine filters for more precise queries (e.g., pending items in a specific project for this week)
+
+**Example workflows:**
+- "What tasks do I have pending this week?" → filter_items with startDate, endDate, and status='pending'
+- "Show me all projects in the Work group" → list_groups → list_projects with groupId
+- "What did I complete last month?" → filter_items with date range and status='completed'
+```
+
 ## License
 
 AGPL-3.0

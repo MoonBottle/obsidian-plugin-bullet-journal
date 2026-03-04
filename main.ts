@@ -664,6 +664,50 @@ class BulletJournalSettingTab extends PluginSettingTab {
           }
         }));
 
+    // MCP Configuration Section
+    new Setting(containerEl)
+      .setName((t('settings') as any).mcp?.title ?? 'MCP 配置')
+      .setDesc((t('settings') as any).mcp?.description ?? '将子弹笔记数据暴露给 Cursor、Claude 等 AI 助手')
+      .setHeading();
+
+    new Setting(containerEl)
+      .setName((t('settings') as any).mcp?.copyButton ?? '复制 MCP 配置')
+      .setDesc((t('settings') as any).mcp?.copyDesc ?? '将 MCP 服务器配置复制到剪贴板，可粘贴到 Cursor 或 Claude 的配置文件中')
+      .addButton(button => button
+        .setButtonText((t('settings') as any).mcp?.copyButton ?? '复制 MCP 配置')
+        .setCta()
+        .onClick(async () => {
+          // Get vault base path
+          // @ts-ignore - getBasePath is available on FileSystemAdapter
+          const vaultPath = this.app.vault.adapter.getBasePath?.() ?? '';
+
+          if (!vaultPath) {
+            new Notice((t('settings') as any).mcp?.vaultUnavailable ?? '无法获取仓库路径');
+            return;
+          }
+
+          const mcpConfig = {
+            mcpServers: {
+              'obsidian-bullet-journal-assistant': {
+                command: 'node',
+                args: [`${vaultPath}/.obsidian/plugins/obsidian-plugin-bullet-journal/mcp-server.js`],
+                env: {
+                  VAULT_PATH: vaultPath
+                }
+              }
+            }
+          };
+
+          const configStr = JSON.stringify(mcpConfig, null, 2);
+
+          try {
+            await navigator.clipboard.writeText(configStr);
+            new Notice((t('settings') as any).mcp?.copySuccess ?? 'MCP 配置已复制到剪贴板');
+          } catch (err) {
+            new Notice((t('settings') as any).mcp?.copyFailed ?? '复制失败，请手动复制');
+          }
+        }));
+
   }
 
   private renderDefaultGroupDropdown(container: HTMLElement): void {
