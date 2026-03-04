@@ -593,6 +593,7 @@ class BulletJournalSettingTab extends PluginSettingTab {
       .setDesc(t('settings').projectDirectories.description)
       .setHeading();
 
+    const projectDirsContainer = containerEl.createDiv({ cls: 'bullet-journal-dirs-container' });
     this.renderProjectDirectories(containerEl);
 
     // Project Groups Section
@@ -729,11 +730,12 @@ class BulletJournalSettingTab extends PluginSettingTab {
   }
 
   private renderProjectDirectories(containerEl: HTMLElement): void {
+    const target = (containerEl.querySelector('.bullet-journal-dirs-container') || containerEl) as HTMLElement;
     // Remove existing directory settings
-    containerEl.querySelectorAll('.bullet-journal-dir-setting').forEach(el => el.remove());
+    target.querySelectorAll('.bullet-journal-dir-setting').forEach(el => el.remove());
 
     if (this.plugin.settings.projectDirectories.length === 0) {
-      new Setting(containerEl)
+      new Setting(target)
         .setDesc(t('settings').projectDirectories.emptyMessage)
         .setClass('bullet-journal-dir-setting');
       return;
@@ -745,7 +747,7 @@ class BulletJournalSettingTab extends PluginSettingTab {
         groupOptions[group.id] = group.name || t('settings').projectGroups.unnamed;
       });
 
-      const setting = new Setting(containerEl)
+      const setting = new Setting(target)
         .setName(dir.path || t('settings').projectDirectories.noPath)
         .setClass('bullet-journal-dir-setting');
       if (this.plugin.settings.projectGroups.length > 0) {
