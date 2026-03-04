@@ -27,6 +27,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
   const selectedGroup = pluginContext?.selectedGroup ?? '';
   const setSelectedGroup = pluginContext?.setSelectedGroup;
   const availableGroups = pluginContext?.availableGroups ?? [];
+  const getGroupName = pluginContext?.getGroupName ?? (() => '');
   const [groupedItems, setGroupedItems] = useState<GroupedItems>({});
   const [todayItems, setTodayItems] = useState<Item[]>([]);
   const [tomorrowItems, setTomorrowItems] = useState<Item[]>([]);
@@ -132,6 +133,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
         start: item.startDateTime || item.date,
         end: item.endDateTime,
         allDay: !item.startDateTime,
+        groupName: getGroupName(item.project?.groupId ?? ''),
         project: item.project?.name,
         projectLinks: item.project?.links,
         task: item.task?.name,
@@ -145,7 +147,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
       }, plugin);
       modal.open();
     }
-  }, [app, plugin]);
+  }, [app, plugin, getGroupName]);
 
   const handleOpenCalendar = useCallback(async (item: Item, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -276,6 +278,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
             start: item.startDateTime || item.date,
             end: item.endDateTime,
             allDay: !item.startDateTime,
+            groupName: getGroupName(item.project?.groupId ?? ''),
             project: item.project?.name,
             projectLinks: item.project?.links,
             task: item.task?.name,
@@ -306,7 +309,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
         });
       }
     });
-  }, [app, plugin, loadItems, handleItemClick, handleMigrateCustom]);
+  }, [app, plugin, loadItems, handleItemClick, handleMigrateCustom, getGroupName]);
 
   const toggleSection = useCallback((section: keyof typeof collapsedSections) => {
     setCollapsedSections(prev => ({
@@ -399,6 +402,11 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
           <span className="bullet-journal-todo-item-project">
             {item.project?.name}
           </span>
+          {getGroupName(item.project?.groupId ?? '') ? (
+            <span className="bullet-journal-todo-item-group">
+              {getGroupName(item.project?.groupId ?? '')}
+            </span>
+          ) : null}
         </div>
         <div className="bullet-journal-todo-item-task">
           {item.task?.name}

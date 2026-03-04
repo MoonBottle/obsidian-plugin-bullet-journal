@@ -15,6 +15,7 @@ export interface EventDetails {
   start: string;
   end?: string;
   allDay?: boolean;
+  groupName?: string;
   project?: string;
   projectLinks?: Array<{ name: string; url: string }>;
   task?: string;
@@ -78,8 +79,8 @@ export class EventDetailsModal extends Modal {
     // 弹框标题
     contentEl.createEl('h2', { text: '事项详情', cls: 'bullet-journal-modal-title' });
 
-    // 项目卡片
-    if (this.details.project || (this.details.projectLinks && this.details.projectLinks.length > 0)) {
+    // 项目卡片（含分组名标签）
+    if (this.details.project || (this.details.projectLinks && this.details.projectLinks.length > 0) || this.details.groupName) {
       const projectCard = contentEl.createEl('div', { cls: 'bullet-journal-modal-card' });
       projectCard.createEl('div', { text: '项目', cls: 'bullet-journal-modal-card-title' });
       
@@ -92,18 +93,26 @@ export class EventDetailsModal extends Modal {
         });
       }
       
-      if (this.details.projectLinks && this.details.projectLinks.length > 0) {
+      if (this.details.groupName || (this.details.projectLinks && this.details.projectLinks.length > 0)) {
         const linksContainer = projectContent.createEl('div', { cls: 'bullet-journal-modal-tags' });
-        this.details.projectLinks.forEach(link => {
-          const tag = linksContainer.createEl('a', {
-            text: link.name,
-            cls: 'bullet-journal-modal-tag'
+        if (this.details.groupName) {
+          linksContainer.createEl('span', {
+            text: this.details.groupName,
+            cls: 'bullet-journal-modal-tag bullet-journal-modal-tag-level'
           });
-          tag.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.open(link.url, '_blank');
+        }
+        if (this.details.projectLinks && this.details.projectLinks.length > 0) {
+          this.details.projectLinks.forEach(link => {
+            const tag = linksContainer.createEl('a', {
+              text: link.name,
+              cls: 'bullet-journal-modal-tag'
+            });
+            tag.addEventListener('click', (e) => {
+              e.preventDefault();
+              window.open(link.url, '_blank');
+            });
           });
-        });
+        }
       }
     }
 

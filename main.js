@@ -36621,7 +36621,7 @@ var init_EventDetailsModal = __esm({
         const { contentEl } = this;
         contentEl.addClass("bullet-journal-event-modal");
         contentEl.createEl("h2", { text: "\u4E8B\u9879\u8BE6\u60C5", cls: "bullet-journal-modal-title" });
-        if (this.details.project || this.details.projectLinks && this.details.projectLinks.length > 0) {
+        if (this.details.project || this.details.projectLinks && this.details.projectLinks.length > 0 || this.details.groupName) {
           const projectCard = contentEl.createEl("div", { cls: "bullet-journal-modal-card" });
           projectCard.createEl("div", { text: "\u9879\u76EE", cls: "bullet-journal-modal-card-title" });
           const projectContent = projectCard.createEl("div", { cls: "bullet-journal-modal-card-content" });
@@ -36631,18 +36631,26 @@ var init_EventDetailsModal = __esm({
               cls: "bullet-journal-modal-card-value"
             });
           }
-          if (this.details.projectLinks && this.details.projectLinks.length > 0) {
+          if (this.details.groupName || this.details.projectLinks && this.details.projectLinks.length > 0) {
             const linksContainer = projectContent.createEl("div", { cls: "bullet-journal-modal-tags" });
-            this.details.projectLinks.forEach((link) => {
-              const tag = linksContainer.createEl("a", {
-                text: link.name,
-                cls: "bullet-journal-modal-tag"
+            if (this.details.groupName) {
+              linksContainer.createEl("span", {
+                text: this.details.groupName,
+                cls: "bullet-journal-modal-tag bullet-journal-modal-tag-level"
               });
-              tag.addEventListener("click", (e3) => {
-                e3.preventDefault();
-                window.open(link.url, "_blank");
+            }
+            if (this.details.projectLinks && this.details.projectLinks.length > 0) {
+              this.details.projectLinks.forEach((link) => {
+                const tag = linksContainer.createEl("a", {
+                  text: link.name,
+                  cls: "bullet-journal-modal-tag"
+                });
+                tag.addEventListener("click", (e3) => {
+                  e3.preventDefault();
+                  window.open(link.url, "_blank");
+                });
               });
-            });
+            }
           }
         }
         if (this.details.task || this.details.level || this.details.taskLinks && this.details.taskLinks.length > 0) {
@@ -37141,6 +37149,7 @@ var init_CalendarView = __esm({
       const selectedGroup = pluginContext?.selectedGroup ?? "";
       const setSelectedGroup = pluginContext?.setSelectedGroup;
       const availableGroups = pluginContext?.availableGroups ?? [];
+      const getGroupName = pluginContext?.getGroupName ?? (() => "");
       const app = useApp();
       const calendarRef = (0, import_react9.useRef)(null);
       const calendarInstanceRef = (0, import_react9.useRef)(null);
@@ -37163,6 +37172,7 @@ var init_CalendarView = __esm({
           start: info.event.startStr,
           end: info.event.endStr,
           allDay: info.event.allDay,
+          groupName: getGroupName(info.event.extendedProps?.projectGroupId ?? info.event.projectGroupId ?? ""),
           project: info.event.extendedProps.project,
           projectLinks: info.event.extendedProps.projectLinks,
           task: info.event.extendedProps.task,
@@ -37175,7 +37185,7 @@ var init_CalendarView = __esm({
           lineNumber: info.event.extendedProps.lineNumber
         };
         new EventDetailsModal(app, details, plugin).open();
-      }, [app, plugin]);
+      }, [app, plugin, getGroupName]);
       const handleDateClick = (0, import_react9.useCallback)((info) => {
         if (!app) return;
         const items = allItemsRef.current;
@@ -37376,6 +37386,7 @@ var init_CalendarView = __esm({
               start: info.event.startStr,
               end: info.event.endStr,
               allDay: info.event.allDay,
+              groupName: getGroupName(extendedProps.projectGroupId ?? info.event.projectGroupId ?? ""),
               project: extendedProps.project,
               projectLinks: extendedProps.projectLinks,
               task: extendedProps.task,
@@ -37390,7 +37401,7 @@ var init_CalendarView = __esm({
             new EventDetailsModal(app, details, plugin).open();
           }
         });
-      }, [app, plugin]);
+      }, [app, plugin, getGroupName]);
       const handleEventDidMount = (0, import_react9.useCallback)((info) => {
         info.el.addEventListener("contextmenu", (e3) => {
           handleCalendarEventContextMenu(info, e3);
@@ -51157,6 +51168,7 @@ var TodoSidebar = ({ onItemClick }) => {
   const selectedGroup = pluginContext?.selectedGroup ?? "";
   const setSelectedGroup = pluginContext?.setSelectedGroup;
   const availableGroups = pluginContext?.availableGroups ?? [];
+  const getGroupName = pluginContext?.getGroupName ?? (() => "");
   const [groupedItems, setGroupedItems] = (0, import_react12.useState)({});
   const [todayItems, setTodayItems] = (0, import_react12.useState)([]);
   const [tomorrowItems, setTomorrowItems] = (0, import_react12.useState)([]);
@@ -51244,6 +51256,7 @@ var TodoSidebar = ({ onItemClick }) => {
         start: item.startDateTime || item.date,
         end: item.endDateTime,
         allDay: !item.startDateTime,
+        groupName: getGroupName(item.project?.groupId ?? ""),
         project: item.project?.name,
         projectLinks: item.project?.links,
         task: item.task?.name,
@@ -51257,7 +51270,7 @@ var TodoSidebar = ({ onItemClick }) => {
       }, plugin);
       modal.open();
     }
-  }, [app, plugin]);
+  }, [app, plugin, getGroupName]);
   const handleOpenCalendar = (0, import_react12.useCallback)(async (item, e3) => {
     e3.stopPropagation();
     if (!app) return;
@@ -51367,6 +51380,7 @@ var TodoSidebar = ({ onItemClick }) => {
             start: item.startDateTime || item.date,
             end: item.endDateTime,
             allDay: !item.startDateTime,
+            groupName: getGroupName(item.project?.groupId ?? ""),
             project: item.project?.name,
             projectLinks: item.project?.links,
             task: item.task?.name,
@@ -51397,7 +51411,7 @@ var TodoSidebar = ({ onItemClick }) => {
         });
       }
     });
-  }, [app, plugin, loadItems, handleItemClick, handleMigrateCustom]);
+  }, [app, plugin, loadItems, handleItemClick, handleMigrateCustom, getGroupName]);
   const toggleSection = (0, import_react12.useCallback)((section) => {
     setCollapsedSections((prev) => ({
       ...prev,
@@ -51458,7 +51472,8 @@ var TodoSidebar = ({ onItemClick }) => {
         /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-item-content", children: [
           /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-item-header", children: [
             /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-item-time", children: formatTimeRange(item.startDateTime, item.endDateTime) || todoTexts.allDay }),
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-item-project", children: item.project?.name })
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-item-project", children: item.project?.name }),
+            getGroupName(item.project?.groupId ?? "") ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-item-group", children: getGroupName(item.project?.groupId ?? "") }) : null
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-item-task", children: item.task?.name }),
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-item-text", children: item.content })

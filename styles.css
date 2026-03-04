@@ -1241,6 +1241,16 @@
   text-overflow: ellipsis;
 }
 
+.bullet-journal-todo-item-group {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-left: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
 .bullet-journal-todo-item-task {
   font-size: 12px;
   color: var(--text-muted);

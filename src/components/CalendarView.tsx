@@ -73,6 +73,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
   const selectedGroup = pluginContext?.selectedGroup ?? '';
   const setSelectedGroup = pluginContext?.setSelectedGroup;
   const availableGroups = pluginContext?.availableGroups ?? [];
+  const getGroupName = pluginContext?.getGroupName ?? (() => '');
   const app = useApp();
   const calendarRef = useRef<HTMLDivElement>(null);
   const calendarInstanceRef = useRef<Calendar | null>(null);
@@ -101,6 +102,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
       start: info.event.startStr,
       end: info.event.endStr,
       allDay: info.event.allDay,
+      groupName: getGroupName(info.event.extendedProps?.projectGroupId ?? info.event.projectGroupId ?? ''),
       project: info.event.extendedProps.project,
       projectLinks: info.event.extendedProps.projectLinks,
       task: info.event.extendedProps.task,
@@ -114,7 +116,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
     };
 
     new EventDetailsModal(app, details, plugin).open();
-  }, [app, plugin]);
+  }, [app, plugin, getGroupName]);
 
   const handleDateClick = useCallback((info: any) => {
     if (!app) return;
@@ -360,6 +362,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
           start: info.event.startStr,
           end: info.event.endStr,
           allDay: info.event.allDay,
+          groupName: getGroupName(extendedProps.projectGroupId ?? info.event.projectGroupId ?? ''),
           project: extendedProps.project,
           projectLinks: extendedProps.projectLinks,
           task: extendedProps.task,
@@ -374,7 +377,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
         new EventDetailsModal(app, details, plugin).open();
       }
     });
-  }, [app, plugin]);
+  }, [app, plugin, getGroupName]);
 
   const handleEventDidMount = useCallback((info: any) => {
     info.el.addEventListener('contextmenu', (e: MouseEvent) => {
