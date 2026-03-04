@@ -228,7 +228,7 @@ export default class BulletJournalPlugin extends Plugin {
   async saveSettings() {
     await this.saveData(this.settings);
     this.updateNormalizedDataDirectory();
-    // Trigger refresh when settings change
+    this.triggerRefresh();
     this.debouncedRefresh();
   }
 
@@ -273,6 +273,9 @@ export default class BulletJournalPlugin extends Plugin {
           let project: Project | null;
           if (cached && cached.mtime === mtime) {
             project = cached.project;
+            if (project && project.groupId !== groupId) {
+              project.groupId = groupId;
+            }
           } else {
             project = await parser.parseProjectFile(filePath, dataDir, groupId, file);
             this.projectCache.set(filePath, { project, mtime });
@@ -310,6 +313,9 @@ export default class BulletJournalPlugin extends Plugin {
         let project: Project | null;
         if (cached && cached.mtime === mtime) {
           project = cached.project;
+          if (project && project.groupId !== groupId) {
+            project.groupId = groupId;
+          }
         } else {
           project = await parser.parseProjectFile(filePath, dataDir, groupId, file);
           this.projectCache.set(filePath, { project, mtime });

@@ -22126,8 +22126,10 @@ var init_PluginContext = __esm({
         setRefreshKey((prev) => prev + 1);
       }, []);
       (0, import_react.useEffect)(() => {
-        const defaultGroup = plugin.getDefaultGroup();
-        if (defaultGroup && defaultGroup !== selectedGroup) {
+        const groups = plugin.getProjectGroups();
+        const groupIds = new Set(groups.map((g4) => g4.id));
+        const defaultGroup = plugin.getDefaultGroup() || "";
+        if (selectedGroup && !groupIds.has(selectedGroup)) {
           setSelectedGroupState(defaultGroup);
         }
       }, [plugin, refreshKey]);
@@ -52002,6 +52004,7 @@ var BulletJournalPlugin = class extends import_obsidian15.Plugin {
   async saveSettings() {
     await this.saveData(this.settings);
     this.updateNormalizedDataDirectory();
+    this.triggerRefresh();
     this.debouncedRefresh();
   }
   updateNormalizedDataDirectory() {
@@ -52040,6 +52043,9 @@ var BulletJournalPlugin = class extends import_obsidian15.Plugin {
           let project;
           if (cached && cached.mtime === mtime) {
             project = cached.project;
+            if (project && project.groupId !== groupId) {
+              project.groupId = groupId;
+            }
           } else {
             project = await parser2.parseProjectFile(filePath, dataDir, groupId, file);
             this.projectCache.set(filePath, { project, mtime });
@@ -52075,6 +52081,9 @@ var BulletJournalPlugin = class extends import_obsidian15.Plugin {
         let project;
         if (cached && cached.mtime === mtime) {
           project = cached.project;
+          if (project && project.groupId !== groupId) {
+            project.groupId = groupId;
+          }
         } else {
           project = await parser.parseProjectFile(filePath, dataDir, groupId, file);
           this.projectCache.set(filePath, { project, mtime });

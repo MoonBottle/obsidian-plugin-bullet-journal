@@ -34,10 +34,12 @@ export const PluginProvider = ({ plugin, children }: PluginProviderProps) => {
     setRefreshKey(prev => prev + 1);
   }, []);
 
-  // Update selected group when default group changes in settings
+  // When groups list changes (e.g. after settings save), reset selection if it is no longer valid
   useEffect(() => {
-    const defaultGroup = plugin.getDefaultGroup();
-    if (defaultGroup && defaultGroup !== selectedGroup) {
+    const groups = plugin.getProjectGroups();
+    const groupIds = new Set(groups.map(g => g.id));
+    const defaultGroup = plugin.getDefaultGroup() || '';
+    if (selectedGroup && !groupIds.has(selectedGroup)) {
       setSelectedGroupState(defaultGroup);
     }
   }, [plugin, refreshKey]);
