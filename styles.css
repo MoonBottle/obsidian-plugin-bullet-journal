@@ -738,7 +738,7 @@
   color: var(--text-normal);
 }
 
-/* Level Tag Style - 与全天样式一致 */
+/* Level Tag Style - 与全天样式一致，无 hover/pointer */
 .bullet-journal-modal-tag-level {
   color: var(--tag-color);
   background-color: var(--tag-background);
@@ -749,6 +749,13 @@
   border-radius: var(--tag-radius);
   white-space: nowrap;
   margin-right: 2px;
+  cursor: default;
+}
+
+.bullet-journal-modal-tag-level:hover {
+  background-color: var(--tag-background);
+  border-color: var(--tag-border-color);
+  color: var(--tag-color);
 }
 
 /* Time Row with Icons */
