@@ -1,9 +1,9 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { MarkdownParser } from '../parser/markdownParser';
 import { Project } from '../models/types';
 import { usePlugin } from '../context/PluginContext';
 import { useApp } from '../context/AppContext';
 import { t } from '../i18n';
+import { Notice } from 'obsidian';
 
 export interface DirConfig {
   path: string;
@@ -66,13 +66,9 @@ export const useProjectData = (options: UseProjectDataOptions = {}): UseProjectD
     setIsLoading(true);
 
     try {
-      const dirConfigs: { path: string; groupId?: string }[] = [];
-      for (const d of plugin.settings.projectDirectories) {
-        if (d.enabled && d.path) {
-          dirConfigs.push({ path: d.path, groupId: d.groupId });
-        }
-      }
-      const enabledDirs = dirConfigs.map(d => d.path);
+      const enabledDirs = plugin.settings.projectDirectories
+        .filter(d => d.enabled && d.path)
+        .map(d => d.path);
 
       if (enabledDirs.length === 0) {
         new Notice(t('config').setDirectory);
@@ -80,9 +76,7 @@ export const useProjectData = (options: UseProjectDataOptions = {}): UseProjectD
         return;
       }
 
-      const vault = app?.vault;
-      const parser = new MarkdownParser(enabledDirs, dirConfigs, vault);
-      const loadedProjects = await parser.parseAllProjects();
+      const loadedProjects = await plugin.getCachedProjects();
       setProjects(loadedProjects);
     } catch (error) {
       console.error('Error loading projects:', error);
@@ -90,7 +84,7 @@ export const useProjectData = (options: UseProjectDataOptions = {}): UseProjectD
     } finally {
       setIsLoading(false);
     }
-  }, [plugin, app]);
+  }, [plugin]);
 
   // Load data on mount and when refreshKey changes
   useEffect(() => {
@@ -116,11 +110,11 @@ export const useProjectData = (options: UseProjectDataOptions = {}): UseProjectD
     }
   }, [setSelectedGroup]);
 
-  const handleRefresh = useCallback(() => {
-    if (refresh) {
-      refresh();
+  const handleRefresh = useCallback(async () => {
+    if (plugin) {
+      await plugin.refreshDataNow();
     }
-  }, [refresh]);
+  }, [plugin]);
 
   return {
     projects,

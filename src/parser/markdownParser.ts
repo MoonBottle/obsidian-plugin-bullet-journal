@@ -62,7 +62,7 @@ export class MarkdownParser {
    * Find all project Markdown files in all project directories
    * Note: projectDirectories are relative paths from vault root
    */
-  private async findProjectFiles(): Promise<{ filePath: string; dataDir: string; groupId?: string; file: TFile }[]> {
+  async findProjectFiles(): Promise<{ filePath: string; dataDir: string; groupId?: string; file: TFile }[]> {
     const projectFiles: { filePath: string; dataDir: string; groupId?: string; file: TFile }[] = [];
 
     if (!this.vault) {
@@ -96,6 +96,13 @@ export class MarkdownParser {
     }
 
     return projectFiles;
+  }
+
+  /**
+   * Get list of project files (for cache invalidation). Public wrapper around findProjectFiles.
+   */
+  public async getProjectFileList(): Promise<{ filePath: string; dataDir: string; groupId?: string; file: TFile }[]> {
+    return this.findProjectFiles();
   }
 
   /**
@@ -242,11 +249,16 @@ export class MarkdownParser {
    */
   public async getAllItems(): Promise<Item[]> {
     const projects = await this.parseAllProjects();
-    const items: Item[] = [];
+    return MarkdownParser.projectsToItems(projects);
+  }
 
+  /**
+   * Flatten projects to items (with task/project refs). Used for cache.
+   */
+  public static projectsToItems(projects: Project[]): Item[] {
+    const items: Item[] = [];
     for (const project of projects) {
       for (const task of project.tasks) {
-        // Add items from task's sub-items
         for (const item of task.items) {
           item.task = task;
           item.project = project;
@@ -254,7 +266,6 @@ export class MarkdownParser {
         }
       }
     }
-
     return items;
   }
 

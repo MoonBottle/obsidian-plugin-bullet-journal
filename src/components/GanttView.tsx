@@ -4,7 +4,6 @@ import { gantt } from 'dhtmlx-gantt';
 // CSS imported via styles.css concatenation
 import { usePlugin } from '../context/PluginContext';
 import { useApp } from '../context/AppContext';
-import { MarkdownParser } from '../parser/markdownParser';
 import { Project, Task } from '../models/types';
 import { t } from '../i18n';
 import { GroupSelect } from './shared/GroupSelect';
@@ -227,21 +226,15 @@ export const GanttViewComponent = () => {
     if (!plugin) return;
     setIsLoading(true);
     try {
-      const dirConfigs: { path: string; groupId?: string }[] = [];
-      for (const d of plugin.settings.projectDirectories) {
-        if (d.enabled && d.path) {
-          dirConfigs.push({ path: d.path, groupId: d.groupId });
-        }
-      }
-      const enabledDirs = dirConfigs.map(d => d.path);
+      const enabledDirs = plugin.settings.projectDirectories
+        .filter(d => d.enabled && d.path)
+        .map(d => d.path);
 
       if (enabledDirs.length === 0) {
         new Notice(t('config').setDirectory);
         return;
       }
-      const vault = app?.vault;
-      const parser = new MarkdownParser(enabledDirs, dirConfigs, vault);
-      const projects = await parser.parseAllProjects();
+      const projects = await plugin.getCachedProjects();
       setProjectsData(projects);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -249,7 +242,7 @@ export const GanttViewComponent = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [plugin, app]);
+  }, [plugin]);
 
   // Initial Load
   useEffect(() => {
@@ -353,11 +346,11 @@ export const GanttViewComponent = () => {
     gantt.render();
   }, [viewMode, configureScale]);
 
-  const handleRefresh = useCallback(() => {
-    if (refresh) {
-      refresh();
+  const handleRefresh = useCallback(async () => {
+    if (plugin) {
+      await plugin.refreshDataNow();
     }
-  }, [refresh]);
+  }, [plugin]);
 
   const handleGroupChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     if (setSelectedGroup) {

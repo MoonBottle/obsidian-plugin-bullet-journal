@@ -7,8 +7,8 @@ import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import { usePlugin } from '../context/PluginContext';
 import { useApp } from '../context/AppContext';
-import { MarkdownParser } from '../parser/markdownParser';
 import { DataConverter } from '../utils/dataConverter';
+import { MarkdownParser } from '../parser/markdownParser';
 import { Item } from '../models/types';
 import { EventDetailsModal, EventDetails } from '../modals/EventDetailsModal';
 import { DatePickerModal } from '../modals/DatePickerModal';
@@ -76,7 +76,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
   const app = useApp();
   const calendarRef = useRef<HTMLDivElement>(null);
   const calendarInstanceRef = useRef<Calendar | null>(null);
-  const parserRef = useRef<MarkdownParser | null>(null);
+  const allItemsRef = useRef<Item[]>([]);
   const calendarOptionsRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [missingConfig, setMissingConfig] = useState(false);
@@ -117,9 +117,9 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
   }, [app, plugin]);
 
   const handleDateClick = useCallback((info: any) => {
-    if (!app || !parserRef.current) return;
+    if (!app) return;
 
-    const items = parserRef.current.getAllItems();
+    const items = allItemsRef.current;
 
     // Filter items for the clicked date
     const dateItems = items.filter((item: Item) => {
@@ -280,6 +280,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
         new Notice(t('calendar').timeFormatNotFound);
         return content;
       });
+      await plugin.refreshDataNow();
     } catch (error) {
       console.error('[BulletJournal] Error updating event time:', error);
       new Notice(t('calendar').updateTimeFailed);
@@ -319,33 +320,33 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
       onComplete: async () => {
         if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
         const success = await updateItemStatus(app, extendedProps.filePath, extendedProps.lineNumber, 'completed');
-        if (success && refresh) refresh();
+        if (success && plugin) await plugin.refreshDataNow();
       },
       onMigrateToday: async () => {
         if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
         const todayDate = getTodayDate();
         const success = await updateItemDate(app, extendedProps.filePath, extendedProps.lineNumber, todayDate);
-        if (success && refresh) refresh();
+        if (success && plugin) await plugin.refreshDataNow();
       },
       onMigrateTomorrow: async () => {
         if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
         const tomorrowDate = getTomorrowDate();
         const success = await updateItemDate(app, extendedProps.filePath, extendedProps.lineNumber, tomorrowDate);
-        if (success && refresh) refresh();
+        if (success && plugin) await plugin.refreshDataNow();
       },
       onMigrateCustom: () => {
         if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
         const dateStr = info.event.startStr.split('T')[0];
         const modal = new DatePickerModal(app, '选择迁移日期', dateStr, async (newDate: string) => {
           const success = await updateItemDate(app, extendedProps.filePath!, extendedProps.lineNumber!, newDate);
-          if (success && refresh) refresh();
+          if (success && plugin) await plugin.refreshDataNow();
         });
         modal.open();
       },
       onAbandon: async () => {
         if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
         const success = await updateItemStatus(app, extendedProps.filePath, extendedProps.lineNumber, 'abandoned');
-        if (success && refresh) refresh();
+        if (success && plugin) await plugin.refreshDataNow();
       },
       onOpenDoc: async () => {
         if (!app || !extendedProps.filePath || !extendedProps.lineNumber) return;
@@ -373,7 +374,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
         new EventDetailsModal(app, details, plugin).open();
       }
     });
-  }, [app, plugin, refresh]);
+  }, [app, plugin]);
 
   const handleEventDidMount = useCallback((info: any) => {
     info.el.addEventListener('contextmenu', (e: MouseEvent) => {
@@ -440,13 +441,9 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
     setIsLoading(true);
 
     try {
-      const dirConfigs: { path: string; groupId?: string }[] = [];
-      for (const d of plugin.settings.projectDirectories) {
-        if (d.enabled && d.path) {
-          dirConfigs.push({ path: d.path, groupId: d.groupId });
-        }
-      }
-      const enabledDirs = dirConfigs.map(d => d.path);
+      const enabledDirs = plugin.settings.projectDirectories
+        .filter(d => d.enabled && d.path)
+        .map(d => d.path);
 
       if (enabledDirs.length === 0) {
         setMissingConfig(true);
@@ -456,11 +453,9 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
       }
       setMissingConfig(false);
 
-      const vault = app?.vault;
-      const parser = new MarkdownParser(enabledDirs, dirConfigs, vault);
-      parserRef.current = parser;
-
-      const projects = await parser.parseAllProjects();
+      const projects = await plugin.getCachedProjects();
+      const items = MarkdownParser.projectsToItems(projects);
+      allItemsRef.current = items;
       const events = DataConverter.projectsToCalendarEvents(projects);
       setAllEvents(events);
 
@@ -541,11 +536,11 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
     };
   }, []);
 
-  const handleRefresh = useCallback(() => {
-    if (refresh) {
-      refresh();
+  const handleRefresh = useCallback(async () => {
+    if (plugin) {
+      await plugin.refreshDataNow();
     }
-  }, [refresh]);
+  }, [plugin]);
 
   const handleGroupChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     if (setSelectedGroup) {

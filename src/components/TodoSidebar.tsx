@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Item } from '../models/types';
-import { MarkdownParser } from '../parser/markdownParser';
 import { usePlugin } from '../context/PluginContext';
 import { useApp } from '../context/AppContext';
 import { t } from '../i18n';
@@ -67,13 +66,9 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
       return;
     }
 
-    const dirConfigs: { path: string; groupId?: string }[] = [];
-    for (const dir of plugin.settings.projectDirectories) {
-      if (dir.enabled && dir.path) {
-        dirConfigs.push({ path: dir.path, groupId: dir.groupId });
-      }
-    }
-    const projectDirectories = dirConfigs.map(d => d.path);
+    const projectDirectories = plugin.settings.projectDirectories
+      .filter(d => d.enabled && d.path)
+      .map(d => d.path);
 
     if (projectDirectories.length === 0) {
       setGroupedItems({});
@@ -86,9 +81,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
       return;
     }
 
-    const vault = app?.vault;
-    const parser = new MarkdownParser(projectDirectories, dirConfigs, vault);
-    const allItems = await parser.getAllItems();
+    const allItems = await plugin.getCachedItems();
 
     const filteredItems = selectedGroup
       ? allItems.filter(item => item.project?.groupId === selectedGroup)
@@ -129,23 +122,12 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     setAbandonedItems(abandoned);
     setExpiredItems(expired);
     setLoading(false);
-  }, [plugin, selectedGroup, app]);
+  }, [plugin, selectedGroup]);
 
+  // Load from cache on mount and when refreshKey changes (unified refresh path)
   useEffect(() => {
     loadItems();
-
-    if (!plugin) {
-      return;
-    }
-
-    const unsubscribe = plugin.onRefresh(() => {
-      loadItems();
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [loadItems, plugin]);
+  }, [loadItems, pluginContext?.refreshKey ?? 0]);
 
   const handleItemClick = useCallback(async (item: Item) => {
     if (!app || !item.project?.filePath) return;
@@ -209,10 +191,10 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     if (!app || !item.project?.filePath || !item.lineNumber) return;
 
     const success = await updateItemStatus(app, item.project.filePath, item.lineNumber, 'completed');
-    if (success) {
-      loadItems();
+    if (success && plugin) {
+      await plugin.refreshDataNow();
     }
-  }, [app, loadItems]);
+  }, [app, plugin]);
 
   const handleMigrate = useCallback(async (item: Item, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -223,10 +205,10 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     const newTime = timeMatch ? timeMatch[1] : undefined;
 
     const success = await updateItemDate(app, item.project.filePath, item.lineNumber, tomorrowDate, newTime);
-    if (success) {
-      loadItems();
+    if (success && plugin) {
+      await plugin.refreshDataNow();
     }
-  }, [app, loadItems]);
+  }, [app, plugin]);
 
   const handleMigrateToday = useCallback(async (item: Item, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -237,20 +219,20 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     const newTime = timeMatch ? timeMatch[1] : undefined;
 
     const success = await updateItemDate(app, item.project.filePath, item.lineNumber, todayDate, newTime);
-    if (success) {
-      loadItems();
+    if (success && plugin) {
+      await plugin.refreshDataNow();
     }
-  }, [app, loadItems]);
+  }, [app, plugin]);
 
   const handleAbandon = useCallback(async (item: Item, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!app || !item.project?.filePath || !item.lineNumber) return;
 
     const success = await updateItemStatus(app, item.project.filePath, item.lineNumber, 'abandoned');
-    if (success) {
-      loadItems();
+    if (success && plugin) {
+      await plugin.refreshDataNow();
     }
-  }, [app, loadItems]);
+  }, [app, plugin]);
 
   const handleMigrateCustom = useCallback((item: Item) => {
     if (!app) return;

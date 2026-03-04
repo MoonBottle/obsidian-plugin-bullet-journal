@@ -5,6 +5,8 @@ import { GanttView, GANTT_VIEW_TYPE } from './src/views/GanttView.tsx';
 import { TodoSidebarView, TODO_SIDEBAR_VIEW_TYPE } from './src/views/TodoSidebarView.tsx';
 import { taskGutterPlugin } from './src/editor/TaskGutter';
 import { initI18n, t } from './src/i18n';
+import { MarkdownParser } from './src/parser/markdownParser';
+import type { Project, Item } from './src/models/types';
 
 interface ProjectGroup {
   id: string;
@@ -46,12 +48,18 @@ export default class BulletJournalPlugin extends Plugin {
   private refreshCallbacks: Set<() => void> = new Set();
   private debouncedRefresh: () => void;
   private normalizedProjectDirectories: string[] = [];
+  /** Shared parse cache; updated before triggerRefresh so all views read the same data */
+  private cachedProjects: Project[] | null = null;
+  /** Per-file cache for incremental refresh: path -> { project, mtime } */
+  private projectCache: Map<string, { project: Project | null; mtime: number }> = new Map();
 
   constructor(app: App, manifest: PluginManifest) {
     super(app, manifest);
     this.settings = { ...DEFAULT_SETTINGS };
-    // Debounce refresh to avoid multiple re-renders during batch file operations
-    this.debouncedRefresh = debounce(this.triggerRefresh.bind(this), 500, true);
+    // Debounce refresh: update cache once then notify all views
+    this.debouncedRefresh = debounce(() => {
+      this.refreshCache().then(() => this.triggerRefresh());
+    }, 500, true);
   }
 
   async onload() {
@@ -238,7 +246,81 @@ export default class BulletJournalPlugin extends Plugin {
   }
 
   /**
-   * Trigger refresh for all registered views
+   * Update shared cache by parsing all project files. Call before triggerRefresh().
+   * Uses per-file cache: only re-parses files whose mtime changed.
+   */
+  async refreshCache(): Promise<void> {
+    const dirConfigs: { path: string; groupId?: string }[] = [];
+    for (const d of this.settings.projectDirectories) {
+      if (d.enabled && d.path) {
+        dirConfigs.push({ path: d.path, groupId: d.groupId });
+      }
+    }
+    const enabledDirs = dirConfigs.map(d => d.path);
+    if (enabledDirs.length === 0) {
+      this.cachedProjects = [];
+      this.projectCache.clear();
+      return;
+    }
+    const parser = new MarkdownParser(enabledDirs, dirConfigs, this.app.vault);
+    try {
+      const fileList = await parser.getProjectFileList();
+      const nextProjects: Project[] = [];
+      for (const { filePath, dataDir, groupId, file } of fileList) {
+        const mtime = file.stat.mtime;
+        const cached = this.projectCache.get(filePath);
+        let project: Project | null;
+        if (cached && cached.mtime === mtime) {
+          project = cached.project;
+        } else {
+          project = await parser.parseProjectFile(filePath, dataDir, groupId, file);
+          this.projectCache.set(filePath, { project, mtime });
+        }
+        if (project) {
+          nextProjects.push(project);
+        }
+      }
+      // Remove cache entries for files no longer in project directories
+      for (const path of this.projectCache.keys()) {
+        if (!fileList.some(f => f.filePath === path)) {
+          this.projectCache.delete(path);
+        }
+      }
+      this.cachedProjects = nextProjects;
+    } catch (error) {
+      console.error('[BulletJournal] refreshCache error:', error);
+      this.cachedProjects = [];
+    }
+  }
+
+  /**
+   * Get projects from cache. If cache is empty, refresh first (e.g. first view open).
+   */
+  async getCachedProjects(): Promise<Project[]> {
+    if (this.cachedProjects === null) {
+      await this.refreshCache();
+    }
+    return this.cachedProjects ?? [];
+  }
+
+  /**
+   * Get all items from cached projects (flattened). If cache is empty, refresh first.
+   */
+  async getCachedItems(): Promise<Item[]> {
+    const projects = await this.getCachedProjects();
+    return MarkdownParser.projectsToItems(projects);
+  }
+
+  /**
+   * Refresh cache and notify all views immediately (e.g. after user edits file from UI).
+   */
+  async refreshDataNow(): Promise<void> {
+    await this.refreshCache();
+    this.triggerRefresh();
+  }
+
+  /**
+   * Trigger refresh for all registered views (cache must already be updated via refreshCache).
    */
   triggerRefresh(): void {
     this.refreshCallbacks.forEach(callback => {
