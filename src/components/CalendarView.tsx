@@ -2,8 +2,7 @@ import { useEffect, useRef, useCallback, useMemo, useState, forwardRef, useImper
 import { Modal, App } from 'obsidian';
 import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/list';
-import timeGridPluginOriginal from '@fullcalendar/timegrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import { usePlugin } from '../context/PluginContext';
@@ -14,7 +13,9 @@ import { Item } from '../models/types';
 import { EventDetailsModal, EventDetails } from '../modals/EventDetailsModal';
 import { DatePickerModal } from '../modals/DatePickerModal';
 import { t } from '../i18n';
-import { GroupSelect, RefreshButton, ViewHeader } from './shared';
+import { GroupSelect } from './shared/GroupSelect';
+import { RefreshButton } from './shared/RefreshButton';
+import { ViewHeader } from './shared/ViewHeader';
 import { showCalendarEventContextMenu } from '../utils/contextMenu';
 import { updateItemStatus, updateItemDate, getTomorrowDate, getTodayDate } from '../utils/fileUtils';
 import {
@@ -199,7 +200,6 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
 
   const updateEventTimeInMarkdown = useCallback(async (info: any) => {
     if (!plugin || !app) {
-      console.log('[BulletJournal] Plugin or app is null');
       return;
     }
 
@@ -383,7 +383,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
 
   const calendarTexts = t('calendar');
   const calendarOptions = useMemo(() => ({
-    plugins: [dayGridPlugin, timeGridPluginOriginal, listPlugin, interactionPlugin],
+    plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
     initialView: 'timeGridDay',
     headerToolbar: {
       left: 'prev,next today',
@@ -425,30 +425,28 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
   calendarOptionsRef.current = calendarOptions;
 
   const isLoadingRef = useRef(false);
-  const instanceIdRef = useRef(Math.random().toString(36).substr(2, 9));
-  console.log('[BulletJournal Debug] Component render, instanceId:', instanceIdRef.current, 'isLoadingRef:', isLoadingRef.current);
 
   const loadCalendarData = useCallback(async () => {
-    console.log('[BulletJournal Debug] loadCalendarData called, instanceId:', instanceIdRef.current, 'isLoadingRef:', isLoadingRef.current, 'plugin:', !!plugin);
     if (!plugin || !calendarRef.current) {
-      console.log('[BulletJournal Debug] Early return, plugin:', !!plugin, 'calendarRef:', !!calendarRef.current);
       return;
     }
 
     // Prevent concurrent loading
     if (isLoadingRef.current) {
-      console.log('[BulletJournal Debug] Already loading, skipping');
       return;
     }
 
     isLoadingRef.current = true;
-    console.log('[BulletJournal Debug] Set isLoadingRef to true');
     setIsLoading(true);
 
     try {
-      const enabledDirs = plugin.settings.projectDirectories
-        .filter(d => d.enabled && d.path)
-        .map(d => d.path);
+      const dirConfigs: { path: string; groupId?: string }[] = [];
+      for (const d of plugin.settings.projectDirectories) {
+        if (d.enabled && d.path) {
+          dirConfigs.push({ path: d.path, groupId: d.groupId });
+        }
+      }
+      const enabledDirs = dirConfigs.map(d => d.path);
 
       if (enabledDirs.length === 0) {
         setMissingConfig(true);
@@ -457,10 +455,6 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
         return;
       }
       setMissingConfig(false);
-
-      const dirConfigs = plugin.settings.projectDirectories
-        .filter(d => d.enabled && d.path)
-        .map(d => ({ path: d.path, groupId: d.groupId }));
 
       const vault = app?.vault;
       const parser = new MarkdownParser(enabledDirs, dirConfigs, vault);
@@ -518,13 +512,6 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
       isMounted = false;
     };
   }, [loadCalendarData, refreshKey]);
-
-  // Log when component unmounts
-  useEffect(() => {
-    return () => {
-      console.log('[BulletJournal Debug] Component unmount, instanceId:', instanceIdRef.current);
-    };
-  }, []);
 
   // Add ResizeObserver to handle container size changes
   useEffect(() => {

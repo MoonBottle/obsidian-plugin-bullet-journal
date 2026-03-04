@@ -46,12 +46,17 @@ export const PluginProvider = ({ plugin, children }: PluginProviderProps) => {
     setSelectedGroupState(groupId);
   }, []);
 
-  // Use Map to optimize repeated lookups
+  // Stable reference for availableGroups: only update when group id/name actually change
+  const availableGroupsRef = useRef<GroupOption[]>([]);
   const availableGroups = useMemo(() => {
-    // Create a new array copy to ensure React detects the change
-    // when settings are modified in the settings tab
     const groups = plugin.getProjectGroups();
-    return groups.map(g => ({ ...g }));
+    const next = groups.map(g => ({ ...g }));
+    const prev = availableGroupsRef.current;
+    if (prev.length === next.length && next.every((g, i) => prev[i]?.id === g.id && prev[i]?.name === g.name)) {
+      return prev;
+    }
+    availableGroupsRef.current = next;
+    return next;
   }, [plugin, refreshKey]);
 
   const groupMap = useMemo(() => {

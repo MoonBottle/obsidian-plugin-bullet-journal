@@ -1,9 +1,8 @@
-import { StrictMode, createRef } from 'react';
+import React, { StrictMode, createRef } from 'react';
 import { ItemView, WorkspaceLeaf } from 'obsidian';
-import { Root, createRoot } from 'react-dom/client';
-import { Calendar } from '@fullcalendar/core';
+import { createRoot } from 'react-dom/client';
+import type { Calendar } from '@fullcalendar/core';
 import BulletJournalPlugin from '../../main';
-import { CalendarViewComponent } from '../components/CalendarView';
 import { AppContext } from '../context/AppContext';
 import { PluginProvider } from '../context/PluginContext';
 import { t } from '../i18n';
@@ -17,7 +16,7 @@ interface CalendarViewComponentHandle {
 
 export class CalendarView extends ItemView {
   private plugin: BulletJournalPlugin;
-  root: Root | null = null;
+  root: ReturnType<typeof createRoot> | null = null;
   private unsubscribeRefresh: (() => void) | null = null;
   calendarInstance: Calendar | null = null;
   private componentRef = createRef<CalendarViewComponentHandle>();
@@ -42,7 +41,10 @@ export class CalendarView extends ItemView {
   async onOpen() {
     const container = this.contentEl;
     container.empty();
+    container.createEl('div', { cls: 'bullet-journal-loading', text: t('common').loading });
 
+    const { CalendarViewComponent } = await import('../components/CalendarView');
+    container.empty();
     this.root = createRoot(container);
     this.root.render(
       <StrictMode>

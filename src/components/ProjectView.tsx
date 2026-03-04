@@ -3,7 +3,9 @@ import { usePlugin } from '../context/PluginContext';
 import { Project, Task } from '../models/types';
 import { t } from '../i18n';
 import { useProjectData } from '../hooks/useProjectData';
-import { GroupSelect, RefreshButton, ViewHeader } from './shared';
+import { GroupSelect } from './shared/GroupSelect';
+import { RefreshButton } from './shared/RefreshButton';
+import { ViewHeader } from './shared/ViewHeader';
 
 interface ProjectListProps {
   projects: Project[];
@@ -89,7 +91,7 @@ const TaskItem = memo(({ task }: TaskItemProps) => {
         <span>{t('project').level}: {task.level}</span>
       </div>
 
-      {task.items.length > 0 && (
+      {task.items.length > 0 ? (
         <ul>
           {task.items.map((item, index) => (
             <li key={index}>
@@ -97,7 +99,7 @@ const TaskItem = memo(({ task }: TaskItemProps) => {
             </li>
           ))}
         </ul>
-      )}
+      ) : null}
     </div>
   );
 });
@@ -126,7 +128,7 @@ const ProjectDetails = ({ project, onBack }: ProjectDetailsProps) => {
 
       {project.description && <p>{project.description}</p>}
 
-      {project.links && project.links.length > 0 && (
+      {project.links && project.links.length > 0 ? (
         <div>
           <h3>{t('project').projectLinks}</h3>
           <ul>
@@ -139,7 +141,7 @@ const ProjectDetails = ({ project, onBack }: ProjectDetailsProps) => {
             ))}
           </ul>
         </div>
-      )}
+      ) : null}
 
       <div>
         <h3>{t('project').workItems}</h3>

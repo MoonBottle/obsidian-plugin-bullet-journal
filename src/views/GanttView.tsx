@@ -1,8 +1,6 @@
-import { StrictMode } from 'react';
 import { ItemView, WorkspaceLeaf } from 'obsidian';
-import { Root, createRoot } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import BulletJournalPlugin from '../../main';
-import { GanttViewComponent } from '../components/GanttView';
 import { AppContext } from '../context/AppContext';
 import { PluginProvider } from '../context/PluginContext';
 import { t } from '../i18n';
@@ -11,7 +9,7 @@ export const GANTT_VIEW_TYPE = 'bullet-journal-gantt-view';
 
 export class GanttView extends ItemView {
   private plugin: BulletJournalPlugin;
-  root: Root | null = null;
+  root: ReturnType<typeof createRoot> | null = null;
 
   constructor(leaf: WorkspaceLeaf, plugin: BulletJournalPlugin) {
     super(leaf);
@@ -33,10 +31,12 @@ export class GanttView extends ItemView {
   async onOpen() {
     const container = this.contentEl;
     container.empty();
+    container.createEl('div', { cls: 'bullet-journal-loading', text: t('common').loading });
 
+    const { GanttViewComponent } = await import('../components/GanttView');
+    container.empty();
     this.root = createRoot(container);
     this.root.render(
-      // StrictMode removed to prevent double initialization of dhtmlx-gantt
       <AppContext.Provider value={this.app}>
         <PluginProvider plugin={this.plugin}>
           <GanttViewComponent />

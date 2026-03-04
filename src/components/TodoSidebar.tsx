@@ -8,7 +8,7 @@ import { EventDetailsModal } from '../modals/EventDetailsModal';
 import { DatePickerModal } from '../modals/DatePickerModal';
 import { CALENDAR_VIEW_TYPE } from '../views/CalendarView';
 import { openFileAtLine, updateItemDate, updateItemStatus, getTomorrowDate, getTodayDate } from '../utils/fileUtils';
-import { GroupSelect } from './shared';
+import { GroupSelect } from './shared/GroupSelect';
 import { formatDateLabel, formatTimeRange, getTodayISO } from '../utils/dateUtils';
 import { showItemContextMenu } from '../utils/contextMenu';
 import { Menu, MenuItem, Notice } from 'obsidian';
@@ -56,7 +56,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
   }, [plugin]);
 
   const loadItems = useCallback(async () => {
-    if (!pluginContext?.plugin?.settings) {
+    if (!plugin?.settings) {
       setGroupedItems({});
       setTodayItems([]);
       setTomorrowItems([]);
@@ -67,9 +67,13 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
       return;
     }
 
-    const projectDirectories = pluginContext.plugin.settings.projectDirectories
-      .filter(dir => dir.enabled && dir.path)
-      .map(dir => dir.path);
+    const dirConfigs: { path: string; groupId?: string }[] = [];
+    for (const dir of plugin.settings.projectDirectories) {
+      if (dir.enabled && dir.path) {
+        dirConfigs.push({ path: dir.path, groupId: dir.groupId });
+      }
+    }
+    const projectDirectories = dirConfigs.map(d => d.path);
 
     if (projectDirectories.length === 0) {
       setGroupedItems({});
@@ -81,10 +85,6 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
       setLoading(false);
       return;
     }
-
-    const dirConfigs = pluginContext.plugin.settings.projectDirectories
-      .filter(dir => dir.enabled && dir.path)
-      .map(dir => ({ path: dir.path, groupId: dir.groupId }));
 
     const vault = app?.vault;
     const parser = new MarkdownParser(projectDirectories, dirConfigs, vault);
@@ -129,28 +129,25 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     setAbandonedItems(abandoned);
     setExpiredItems(expired);
     setLoading(false);
-  }, [pluginContext, selectedGroup]);
+  }, [plugin, selectedGroup, app]);
 
   useEffect(() => {
     loadItems();
 
-    if (!pluginContext?.plugin) {
+    if (!plugin) {
       return;
     }
 
-    const unsubscribe = pluginContext.plugin.onRefresh(() => {
+    const unsubscribe = plugin.onRefresh(() => {
       loadItems();
     });
 
     return () => {
       unsubscribe();
     };
-  }, [loadItems, pluginContext]);
+  }, [loadItems, plugin]);
 
-  const handleItemClick = async (item: Item) => {
-    console.log('[BulletJournal TodoSidebar] Debug - item:', item);
-    console.log('[BulletJournal TodoSidebar] Debug - item.project?.filePath:', item.project?.filePath);
-    console.log('[BulletJournal TodoSidebar] Debug - item.lineNumber:', item.lineNumber);
+  const handleItemClick = useCallback(async (item: Item) => {
     if (!app || !item.project?.filePath) return;
 
     await openFileAtLine(app, item.project.filePath, item.lineNumber);
@@ -158,11 +155,11 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     if (onItemClick) {
       onItemClick(item);
     }
-  };
+  }, [app, onItemClick]);
 
-  const handleOpenModal = (item: Item, e: React.MouseEvent) => {
+  const handleOpenModal = useCallback((item: Item, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (app && pluginContext?.plugin) {
+    if (app && plugin) {
       const modal = new EventDetailsModal(app, {
         title: item.task?.name || item.content,
         start: item.startDateTime || item.date,
@@ -178,12 +175,12 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
         hasItems: true,
         filePath: item.project?.filePath,
         lineNumber: item.lineNumber,
-      }, pluginContext.plugin);
+      }, plugin);
       modal.open();
     }
-  };
+  }, [app, plugin]);
 
-  const handleOpenCalendar = async (item: Item, e: React.MouseEvent) => {
+  const handleOpenCalendar = useCallback(async (item: Item, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!app) return;
 
@@ -205,9 +202,9 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
         calendarInstance.changeView('timeGridDay');
       }
     }
-  };
+  }, [app]);
 
-  const handleDone = async (item: Item, e: React.MouseEvent) => {
+  const handleDone = useCallback(async (item: Item, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!app || !item.project?.filePath || !item.lineNumber) return;
 
@@ -215,9 +212,9 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     if (success) {
       loadItems();
     }
-  };
+  }, [app, loadItems]);
 
-  const handleMigrate = async (item: Item, e: React.MouseEvent) => {
+  const handleMigrate = useCallback(async (item: Item, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!app || !item.project?.filePath || !item.lineNumber) return;
 
@@ -229,9 +226,9 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     if (success) {
       loadItems();
     }
-  };
+  }, [app, loadItems]);
 
-  const handleMigrateToday = async (item: Item, e: React.MouseEvent) => {
+  const handleMigrateToday = useCallback(async (item: Item, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!app || !item.project?.filePath || !item.lineNumber) return;
 
@@ -243,9 +240,9 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     if (success) {
       loadItems();
     }
-  };
+  }, [app, loadItems]);
 
-  const handleAbandon = async (item: Item, e: React.MouseEvent) => {
+  const handleAbandon = useCallback(async (item: Item, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!app || !item.project?.filePath || !item.lineNumber) return;
 
@@ -253,9 +250,9 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     if (success) {
       loadItems();
     }
-  };
+  }, [app, loadItems]);
 
-  const handleMigrateCustom = (item: Item) => {
+  const handleMigrateCustom = useCallback((item: Item) => {
     if (!app) return;
     
     const modal = new DatePickerModal(app, '选择迁移日期', item.date, async (newDate: string) => {
@@ -270,9 +267,9 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
       }
     });
     modal.open();
-  };
+  }, [app, loadItems]);
 
-  const handleContextMenu = (e: React.MouseEvent, item: Item) => {
+  const handleContextMenu = useCallback((e: React.MouseEvent, item: Item) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -306,7 +303,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
       },
       onOpenDoc: () => handleItemClick(item),
       onShowDetail: () => {
-        if (app && pluginContext?.plugin) {
+        if (app && plugin) {
           const modal = new EventDetailsModal(app, {
             title: item.task?.name || item.content,
             start: item.startDateTime || item.date,
@@ -322,7 +319,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
             hasItems: true,
             filePath: item.project?.filePath,
             lineNumber: item.lineNumber,
-          }, pluginContext.plugin);
+          }, plugin);
           modal.open();
         }
       },
@@ -342,16 +339,16 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
         });
       }
     });
-  };
+  }, [app, plugin, loadItems, handleItemClick, handleMigrateCustom]);
 
-  const toggleSection = (section: keyof typeof collapsedSections) => {
+  const toggleSection = useCallback((section: keyof typeof collapsedSections) => {
     setCollapsedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
-  };
+  }, []);
 
-  const handleMoreClick = (event: React.MouseEvent) => {
+  const handleMoreClick = useCallback((event: React.MouseEvent) => {
     event.stopPropagation();
     event.preventDefault();
 
@@ -409,7 +406,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     });
 
     menu.showAtPosition({ x: rect.left, y: rect.bottom + 4 });
-  };
+  }, [plugin, loadItems, hideCompleted, hideAbandoned]);
 
   const sortedDates = Object.keys(groupedItems).sort();
   const todoTexts = t('todoSidebar') as any;
@@ -559,7 +556,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
           </button>
         </div>
         <div className="bullet-journal-todo-body">
-          {availableGroups.length > 0 && (
+          {availableGroups.length > 0 ? (
             <div className="bullet-journal-todo-filter-card">
               <GroupSelect
                 groups={availableGroups}
@@ -567,7 +564,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
                 onChange={handleGroupChange}
               />
             </div>
-          )}
+          ) : null}
           <div className="bullet-journal-todo-empty">{todoTexts.noTodos}</div>
         </div>
       </div>
@@ -592,7 +589,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
         </button>
       </div>
       <div className="bullet-journal-todo-body">
-        {availableGroups.length > 0 && (
+        {availableGroups.length > 0 ? (
           <div className="bullet-journal-todo-filter-card">
             <GroupSelect
               groups={availableGroups}
@@ -600,7 +597,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
               onChange={handleGroupChange}
             />
           </div>
-        )}
+        ) : null}
         <div className="bullet-journal-todo-content">
           {renderSection(todoTexts.expired || '已过期', expiredItems, 'expired')}
           

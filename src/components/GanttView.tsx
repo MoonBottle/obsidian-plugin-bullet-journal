@@ -1,11 +1,15 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
+import { Notice } from 'obsidian';
 import { gantt } from 'dhtmlx-gantt';
 // CSS imported via styles.css concatenation
 import { usePlugin } from '../context/PluginContext';
+import { useApp } from '../context/AppContext';
 import { MarkdownParser } from '../parser/markdownParser';
 import { Project, Task } from '../models/types';
 import { t } from '../i18n';
-import { GroupSelect, RefreshButton, ViewHeader } from './shared';
+import { GroupSelect } from './shared/GroupSelect';
+import { RefreshButton } from './shared/RefreshButton';
+import { ViewHeader } from './shared/ViewHeader';
 import { toISODateString } from '../utils/dateUtils';
 
 // Style constants
@@ -44,6 +48,7 @@ const getDefaultEndDate = (): string => {
 
 export const GanttViewComponent = () => {
   const pluginContext = usePlugin();
+  const app = useApp();
   const plugin = pluginContext?.plugin;
   const refreshKey = pluginContext?.refreshKey ?? 0;
   const refresh = pluginContext?.refresh;
@@ -222,18 +227,18 @@ export const GanttViewComponent = () => {
     if (!plugin) return;
     setIsLoading(true);
     try {
-      const enabledDirs = plugin.settings.projectDirectories
-        .filter(d => d.enabled && d.path)
-        .map(d => d.path);
+      const dirConfigs: { path: string; groupId?: string }[] = [];
+      for (const d of plugin.settings.projectDirectories) {
+        if (d.enabled && d.path) {
+          dirConfigs.push({ path: d.path, groupId: d.groupId });
+        }
+      }
+      const enabledDirs = dirConfigs.map(d => d.path);
 
       if (enabledDirs.length === 0) {
         new Notice(t('config').setDirectory);
         return;
       }
-      const dirConfigs = plugin.settings.projectDirectories
-        .filter(d => d.enabled && d.path)
-        .map(d => ({ path: d.path, groupId: d.groupId }));
-
       const vault = app?.vault;
       const parser = new MarkdownParser(enabledDirs, dirConfigs, vault);
       const projects = await parser.parseAllProjects();
@@ -244,7 +249,7 @@ export const GanttViewComponent = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [plugin]);
+  }, [plugin, app]);
 
   // Initial Load
   useEffect(() => {

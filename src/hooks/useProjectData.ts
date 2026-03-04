@@ -66,19 +66,19 @@ export const useProjectData = (options: UseProjectDataOptions = {}): UseProjectD
     setIsLoading(true);
 
     try {
-      const enabledDirs = plugin.settings.projectDirectories
-        .filter(d => d.enabled && d.path)
-        .map(d => d.path);
+      const dirConfigs: { path: string; groupId?: string }[] = [];
+      for (const d of plugin.settings.projectDirectories) {
+        if (d.enabled && d.path) {
+          dirConfigs.push({ path: d.path, groupId: d.groupId });
+        }
+      }
+      const enabledDirs = dirConfigs.map(d => d.path);
 
       if (enabledDirs.length === 0) {
         new Notice(t('config').setDirectory);
         setIsLoading(false);
         return;
       }
-
-      const dirConfigs = plugin.settings.projectDirectories
-        .filter(d => d.enabled && d.path)
-        .map(d => ({ path: d.path, groupId: d.groupId }));
 
       const vault = app?.vault;
       const parser = new MarkdownParser(enabledDirs, dirConfigs, vault);
