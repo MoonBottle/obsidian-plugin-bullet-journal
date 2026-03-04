@@ -37054,6 +37054,27 @@ var DatePickerModal = class extends import_obsidian5.Modal {
 
 // src/utils/contextMenu.ts
 var import_obsidian6 = require("obsidian");
+function addMigrateSubmenu(menu, contextMenuTexts, options) {
+  menu.addItem((menuItem) => {
+    menuItem.setTitle(contextMenuTexts.migrate).setIcon("arrow-right");
+    const submenu = menuItem.setSubmenu();
+    submenu.addItem((subItem) => {
+      subItem.setTitle(contextMenuTexts.migrateToday).setIcon("calendar").onClick(() => {
+        if (options.onMigrateToday) options.onMigrateToday();
+      });
+    });
+    submenu.addItem((subItem) => {
+      subItem.setTitle(contextMenuTexts.migrateTomorrow).setIcon("calendar").onClick(() => {
+        if (options.onMigrateTomorrow) options.onMigrateTomorrow();
+      });
+    });
+    submenu.addItem((subItem) => {
+      subItem.setTitle(contextMenuTexts.migrateCustom).setIcon("calendar").onClick(() => {
+        if (options.onMigrateCustom) options.onMigrateCustom();
+      });
+    });
+  });
+}
 function showItemContextMenu(event, item, options) {
   const menu = new import_obsidian6.Menu();
   const isPending = item.status !== "completed" && item.status !== "abandoned";
@@ -37066,33 +37087,7 @@ function showItemContextMenu(event, item, options) {
         }
       });
     });
-    menu.addItem((menuItem) => {
-      menuItem.setTitle(contextMenuTexts.migrate).setIcon("arrow-right").onClick(() => {
-        const submenu = new import_obsidian6.Menu();
-        submenu.addItem((subItem) => {
-          subItem.setTitle(contextMenuTexts.migrateToday).setIcon("calendar").onClick(() => {
-            if (options.onMigrateToday) {
-              options.onMigrateToday();
-            }
-          });
-        });
-        submenu.addItem((subItem) => {
-          subItem.setTitle(contextMenuTexts.migrateTomorrow).setIcon("calendar").onClick(() => {
-            if (options.onMigrateTomorrow) {
-              options.onMigrateTomorrow();
-            }
-          });
-        });
-        submenu.addItem((subItem) => {
-          subItem.setTitle(contextMenuTexts.migrateCustom).setIcon("calendar").onClick(() => {
-            if (options.onMigrateCustom) {
-              options.onMigrateCustom();
-            }
-          });
-        });
-        submenu.showAtMouseEvent(event);
-      });
-    });
+    addMigrateSubmenu(menu, contextMenuTexts, options);
     menu.addItem((menuItem) => {
       menuItem.setTitle(contextMenuTexts.abandon).setIcon("x").onClick(() => {
         if (options.onAbandon) {
@@ -37139,33 +37134,7 @@ function showCalendarEventContextMenu(event, eventData, options) {
         }
       });
     });
-    menu.addItem((menuItem) => {
-      menuItem.setTitle(contextMenuTexts.migrate).setIcon("arrow-right").onClick(() => {
-        const submenu = new import_obsidian6.Menu();
-        submenu.addItem((subItem) => {
-          subItem.setTitle(contextMenuTexts.migrateToday).setIcon("calendar").onClick(() => {
-            if (options.onMigrateToday) {
-              options.onMigrateToday();
-            }
-          });
-        });
-        submenu.addItem((subItem) => {
-          subItem.setTitle(contextMenuTexts.migrateTomorrow).setIcon("calendar").onClick(() => {
-            if (options.onMigrateTomorrow) {
-              options.onMigrateTomorrow();
-            }
-          });
-        });
-        submenu.addItem((subItem) => {
-          subItem.setTitle(contextMenuTexts.migrateCustom).setIcon("calendar").onClick(() => {
-            if (options.onMigrateCustom) {
-              options.onMigrateCustom();
-            }
-          });
-        });
-        submenu.showAtMouseEvent(event);
-      });
-    });
+    addMigrateSubmenu(menu, contextMenuTexts, options);
     menu.addItem((menuItem) => {
       menuItem.setTitle(contextMenuTexts.abandon).setIcon("x").onClick(() => {
         if (options.onAbandon) {

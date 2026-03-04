@@ -1,6 +1,46 @@
 import { Menu, MenuItem, Notice } from 'obsidian';
 import { Item } from '../models/types';
 import { t } from '../i18n';
+import type { Translations } from '../i18n/locales/zh-cn';
+
+// Obsidian 未公开 API：MenuItem.setSubmenu() 用于右侧展开的嵌套子菜单
+interface MenuItemWithSubmenu extends MenuItem {
+  setSubmenu(): Menu;
+}
+
+function addMigrateSubmenu(menu: Menu, contextMenuTexts: Translations['contextMenu'], options: ContextMenuOptions): void {
+  menu.addItem((menuItem: MenuItem) => {
+    menuItem
+      .setTitle(contextMenuTexts.migrate)
+      .setIcon('arrow-right');
+
+    const submenu = (menuItem as MenuItemWithSubmenu).setSubmenu();
+    submenu.addItem((subItem: MenuItem) => {
+      subItem
+        .setTitle(contextMenuTexts.migrateToday)
+        .setIcon('calendar')
+        .onClick(() => {
+          if (options.onMigrateToday) options.onMigrateToday();
+        });
+    });
+    submenu.addItem((subItem: MenuItem) => {
+      subItem
+        .setTitle(contextMenuTexts.migrateTomorrow)
+        .setIcon('calendar')
+        .onClick(() => {
+          if (options.onMigrateTomorrow) options.onMigrateTomorrow();
+        });
+    });
+    submenu.addItem((subItem: MenuItem) => {
+      subItem
+        .setTitle(contextMenuTexts.migrateCustom)
+        .setIcon('calendar')
+        .onClick(() => {
+          if (options.onMigrateCustom) options.onMigrateCustom();
+        });
+    });
+  });
+}
 
 export interface ContextMenuOptions {
   onComplete?: () => void;
@@ -14,7 +54,7 @@ export interface ContextMenuOptions {
 }
 
 export function showItemContextMenu(
-  event: React.MouseEvent | MouseEvent,
+  event: MouseEvent,
   item: Item,
   options: ContextMenuOptions
 ): void {
@@ -34,49 +74,7 @@ export function showItemContextMenu(
         });
     });
 
-    menu.addItem((menuItem: MenuItem) => {
-      menuItem
-        .setTitle(contextMenuTexts.migrate)
-        .setIcon('arrow-right')
-        .onClick(() => {
-          const submenu = new Menu();
-          
-          submenu.addItem((subItem: MenuItem) => {
-            subItem
-              .setTitle(contextMenuTexts.migrateToday)
-              .setIcon('calendar')
-              .onClick(() => {
-                if (options.onMigrateToday) {
-                  options.onMigrateToday();
-                }
-              });
-          });
-
-          submenu.addItem((subItem: MenuItem) => {
-            subItem
-              .setTitle(contextMenuTexts.migrateTomorrow)
-              .setIcon('calendar')
-              .onClick(() => {
-                if (options.onMigrateTomorrow) {
-                  options.onMigrateTomorrow();
-                }
-              });
-          });
-
-          submenu.addItem((subItem: MenuItem) => {
-            subItem
-              .setTitle(contextMenuTexts.migrateCustom)
-              .setIcon('calendar')
-              .onClick(() => {
-                if (options.onMigrateCustom) {
-                  options.onMigrateCustom();
-                }
-              });
-          });
-
-          submenu.showAtMouseEvent(event as MouseEvent);
-        });
-    });
+    addMigrateSubmenu(menu, contextMenuTexts, options);
 
     menu.addItem((menuItem: MenuItem) => {
       menuItem
@@ -165,49 +163,7 @@ export function showCalendarEventContextMenu(
         });
     });
 
-    menu.addItem((menuItem: MenuItem) => {
-      menuItem
-        .setTitle(contextMenuTexts.migrate)
-        .setIcon('arrow-right')
-        .onClick(() => {
-          const submenu = new Menu();
-          
-          submenu.addItem((subItem: MenuItem) => {
-            subItem
-              .setTitle(contextMenuTexts.migrateToday)
-              .setIcon('calendar')
-              .onClick(() => {
-                if (options.onMigrateToday) {
-                  options.onMigrateToday();
-                }
-              });
-          });
-
-          submenu.addItem((subItem: MenuItem) => {
-            subItem
-              .setTitle(contextMenuTexts.migrateTomorrow)
-              .setIcon('calendar')
-              .onClick(() => {
-                if (options.onMigrateTomorrow) {
-                  options.onMigrateTomorrow();
-                }
-              });
-          });
-
-          submenu.addItem((subItem: MenuItem) => {
-            subItem
-              .setTitle(contextMenuTexts.migrateCustom)
-              .setIcon('calendar')
-              .onClick(() => {
-                if (options.onMigrateCustom) {
-                  options.onMigrateCustom();
-                }
-              });
-          });
-
-          submenu.showAtMouseEvent(event);
-        });
-    });
+    addMigrateSubmenu(menu, contextMenuTexts, options);
 
     menu.addItem((menuItem: MenuItem) => {
       menuItem
