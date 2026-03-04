@@ -12866,7 +12866,8 @@ var init_zh_cn = __esm({
       },
       // 配置提示
       config: {
-        setDirectory: "\u8BF7\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u81F3\u5C11\u4E00\u4E2A\u9879\u76EE\u76EE\u5F55"
+        setDirectory: "\u8BF7\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u81F3\u5C11\u4E00\u4E2A\u9879\u76EE\u76EE\u5F55",
+        setDirectoryOrTag: "\u8BF7\u914D\u7F6E\u9879\u76EE\u76EE\u5F55\uFF0C\u6216\u786E\u4FDD\u7B14\u8BB0\u4E2D\u5305\u542B #\u4EFB\u52A1 / #task \u6807\u7B7E"
       },
       // 文件菜单
       fileMenu: {
@@ -13039,7 +13040,8 @@ var init_en = __esm({
       },
       // Config hints
       config: {
-        setDirectory: "Please set at least one project directory in plugin settings"
+        setDirectory: "Please set at least one project directory in plugin settings",
+        setDirectoryOrTag: "Configure a project directory, or add #\u4EFB\u52A1 / #task tags to your notes"
       },
       // File menu
       fileMenu: {
@@ -28473,13 +28475,6 @@ var init_CalendarView = __esm({
         isLoadingRef.current = true;
         setIsLoading(true);
         try {
-          const enabledDirs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => d2.path);
-          if (enabledDirs.length === 0) {
-            setMissingConfig(true);
-            new Notice(t("config").setDirectory);
-            setIsLoading(false);
-            return;
-          }
           setMissingConfig(false);
           const projects = await plugin.getCachedProjects();
           const items = MarkdownParser.projectsToItems(projects);
@@ -28546,7 +28541,6 @@ var init_CalendarView = __esm({
             calendarInstanceRef.current.destroy();
             calendarInstanceRef.current = null;
           }
-          parserRef.current = null;
         };
       }, []);
       const handleRefresh = (0, import_react9.useCallback)(async () => {
@@ -41630,11 +41624,6 @@ var init_GanttView = __esm({
         if (!plugin) return;
         setIsLoading(true);
         try {
-          const enabledDirs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => d2.path);
-          if (enabledDirs.length === 0) {
-            new import_obsidian10.Notice(t("config").setDirectory);
-            return;
-          }
           const projects = await plugin.getCachedProjects();
           setProjectsData(projects);
         } catch (error) {
@@ -41857,7 +41846,6 @@ init_i18n();
 var import_react3 = __toESM(require_react());
 init_PluginContext();
 init_AppContext();
-init_i18n();
 var import_obsidian = require("obsidian");
 var useProjectData = (options = {}) => {
   const { loadOnMount = true } = options;
@@ -41879,12 +41867,6 @@ var useProjectData = (options = {}) => {
     if (!plugin) return;
     setIsLoading(true);
     try {
-      const enabledDirs = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => d2.path);
-      if (enabledDirs.length === 0) {
-        new import_obsidian.Notice(t("config").setDirectory);
-        setIsLoading(false);
-        return;
-      }
       const loadedProjects = await plugin.getCachedProjects();
       setProjects(loadedProjects);
     } catch (error) {
@@ -42228,17 +42210,6 @@ var TodoSidebar = ({ onItemClick }) => {
   }, [plugin]);
   const loadItems = (0, import_react12.useCallback)(async () => {
     if (!plugin?.settings) {
-      setGroupedItems({});
-      setTodayItems([]);
-      setTomorrowItems([]);
-      setCompletedItems([]);
-      setAbandonedItems([]);
-      setExpiredItems([]);
-      setLoading(false);
-      return;
-    }
-    const projectDirectories = plugin.settings.projectDirectories.filter((d2) => d2.enabled && d2.path).map((d2) => d2.path);
-    if (projectDirectories.length === 0) {
       setGroupedItems({});
       setTodayItems([]);
       setTomorrowItems([]);
@@ -42933,7 +42904,8 @@ var DEFAULT_SETTINGS = {
   todoDock: {
     hideCompleted: false,
     hideAbandoned: false
-  }
+  },
+  taskTags: ["\u4EFB\u52A1", "task"]
 };
 var BulletJournalPlugin = class extends import_obsidian15.Plugin {
   settings;
@@ -43076,6 +43048,7 @@ var BulletJournalPlugin = class extends import_obsidian15.Plugin {
   /**
    * Update shared cache by parsing all project files. Call before triggerRefresh().
    * Uses per-file cache: only re-parses files whose mtime changed.
+   * When no project directories are configured, discovers files by taskTags (#任务, #task) via metadataCache.
    */
   async refreshCache() {
     const dirConfigs = [];
@@ -43085,14 +43058,45 @@ var BulletJournalPlugin = class extends import_obsidian15.Plugin {
       }
     }
     const enabledDirs = dirConfigs.map((d2) => d2.path);
-    if (enabledDirs.length === 0) {
+    if (enabledDirs.length > 0) {
+      const parser2 = new MarkdownParser(enabledDirs, dirConfigs, this.app.vault);
+      try {
+        const fileList2 = await parser2.getProjectFileList();
+        const nextProjects = [];
+        for (const { filePath, dataDir, groupId, file } of fileList2) {
+          const mtime = file.stat.mtime;
+          const cached = this.projectCache.get(filePath);
+          let project;
+          if (cached && cached.mtime === mtime) {
+            project = cached.project;
+          } else {
+            project = await parser2.parseProjectFile(filePath, dataDir, groupId, file);
+            this.projectCache.set(filePath, { project, mtime });
+          }
+          if (project) {
+            nextProjects.push(project);
+          }
+        }
+        for (const path of this.projectCache.keys()) {
+          if (!fileList2.some((f3) => f3.filePath === path)) {
+            this.projectCache.delete(path);
+          }
+        }
+        this.cachedProjects = nextProjects;
+      } catch (error) {
+        console.error("[BulletJournal] refreshCache error:", error);
+        this.cachedProjects = [];
+      }
+      return;
+    }
+    const fileList = await this.getProjectFilesByTag();
+    if (fileList.length === 0) {
       this.cachedProjects = [];
       this.projectCache.clear();
       return;
     }
-    const parser = new MarkdownParser(enabledDirs, dirConfigs, this.app.vault);
+    const parser = new MarkdownParser([], [], this.app.vault);
     try {
-      const fileList = await parser.getProjectFileList();
       const nextProjects = [];
       for (const { filePath, dataDir, groupId, file } of fileList) {
         const mtime = file.stat.mtime;
@@ -43115,9 +43119,32 @@ var BulletJournalPlugin = class extends import_obsidian15.Plugin {
       }
       this.cachedProjects = nextProjects;
     } catch (error) {
-      console.error("[BulletJournal] refreshCache error:", error);
+      console.error("[BulletJournal] refreshCache (tag) error:", error);
       this.cachedProjects = [];
     }
+  }
+  /**
+   * Get project files by scanning all markdown files and matching taskTags in metadataCache.
+   * Used when no project directories are configured.
+   */
+  async getProjectFilesByTag() {
+    const tags = this.settings.taskTags ?? ["\u4EFB\u52A1", "task"];
+    const normalizedTags = new Set(tags.map((t4) => this.normalizeTag(t4)));
+    const files = this.app.vault.getMarkdownFiles();
+    const result = [];
+    for (const file of files) {
+      const cache = this.app.metadataCache.getFileCache(file);
+      if (!cache?.tags) continue;
+      const hasTag = cache.tags.some((t4) => normalizedTags.has(this.normalizeTag(t4.tag)));
+      if (!hasTag) continue;
+      const path = file.path.replace(/\\/g, "/");
+      const dataDir = path.includes("/") ? path.substring(0, path.lastIndexOf("/")) : "";
+      result.push({ filePath: file.path, dataDir, file });
+    }
+    return result;
+  }
+  normalizeTag(tag) {
+    return tag.replace(/^#/, "").toLowerCase().trim();
   }
   /**
    * Get projects from cache. If cache is empty, refresh first (e.g. first view open).
@@ -43189,25 +43216,37 @@ var BulletJournalPlugin = class extends import_obsidian15.Plugin {
     );
   }
   /**
-   * Check if a file is in any of the project directories
+   * Check if a file is in any of the project directories, or (when no dirs) if it has a task tag.
    */
   isDataFile(file) {
-    if (this.normalizedProjectDirectories.length === 0) {
-      return false;
+    if (this.normalizedProjectDirectories.length > 0) {
+      return this.isPathInDataDirectory(file.path);
     }
-    return this.isPathInDataDirectory(file.path);
+    return this.fileHasTaskTag(file);
+  }
+  fileHasTaskTag(file) {
+    const cache = this.app.metadataCache.getFileCache(file);
+    return this.cacheHasTaskTag(cache);
+  }
+  pathHasTaskTag(path) {
+    const cache = this.app.metadataCache.getCache(path);
+    return this.cacheHasTaskTag(cache);
+  }
+  cacheHasTaskTag(cache) {
+    if (!cache?.tags?.length) return false;
+    const tags = this.settings.taskTags ?? ["\u4EFB\u52A1", "task"];
+    const normalized = new Set(tags.map((t4) => this.normalizeTag(t4)));
+    return cache.tags.some((t4) => normalized.has(this.normalizeTag(t4.tag)));
   }
   /**
-   * Check if a path is within any of the project directories
+   * Check if a path is within any of the project directories, or (when no dirs) if that path had a task tag.
    */
   isPathInDataDirectory(filePath) {
-    if (this.normalizedProjectDirectories.length === 0) {
-      return false;
+    if (this.normalizedProjectDirectories.length > 0) {
+      const normalizedFilePath = filePath.replace(/\\/g, "/");
+      return this.normalizedProjectDirectories.some((dir) => normalizedFilePath.startsWith(dir));
     }
-    const normalizedFilePath = filePath.replace(/\\/g, "/");
-    return this.normalizedProjectDirectories.some((dir) => {
-      return normalizedFilePath.startsWith(dir);
-    });
+    return this.pathHasTaskTag(filePath);
   }
   /**
    * Get group ID for a project file path

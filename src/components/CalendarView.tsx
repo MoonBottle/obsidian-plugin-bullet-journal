@@ -441,16 +441,6 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
     setIsLoading(true);
 
     try {
-      const enabledDirs = plugin.settings.projectDirectories
-        .filter(d => d.enabled && d.path)
-        .map(d => d.path);
-
-      if (enabledDirs.length === 0) {
-        setMissingConfig(true);
-        new Notice(t('config').setDirectory);
-        setIsLoading(false);
-        return;
-      }
       setMissingConfig(false);
 
       const projects = await plugin.getCachedProjects();
@@ -532,7 +522,6 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
         calendarInstanceRef.current.destroy();
         calendarInstanceRef.current = null;
       }
-      parserRef.current = null;
     };
   }, []);
 

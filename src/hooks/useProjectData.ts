@@ -66,16 +66,6 @@ export const useProjectData = (options: UseProjectDataOptions = {}): UseProjectD
     setIsLoading(true);
 
     try {
-      const enabledDirs = plugin.settings.projectDirectories
-        .filter(d => d.enabled && d.path)
-        .map(d => d.path);
-
-      if (enabledDirs.length === 0) {
-        new Notice(t('config').setDirectory);
-        setIsLoading(false);
-        return;
-      }
-
       const loadedProjects = await plugin.getCachedProjects();
       setProjects(loadedProjects);
     } catch (error) {

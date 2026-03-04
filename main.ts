@@ -29,6 +29,8 @@ interface BulletJournalPluginSettings {
     hideCompleted: boolean;
     hideAbandoned: boolean;
   };
+  /** Tags used to discover project files when no project directories are configured (e.g. #任务, #task) */
+  taskTags?: string[];
 }
 
 const DEFAULT_SETTINGS: BulletJournalPluginSettings = {
@@ -40,7 +42,8 @@ const DEFAULT_SETTINGS: BulletJournalPluginSettings = {
   todoDock: {
     hideCompleted: false,
     hideAbandoned: false
-  }
+  },
+  taskTags: ['任务', 'task']
 };
 
 export default class BulletJournalPlugin extends Plugin {
@@ -248,6 +251,7 @@ export default class BulletJournalPlugin extends Plugin {
   /**
    * Update shared cache by parsing all project files. Call before triggerRefresh().
    * Uses per-file cache: only re-parses files whose mtime changed.
+   * When no project directories are configured, discovers files by taskTags (#任务, #task) via metadataCache.
    */
   async refreshCache(): Promise<void> {
     const dirConfigs: { path: string; groupId?: string }[] = [];
@@ -257,14 +261,48 @@ export default class BulletJournalPlugin extends Plugin {
       }
     }
     const enabledDirs = dirConfigs.map(d => d.path);
-    if (enabledDirs.length === 0) {
+
+    if (enabledDirs.length > 0) {
+      const parser = new MarkdownParser(enabledDirs, dirConfigs, this.app.vault);
+      try {
+        const fileList = await parser.getProjectFileList();
+        const nextProjects: Project[] = [];
+        for (const { filePath, dataDir, groupId, file } of fileList) {
+          const mtime = file.stat.mtime;
+          const cached = this.projectCache.get(filePath);
+          let project: Project | null;
+          if (cached && cached.mtime === mtime) {
+            project = cached.project;
+          } else {
+            project = await parser.parseProjectFile(filePath, dataDir, groupId, file);
+            this.projectCache.set(filePath, { project, mtime });
+          }
+          if (project) {
+            nextProjects.push(project);
+          }
+        }
+        for (const path of this.projectCache.keys()) {
+          if (!fileList.some(f => f.filePath === path)) {
+            this.projectCache.delete(path);
+          }
+        }
+        this.cachedProjects = nextProjects;
+      } catch (error) {
+        console.error('[BulletJournal] refreshCache error:', error);
+        this.cachedProjects = [];
+      }
+      return;
+    }
+
+    // No directories configured: discover by task tags
+    const fileList = await this.getProjectFilesByTag();
+    if (fileList.length === 0) {
       this.cachedProjects = [];
       this.projectCache.clear();
       return;
     }
-    const parser = new MarkdownParser(enabledDirs, dirConfigs, this.app.vault);
+    const parser = new MarkdownParser([], [], this.app.vault);
     try {
-      const fileList = await parser.getProjectFileList();
       const nextProjects: Project[] = [];
       for (const { filePath, dataDir, groupId, file } of fileList) {
         const mtime = file.stat.mtime;
@@ -280,7 +318,6 @@ export default class BulletJournalPlugin extends Plugin {
           nextProjects.push(project);
         }
       }
-      // Remove cache entries for files no longer in project directories
       for (const path of this.projectCache.keys()) {
         if (!fileList.some(f => f.filePath === path)) {
           this.projectCache.delete(path);
@@ -288,9 +325,35 @@ export default class BulletJournalPlugin extends Plugin {
       }
       this.cachedProjects = nextProjects;
     } catch (error) {
-      console.error('[BulletJournal] refreshCache error:', error);
+      console.error('[BulletJournal] refreshCache (tag) error:', error);
       this.cachedProjects = [];
     }
+  }
+
+  /**
+   * Get project files by scanning all markdown files and matching taskTags in metadataCache.
+   * Used when no project directories are configured.
+   */
+  private async getProjectFilesByTag(): Promise<{ filePath: string; dataDir: string; groupId?: string; file: TFile }[]> {
+    const tags = this.settings.taskTags ?? ['任务', 'task'];
+    const normalizedTags = new Set(tags.map(t => this.normalizeTag(t)));
+    const files = this.app.vault.getMarkdownFiles();
+    const result: { filePath: string; dataDir: string; groupId?: string; file: TFile }[] = [];
+
+    for (const file of files) {
+      const cache = this.app.metadataCache.getFileCache(file);
+      if (!cache?.tags) continue;
+      const hasTag = cache.tags.some((t: { tag: string }) => normalizedTags.has(this.normalizeTag(t.tag)));
+      if (!hasTag) continue;
+      const path = file.path.replace(/\\/g, '/');
+      const dataDir = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+      result.push({ filePath: file.path, dataDir, file });
+    }
+    return result;
+  }
+
+  private normalizeTag(tag: string): string {
+    return tag.replace(/^#/, '').toLowerCase().trim();
   }
 
   /**
@@ -375,29 +438,41 @@ export default class BulletJournalPlugin extends Plugin {
   }
 
   /**
-   * Check if a file is in any of the project directories
+   * Check if a file is in any of the project directories, or (when no dirs) if it has a task tag.
    */
   private isDataFile(file: TFile): boolean {
-    if (this.normalizedProjectDirectories.length === 0) {
-      return false;
+    if (this.normalizedProjectDirectories.length > 0) {
+      return this.isPathInDataDirectory(file.path);
     }
-    return this.isPathInDataDirectory(file.path);
+    return this.fileHasTaskTag(file);
+  }
+
+  private fileHasTaskTag(file: TFile): boolean {
+    const cache = this.app.metadataCache.getFileCache(file);
+    return this.cacheHasTaskTag(cache);
+  }
+
+  private pathHasTaskTag(path: string): boolean {
+    const cache = this.app.metadataCache.getCache(path);
+    return this.cacheHasTaskTag(cache);
+  }
+
+  private cacheHasTaskTag(cache: { tags?: { tag: string }[] } | null): boolean {
+    if (!cache?.tags?.length) return false;
+    const tags = this.settings.taskTags ?? ['任务', 'task'];
+    const normalized = new Set(tags.map(t => this.normalizeTag(t)));
+    return cache.tags.some((t: { tag: string }) => normalized.has(this.normalizeTag(t.tag)));
   }
 
   /**
-   * Check if a path is within any of the project directories
+   * Check if a path is within any of the project directories, or (when no dirs) if that path had a task tag.
    */
   private isPathInDataDirectory(filePath: string): boolean {
-    if (this.normalizedProjectDirectories.length === 0) {
-      return false;
+    if (this.normalizedProjectDirectories.length > 0) {
+      const normalizedFilePath = filePath.replace(/\\/g, '/');
+      return this.normalizedProjectDirectories.some(dir => normalizedFilePath.startsWith(dir));
     }
-    // Convert both paths to forward slash format for comparison
-    const normalizedFilePath = filePath.replace(/\\/g, '/');
-
-    // Check if the file path starts with any of the enabled project directories
-    return this.normalizedProjectDirectories.some(dir => {
-      return normalizedFilePath.startsWith(dir);
-    });
+    return this.pathHasTaskTag(filePath);
   }
 
   /**

@@ -145,6 +145,7 @@ export const en: Translations = {
   // Config hints
   config: {
     setDirectory: 'Please set at least one project directory in plugin settings',
+    setDirectoryOrTag: 'Configure a project directory, or add #任务 / #task tags to your notes',
   },
 
   // File menu

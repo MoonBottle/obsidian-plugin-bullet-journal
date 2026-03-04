@@ -66,21 +66,6 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
       return;
     }
 
-    const projectDirectories = plugin.settings.projectDirectories
-      .filter(d => d.enabled && d.path)
-      .map(d => d.path);
-
-    if (projectDirectories.length === 0) {
-      setGroupedItems({});
-      setTodayItems([]);
-      setTomorrowItems([]);
-      setCompletedItems([]);
-      setAbandonedItems([]);
-      setExpiredItems([]);
-      setLoading(false);
-      return;
-    }
-
     const allItems = await plugin.getCachedItems();
 
     const filteredItems = selectedGroup

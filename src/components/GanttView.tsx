@@ -226,14 +226,6 @@ export const GanttViewComponent = () => {
     if (!plugin) return;
     setIsLoading(true);
     try {
-      const enabledDirs = plugin.settings.projectDirectories
-        .filter(d => d.enabled && d.path)
-        .map(d => d.path);
-
-      if (enabledDirs.length === 0) {
-        new Notice(t('config').setDirectory);
-        return;
-      }
       const projects = await plugin.getCachedProjects();
       setProjectsData(projects);
     } catch (error) {

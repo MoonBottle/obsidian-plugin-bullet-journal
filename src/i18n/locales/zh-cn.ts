@@ -155,6 +155,7 @@ export const zhCN = {
   // 配置提示
   config: {
     setDirectory: '请在插件设置中配置至少一个项目目录',
+    setDirectoryOrTag: '请配置项目目录，或确保笔记中包含 #任务 / #task 标签',
   },
 
   // 文件菜单
