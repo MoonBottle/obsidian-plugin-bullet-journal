@@ -628,10 +628,15 @@
 
 /* Event Modal Styles - Three Card Design */
 .bullet-journal-event-modal {
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  padding: 0 24px 24px 24px;
   background-color: var(--background-primary);
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  width: 100% !important;
+  min-height: 100%;
+  box-shadow: none;
 }
 
 /* Modal overlay enhancement */
@@ -642,15 +647,32 @@
 
 .modal-container:has(.bullet-journal-event-modal) .modal {
   border-radius: 12px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
-  border: 1px solid var(--background-modifier-border) !important;
+  box-shadow: none !important;
+  border: none !important;
   min-width: 520px !important;
   max-width: 640px !important;
   width: auto !important;
+  padding: 0 !important;
+  overflow: hidden;
+  background-color: var(--background-primary) !important;
+}
+
+/* 消除 Obsidian 默认 modal 顶部空隙，让内容区顶到顶 */
+.modal-container:has(.bullet-journal-event-modal) .modal .bullet-journal-event-modal {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* 关闭按钮内移，不压住圆角 */
+.modal-container:has(.bullet-journal-event-modal) .modal > .clickable-icon,
+.modal-container:has(.bullet-journal-event-modal) .modal .modal-close-button {
+  right: 20px !important;
+  top: 20px !important;
 }
 
 .bullet-journal-modal-title {
   margin: 0 0 20px 0;
+  padding-top: 20px;
   font-size: 18px;
   font-weight: 600;
   line-height: 1.4;
@@ -740,6 +762,8 @@
 
 /* Level Tag Style - 与全天样式一致，无 hover/pointer */
 .bullet-journal-modal-tag-level {
+  display: inline-flex;
+  align-items: center;
   color: var(--tag-color);
   background-color: var(--tag-background);
   border: var(--tag-border-width) solid var(--tag-border-color);

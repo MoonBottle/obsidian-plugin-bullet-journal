@@ -73,6 +73,7 @@ export class EventDetailsModal extends Modal {
   }
 
   onOpen() {
+    this.titleEl.style.display = 'none';
     const { contentEl } = this;
     contentEl.addClass('bullet-journal-event-modal');
 

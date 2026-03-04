@@ -36618,6 +36618,7 @@ var init_EventDetailsModal = __esm({
         this.plugin = plugin;
       }
       onOpen() {
+        this.titleEl.style.display = "none";
         const { contentEl } = this;
         contentEl.addClass("bullet-journal-event-modal");
         contentEl.createEl("h2", { text: "\u4E8B\u9879\u8BE6\u60C5", cls: "bullet-journal-modal-title" });
