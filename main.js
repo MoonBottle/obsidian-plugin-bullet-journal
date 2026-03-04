@@ -51766,7 +51766,17 @@ var BulletJournalPlugin = class extends import_obsidian13.Plugin {
       this.openTodoSidebar();
     });
     this.addRibbonIcon("calendar", "\u5B50\u5F39\u7B14\u8BB0", (evt) => {
-      this.openView(this.settings.defaultView === "calendar" ? CALENDAR_VIEW_TYPE : PROJECT_VIEW_TYPE);
+      const menu = new import_obsidian13.Menu();
+      menu.addItem(
+        (item) => item.setTitle("\u65E5\u5386\u89C6\u56FE").setIcon("calendar").onClick(() => this.openView(CALENDAR_VIEW_TYPE))
+      );
+      menu.addItem(
+        (item) => item.setTitle("\u7518\u7279\u56FE\u89C6\u56FE").setIcon("git-commit").onClick(() => this.openView(GANTT_VIEW_TYPE))
+      );
+      menu.addItem(
+        (item) => item.setTitle("\u9879\u76EE\u89C6\u56FE").setIcon("folder").onClick(() => this.openView(PROJECT_VIEW_TYPE))
+      );
+      menu.showAtPosition({ x: evt.clientX, y: evt.clientY });
     });
     this.registerFileWatcher();
     this.registerEditorExtension(taskGutterPlugin);

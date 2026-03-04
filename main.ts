@@ -1,4 +1,4 @@
-import { App, Plugin, PluginManifest, PluginSettingTab, Setting, WorkspaceLeaf, TFile, TFolder, debounce, Notice } from 'obsidian';
+import { App, Plugin, PluginManifest, PluginSettingTab, Setting, WorkspaceLeaf, TFile, TFolder, debounce, Notice, Menu } from 'obsidian';
 import { ProjectView, PROJECT_VIEW_TYPE } from './src/views/ProjectView.tsx';
 import { CalendarView, CALENDAR_VIEW_TYPE } from './src/views/CalendarView.tsx';
 import { GanttView, GANTT_VIEW_TYPE } from './src/views/GanttView.tsx';
@@ -128,9 +128,28 @@ export default class BulletJournalPlugin extends Plugin {
       this.openTodoSidebar();
     });
 
-    // Add ribbon icon
+    // Add ribbon icon with menu
     this.addRibbonIcon('calendar', '子弹笔记', (evt) => {
-      this.openView(this.settings.defaultView === 'calendar' ? CALENDAR_VIEW_TYPE : PROJECT_VIEW_TYPE);
+      const menu = new Menu();
+      menu.addItem((item) =>
+        item
+          .setTitle('日历视图')
+          .setIcon('calendar')
+          .onClick(() => this.openView(CALENDAR_VIEW_TYPE))
+      );
+      menu.addItem((item) =>
+        item
+          .setTitle('甘特图视图')
+          .setIcon('git-commit')
+          .onClick(() => this.openView(GANTT_VIEW_TYPE))
+      );
+      menu.addItem((item) =>
+        item
+          .setTitle('项目视图')
+          .setIcon('folder')
+          .onClick(() => this.openView(PROJECT_VIEW_TYPE))
+      );
+      menu.showAtPosition({ x: evt.clientX, y: evt.clientY });
     });
 
     // Register file change listener
