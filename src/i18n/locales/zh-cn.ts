@@ -25,15 +25,6 @@ export const zhCN = {
       noPath: '未选择目录',
       dialogTitle: '选择项目目录',
     },
-    defaultView: {
-      title: '默认视图',
-      description: '打开插件时默认显示的视图',
-      options: {
-        project: '项目视图',
-        calendar: '日历视图',
-        gantt: '甘特图视图',
-      },
-    },
     lunchBreak: {
       title: '午休时间',
       description: '设置午休时间段，计算工作耗时时会自动减去午休时间',

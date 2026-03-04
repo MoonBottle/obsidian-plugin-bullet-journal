@@ -21,7 +21,6 @@ interface BulletJournalPluginSettings {
   projectDirectories: ProjectDirectory[];
   projectGroups: ProjectGroup[];
   defaultGroup: string;
-  defaultView: string;
   lunchBreakStart: string;
   lunchBreakEnd: string;
   todoDock: {
@@ -34,7 +33,6 @@ const DEFAULT_SETTINGS: BulletJournalPluginSettings = {
   projectDirectories: [],
   projectGroups: [],
   defaultGroup: '',
-  defaultView: 'calendar',
   lunchBreakStart: '12:00',
   lunchBreakEnd: '13:00',
   todoDock: {
@@ -502,19 +500,6 @@ class BulletJournalSettingTab extends PluginSettingTab {
           }
         }));
 
-    // Default View Setting
-    new Setting(containerEl)
-      .setName(t('settings').defaultView.title)
-      .setDesc(t('settings').defaultView.description)
-      .addDropdown(dropdown => dropdown
-        .addOption('project', t('settings').defaultView.options.project)
-        .addOption('calendar', t('settings').defaultView.options.calendar)
-        .addOption('gantt', t('settings').defaultView.options.gantt)
-        .setValue(this.plugin.settings.defaultView)
-        .onChange(async (value) => {
-          this.plugin.settings.defaultView = value;
-          await this.plugin.saveSettings();
-        }));
   }
 
   private renderDefaultGroupDropdown(container: HTMLElement): void {

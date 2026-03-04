@@ -21897,15 +21897,6 @@ var zhCN = {
       noPath: "\u672A\u9009\u62E9\u76EE\u5F55",
       dialogTitle: "\u9009\u62E9\u9879\u76EE\u76EE\u5F55"
     },
-    defaultView: {
-      title: "\u9ED8\u8BA4\u89C6\u56FE",
-      description: "\u6253\u5F00\u63D2\u4EF6\u65F6\u9ED8\u8BA4\u663E\u793A\u7684\u89C6\u56FE",
-      options: {
-        project: "\u9879\u76EE\u89C6\u56FE",
-        calendar: "\u65E5\u5386\u89C6\u56FE",
-        gantt: "\u7518\u7279\u56FE\u89C6\u56FE"
-      }
-    },
     lunchBreak: {
       title: "\u5348\u4F11\u65F6\u95F4",
       description: "\u8BBE\u7F6E\u5348\u4F11\u65F6\u95F4\u6BB5\uFF0C\u8BA1\u7B97\u5DE5\u4F5C\u8017\u65F6\u65F6\u4F1A\u81EA\u52A8\u51CF\u53BB\u5348\u4F11\u65F6\u95F4",
@@ -22084,15 +22075,6 @@ var en = {
       deleteButton: "Delete",
       noPath: "No directory selected",
       dialogTitle: "Select Project Directory"
-    },
-    defaultView: {
-      title: "Default View",
-      description: "Default view to open when launching the plugin",
-      options: {
-        project: "Project View",
-        calendar: "Calendar View",
-        gantt: "Gantt Chart View"
-      }
     }
   },
   // View titles
@@ -51696,7 +51678,6 @@ var DEFAULT_SETTINGS = {
   projectDirectories: [],
   projectGroups: [],
   defaultGroup: "",
-  defaultView: "calendar",
   lunchBreakStart: "12:00",
   lunchBreakEnd: "13:00",
   todoDock: {
@@ -52017,10 +51998,6 @@ var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
         this.plugin.settings.lunchBreakEnd = value;
         await this.plugin.saveSettings();
       }
-    }));
-    new import_obsidian13.Setting(containerEl).setName(t("settings").defaultView.title).setDesc(t("settings").defaultView.description).addDropdown((dropdown) => dropdown.addOption("project", t("settings").defaultView.options.project).addOption("calendar", t("settings").defaultView.options.calendar).addOption("gantt", t("settings").defaultView.options.gantt).setValue(this.plugin.settings.defaultView).onChange(async (value) => {
-      this.plugin.settings.defaultView = value;
-      await this.plugin.saveSettings();
     }));
   }
   renderDefaultGroupDropdown(container) {

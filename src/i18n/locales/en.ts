@@ -27,15 +27,6 @@ export const en: Translations = {
       noPath: 'No directory selected',
       dialogTitle: 'Select Project Directory',
     },
-    defaultView: {
-      title: 'Default View',
-      description: 'Default view to open when launching the plugin',
-      options: {
-        project: 'Project View',
-        calendar: 'Calendar View',
-        gantt: 'Gantt Chart View',
-      },
-    },
   },
 
   // View titles

@@ -50,13 +50,12 @@ An Obsidian assistant plugin for visualizing Bullet Journal project tasks with c
 
 1. **Data Directory**: Set the path to your Bullet Journal data directory
 2. **Default Year**: Set the default year to display
-3. **Default View**: Set the default view to open
 
 ## Usage
 
 ### Opening Views
 - **Command Palette**: Use Obsidian's command palette to open different views
-- **Ribbon Icon**: Click the calendar icon in the ribbon to open the default view
+- **Ribbon Icon**: Click the calendar icon in the ribbon to open a menu (Calendar, Gantt, or Project view)
 - **Keyboard Shortcuts**: Assign keyboard shortcuts to open views quickly
 
 ### Navigating Views
