@@ -51762,6 +51762,9 @@ var BulletJournalPlugin = class extends import_obsidian13.Plugin {
       callback: () => this.openTodoSidebar()
     });
     this.addSettingTab(new BulletJournalSettingTab(this.app, this));
+    this.addRibbonIcon("check-circle", "\u6253\u5F00\u5F85\u529E\u4E8B\u9879", (evt) => {
+      this.openTodoSidebar();
+    });
     this.addRibbonIcon("calendar", "\u5B50\u5F39\u7B14\u8BB0", (evt) => {
       this.openView(this.settings.defaultView === "calendar" ? CALENDAR_VIEW_TYPE : PROJECT_VIEW_TYPE);
     });
@@ -51975,23 +51978,8 @@ var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
     containerEl.createEl("h2", { text: t("settings").title });
-    new import_obsidian13.Setting(containerEl).setName(t("settings").defaultView.title).setDesc(t("settings").defaultView.description).addDropdown((dropdown) => dropdown.addOption("project", t("settings").defaultView.options.project).addOption("calendar", t("settings").defaultView.options.calendar).addOption("gantt", t("settings").defaultView.options.gantt).setValue(this.plugin.settings.defaultView).onChange(async (value) => {
-      this.plugin.settings.defaultView = value;
-      await this.plugin.saveSettings();
-    }));
-    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.title).setDesc(t("settings").lunchBreak.description).setHeading();
-    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.start.title).setDesc(t("settings").lunchBreak.start.description).addText((text) => text.setPlaceholder("12:00").setValue(this.plugin.settings.lunchBreakStart).onChange(async (value) => {
-      if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
-        this.plugin.settings.lunchBreakStart = value;
-        await this.plugin.saveSettings();
-      }
-    }));
-    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.end.title).setDesc(t("settings").lunchBreak.end.description).addText((text) => text.setPlaceholder("13:00").setValue(this.plugin.settings.lunchBreakEnd).onChange(async (value) => {
-      if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
-        this.plugin.settings.lunchBreakEnd = value;
-        await this.plugin.saveSettings();
-      }
-    }));
+    new import_obsidian13.Setting(containerEl).setName(t("settings").projectDirectories.title).setDesc(t("settings").projectDirectories.description).setHeading();
+    this.renderProjectDirectories(containerEl);
     new import_obsidian13.Setting(containerEl).setName(t("settings").projectGroups.title).setDesc(t("settings").projectGroups.description).setHeading().addButton((button) => button.setButtonText(t("settings").projectGroups.addButton).setCta().onClick(() => {
       const newGroup = {
         id: "group-" + Date.now(),
@@ -52007,8 +51995,23 @@ var BulletJournalSettingTab = class extends import_obsidian13.PluginSettingTab {
     this.renderProjectGroups(groupsContainer, containerEl);
     const defaultGroupContainer = containerEl.createDiv({ cls: "bullet-journal-default-group-container" });
     this.renderDefaultGroupDropdown(defaultGroupContainer);
-    new import_obsidian13.Setting(containerEl).setName(t("settings").projectDirectories.title).setDesc(t("settings").projectDirectories.description).setHeading();
-    this.renderProjectDirectories(containerEl);
+    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.title).setDesc(t("settings").lunchBreak.description).setHeading();
+    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.start.title).setDesc(t("settings").lunchBreak.start.description).addText((text) => text.setPlaceholder("12:00").setValue(this.plugin.settings.lunchBreakStart).onChange(async (value) => {
+      if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
+        this.plugin.settings.lunchBreakStart = value;
+        await this.plugin.saveSettings();
+      }
+    }));
+    new import_obsidian13.Setting(containerEl).setName(t("settings").lunchBreak.end.title).setDesc(t("settings").lunchBreak.end.description).addText((text) => text.setPlaceholder("13:00").setValue(this.plugin.settings.lunchBreakEnd).onChange(async (value) => {
+      if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
+        this.plugin.settings.lunchBreakEnd = value;
+        await this.plugin.saveSettings();
+      }
+    }));
+    new import_obsidian13.Setting(containerEl).setName(t("settings").defaultView.title).setDesc(t("settings").defaultView.description).addDropdown((dropdown) => dropdown.addOption("project", t("settings").defaultView.options.project).addOption("calendar", t("settings").defaultView.options.calendar).addOption("gantt", t("settings").defaultView.options.gantt).setValue(this.plugin.settings.defaultView).onChange(async (value) => {
+      this.plugin.settings.defaultView = value;
+      await this.plugin.saveSettings();
+    }));
   }
   renderDefaultGroupDropdown(container) {
     container.empty();

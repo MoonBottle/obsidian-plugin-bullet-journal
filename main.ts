@@ -123,6 +123,11 @@ export default class BulletJournalPlugin extends Plugin {
     // Add setting tab
     this.addSettingTab(new BulletJournalSettingTab(this.app, this));
 
+    // Add ribbon icon for todo sidebar (placed first to appear below in the sidebar)
+    this.addRibbonIcon('check-circle', '打开待办事项', (evt) => {
+      this.openTodoSidebar();
+    });
+
     // Add ribbon icon
     this.addRibbonIcon('calendar', '子弹笔记', (evt) => {
       this.openView(this.settings.defaultView === 'calendar' ? CALENDAR_VIEW_TYPE : PROJECT_VIEW_TYPE);
@@ -411,19 +416,41 @@ class BulletJournalSettingTab extends PluginSettingTab {
     // Header
     containerEl.createEl('h2', { text: t('settings').title });
 
-    // Default View Setting
+    // Project Directories Section
     new Setting(containerEl)
-      .setName(t('settings').defaultView.title)
-      .setDesc(t('settings').defaultView.description)
-      .addDropdown(dropdown => dropdown
-        .addOption('project', t('settings').defaultView.options.project)
-        .addOption('calendar', t('settings').defaultView.options.calendar)
-        .addOption('gantt', t('settings').defaultView.options.gantt)
-        .setValue(this.plugin.settings.defaultView)
-        .onChange(async (value) => {
-          this.plugin.settings.defaultView = value;
-          await this.plugin.saveSettings();
+      .setName(t('settings').projectDirectories.title)
+      .setDesc(t('settings').projectDirectories.description)
+      .setHeading();
+
+    this.renderProjectDirectories(containerEl);
+
+    // Project Groups Section
+    new Setting(containerEl)
+      .setName(t('settings').projectGroups.title)
+      .setDesc(t('settings').projectGroups.description)
+      .setHeading()
+      .addButton(button => button
+        .setButtonText(t('settings').projectGroups.addButton)
+        .setCta()
+        .onClick(() => {
+          const newGroup: ProjectGroup = {
+            id: 'group-' + Date.now(),
+            name: ''
+          };
+          this.plugin.settings.projectGroups.push(newGroup);
+          this.plugin.saveSettings();
+          this.renderProjectGroups(groupsContainer, containerEl);
+          this.renderDefaultGroupDropdown(defaultGroupContainer);
+          this.renderProjectDirectories(containerEl);
         }));
+
+    // Create a container for groups to ensure correct positioning
+    const groupsContainer = containerEl.createDiv({ cls: 'bullet-journal-groups-container' });
+    this.renderProjectGroups(groupsContainer, containerEl);
+
+    // Default Group Setting - use container for dynamic refresh
+    const defaultGroupContainer = containerEl.createDiv({ cls: 'bullet-journal-default-group-container' });
+    this.renderDefaultGroupDropdown(defaultGroupContainer);
 
     // Lunch Break Setting
     new Setting(containerEl)
@@ -459,41 +486,19 @@ class BulletJournalSettingTab extends PluginSettingTab {
           }
         }));
 
-    // Project Groups Section
+    // Default View Setting
     new Setting(containerEl)
-      .setName(t('settings').projectGroups.title)
-      .setDesc(t('settings').projectGroups.description)
-      .setHeading()
-      .addButton(button => button
-        .setButtonText(t('settings').projectGroups.addButton)
-        .setCta()
-        .onClick(() => {
-          const newGroup: ProjectGroup = {
-            id: 'group-' + Date.now(),
-            name: ''
-          };
-          this.plugin.settings.projectGroups.push(newGroup);
-          this.plugin.saveSettings();
-          this.renderProjectGroups(groupsContainer, containerEl);
-          this.renderDefaultGroupDropdown(defaultGroupContainer);
-          this.renderProjectDirectories(containerEl);
+      .setName(t('settings').defaultView.title)
+      .setDesc(t('settings').defaultView.description)
+      .addDropdown(dropdown => dropdown
+        .addOption('project', t('settings').defaultView.options.project)
+        .addOption('calendar', t('settings').defaultView.options.calendar)
+        .addOption('gantt', t('settings').defaultView.options.gantt)
+        .setValue(this.plugin.settings.defaultView)
+        .onChange(async (value) => {
+          this.plugin.settings.defaultView = value;
+          await this.plugin.saveSettings();
         }));
-
-    // Create a container for groups to ensure correct positioning
-    const groupsContainer = containerEl.createDiv({ cls: 'bullet-journal-groups-container' });
-    this.renderProjectGroups(groupsContainer, containerEl);
-
-    // Default Group Setting - use container for dynamic refresh
-    const defaultGroupContainer = containerEl.createDiv({ cls: 'bullet-journal-default-group-container' });
-    this.renderDefaultGroupDropdown(defaultGroupContainer);
-
-    // Project Directories Section
-    new Setting(containerEl)
-      .setName(t('settings').projectDirectories.title)
-      .setDesc(t('settings').projectDirectories.description)
-      .setHeading();
-
-    this.renderProjectDirectories(containerEl);
   }
 
   private renderDefaultGroupDropdown(container: HTMLElement): void {
