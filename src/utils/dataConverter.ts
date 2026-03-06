@@ -41,7 +41,8 @@ export class DataConverter {
         level: item.task?.level,
         filePath: item.project?.filePath,
         lineNumber: item.lineNumber,
-        projectGroupId: item.project?.groupId
+        projectGroupId: item.project?.groupId,
+        status: item.status
       };
     });
   }

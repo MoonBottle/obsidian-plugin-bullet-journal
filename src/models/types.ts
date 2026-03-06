@@ -53,6 +53,7 @@ export interface CalendarEvent {
   filePath?: string;
   lineNumber?: number;
   projectGroupId?: string;
+  status?: ItemStatus;
 }
 
 export interface GanttTask {

@@ -149,13 +149,23 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
 
   const handleEventContent = useCallback((info: any) => {
     const task = info.event.extendedProps.task;
+    const status = info.event.extendedProps.status;
     const viewType = info.view.type;
+
+    // 根据状态添加 emoji 标记
+    const getStatusEmoji = (itemStatus: string | undefined): string => {
+      if (itemStatus === 'completed') return '✅ ';
+      if (itemStatus === 'abandoned') return '❌ ';
+      return '';
+    };
+
+    const statusEmoji = getStatusEmoji(status);
 
     if (isListView(viewType) && task) {
       const container = document.createElement('div');
       container.className = 'fc-list-event-task';
       container.innerHTML = `
-        <div class="fc-list-event-title-main">${info.event.title}</div>
+        <div class="fc-list-event-title-main">${statusEmoji}${info.event.title}</div>
         <div class="fc-list-event-task-name">${task}</div>
       `;
       return { domNodes: [container] };
@@ -167,7 +177,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
           <div class="fc-event-title-container">
             <div class="fc-event-title fc-sticky">
               ${info.timeText ? `<span class="fc-event-time" style="margin-right: 4px;">${info.timeText}</span>` : ''}
-              ${info.event.title}
+              ${statusEmoji}${info.event.title}
               <span class="bullet-journal-event-task-inline">${task}</span>
             </div>
           </div>
@@ -181,7 +191,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
           <div class="fc-event-title-container">
             <div class="fc-event-title">
               ${info.timeText ? `<span class="fc-event-time" style="margin-right: 4px;">${info.timeText}</span>` : ''}
-              ${info.event.title}
+              ${statusEmoji}${info.event.title}
               <span class="bullet-journal-event-task-inline">${task}</span>
             </div>
           </div>
@@ -189,7 +199,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
       ` };
     }
 
-    return { html: `<div class="fc-event-title">${info.event.title}</div>` };
+    return { html: `<div class="fc-event-title">${statusEmoji}${info.event.title}</div>` };
   }, []);
 
   const snapTo15Minutes = useCallback((date: Date): Date => {
