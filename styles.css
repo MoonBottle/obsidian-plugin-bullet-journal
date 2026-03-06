@@ -807,9 +807,9 @@
 .bullet-journal-modal-tag-status-completed {
   display: inline-flex;
   align-items: center;
-  color: var(--text-success);
-  background-color: rgba(var(--background-modifier-success-rgb), 0.2);
-  border: var(--tag-border-width) solid var(--background-modifier-success);
+  color: var(--tag-color);
+  background-color: var(--tag-background);
+  border: var(--tag-border-width) solid var(--tag-border-color);
   font-size: var(--tag-size);
   font-weight: var(--tag-weight);
   padding: var(--tag-padding-y) var(--tag-padding-x);
@@ -820,9 +820,9 @@
 }
 
 .bullet-journal-modal-tag-status-completed:hover {
-  background-color: rgba(var(--background-modifier-success-rgb), 0.3);
-  border-color: var(--background-modifier-success);
-  color: var(--text-success);
+  background-color: var(--tag-background);
+  border-color: var(--tag-border-color);
+  color: var(--tag-color);
 }
 
 .bullet-journal-modal-tag-status-abandoned {
