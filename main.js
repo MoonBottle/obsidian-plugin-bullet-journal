@@ -37225,7 +37225,7 @@ var init_CalendarView = __esm({
         const getStatusEmoji = (itemStatus) => {
           if (itemStatus === "completed") return "\u2705 ";
           if (itemStatus === "abandoned") return "\u274C ";
-          return "";
+          return "\u23F3 ";
         };
         const statusEmoji = getStatusEmoji(status);
         if (isListView(viewType) && task) {

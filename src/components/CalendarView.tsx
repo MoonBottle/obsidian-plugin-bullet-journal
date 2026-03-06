@@ -157,7 +157,7 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
     const getStatusEmoji = (itemStatus: string | undefined): string => {
       if (itemStatus === 'completed') return '✅ ';
       if (itemStatus === 'abandoned') return '❌ ';
-      return '';
+      return '⏳ ';
     };
 
     const statusEmoji = getStatusEmoji(status);
