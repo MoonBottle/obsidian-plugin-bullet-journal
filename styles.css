@@ -782,6 +782,71 @@
   color: var(--tag-color);
 }
 
+/* Status Tag Styles */
+.bullet-journal-modal-tag-status-pending {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-accent);
+  background-color: rgba(var(--interactive-accent-rgb), 0.15);
+  border: var(--tag-border-width) solid var(--interactive-accent);
+  font-size: var(--tag-size);
+  font-weight: var(--tag-weight);
+  padding: var(--tag-padding-y) var(--tag-padding-x);
+  border-radius: var(--tag-radius);
+  white-space: nowrap;
+  margin-right: 2px;
+  cursor: default;
+}
+
+.bullet-journal-modal-tag-status-pending:hover {
+  background-color: rgba(var(--interactive-accent-rgb), 0.25);
+  border-color: var(--interactive-accent);
+  color: var(--text-accent);
+}
+
+.bullet-journal-modal-tag-status-completed {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-success);
+  background-color: rgba(var(--background-modifier-success-rgb), 0.2);
+  border: var(--tag-border-width) solid var(--background-modifier-success);
+  font-size: var(--tag-size);
+  font-weight: var(--tag-weight);
+  padding: var(--tag-padding-y) var(--tag-padding-x);
+  border-radius: var(--tag-radius);
+  white-space: nowrap;
+  margin-right: 2px;
+  cursor: default;
+}
+
+.bullet-journal-modal-tag-status-completed:hover {
+  background-color: rgba(var(--background-modifier-success-rgb), 0.3);
+  border-color: var(--background-modifier-success);
+  color: var(--text-success);
+}
+
+.bullet-journal-modal-tag-status-abandoned {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+  background-color: var(--background-modifier-form-field);
+  border: var(--tag-border-width) solid var(--background-modifier-border);
+  font-size: var(--tag-size);
+  font-weight: var(--tag-weight);
+  padding: var(--tag-padding-y) var(--tag-padding-x);
+  border-radius: var(--tag-radius);
+  white-space: nowrap;
+  margin-right: 2px;
+  cursor: default;
+  text-decoration: line-through;
+}
+
+.bullet-journal-modal-tag-status-abandoned:hover {
+  background-color: var(--background-modifier-form-field);
+  border-color: var(--background-modifier-border);
+  color: var(--text-muted);
+}
+
 /* Time Row with Icons */
 .bullet-journal-modal-time-row {
   display: flex;

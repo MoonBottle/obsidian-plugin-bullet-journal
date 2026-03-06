@@ -36713,6 +36713,17 @@ var init_EventDetailsModal = __esm({
         }
         if (this.details.hasItems && this.details.item) {
           const descRow = itemContent.createEl("div", { cls: "bullet-journal-modal-desc-row" });
+          if (this.details.status) {
+            const statusConfig = {
+              pending: { text: "\u5F85\u529E", cls: "bullet-journal-modal-tag-status-pending" },
+              completed: { text: "\u5DF2\u5B8C\u6210", cls: "bullet-journal-modal-tag-status-completed" },
+              abandoned: { text: "\u5DF2\u653E\u5F03", cls: "bullet-journal-modal-tag-status-abandoned" }
+            }[this.details.status];
+            descRow.createEl("span", {
+              text: statusConfig.text,
+              cls: statusConfig.cls
+            });
+          }
           descRow.createEl("span", { text: this.details.item, cls: "bullet-journal-modal-card-value" });
           createCopyButton(descRow, this.details.item);
         }
@@ -37184,7 +37195,8 @@ var init_CalendarView = __esm({
           itemLinks: info.event.extendedProps.itemLinks,
           hasItems: info.event.extendedProps.hasItems,
           filePath: info.event.extendedProps.filePath,
-          lineNumber: info.event.extendedProps.lineNumber
+          lineNumber: info.event.extendedProps.lineNumber,
+          status: info.event.extendedProps.status
         };
         new EventDetailsModal(app, details, plugin).open();
       }, [app, plugin, getGroupName]);
@@ -37405,7 +37417,8 @@ var init_CalendarView = __esm({
               itemLinks: extendedProps.itemLinks,
               hasItems: extendedProps.hasItems,
               filePath: extendedProps.filePath,
-              lineNumber: extendedProps.lineNumber
+              lineNumber: extendedProps.lineNumber,
+              status: extendedProps.status
             };
             new EventDetailsModal(app, details, plugin).open();
           }
@@ -51275,7 +51288,8 @@ var TodoSidebar = ({ onItemClick }) => {
         itemLinks: item.links,
         hasItems: true,
         filePath: item.project?.filePath,
-        lineNumber: item.lineNumber
+        lineNumber: item.lineNumber,
+        status: item.status
       }, plugin);
       modal.open();
     }
@@ -51399,7 +51413,8 @@ var TodoSidebar = ({ onItemClick }) => {
             itemLinks: item.links,
             hasItems: true,
             filePath: item.project?.filePath,
-            lineNumber: item.lineNumber
+            lineNumber: item.lineNumber,
+            status: item.status
           }, plugin);
           modal.open();
         }
@@ -51769,7 +51784,8 @@ var TaskButtonWidget = class extends import_view.WidgetType {
       hasItems: !isTaskLine,
       filePath: file.path,
       lineNumber: item.lineNumber,
-      fromEditor: true
+      fromEditor: true,
+      status: item.status
     }, plugin).open();
   }
   scanContext(view, currentLineNumber) {

@@ -27,6 +27,7 @@ export interface EventDetails {
   filePath?: string;
   lineNumber?: number;
   fromEditor?: boolean;
+  status?: 'pending' | 'completed' | 'abandoned';
 }
 
 const createCopyButton = (container: HTMLElement, value: string): HTMLButtonElement => {
@@ -194,9 +195,23 @@ export class EventDetailsModal extends Modal {
       }
     }
     
-    // 事项描述
+    // 事项描述和状态
     if (this.details.hasItems && this.details.item) {
       const descRow = itemContent.createEl('div', { cls: 'bullet-journal-modal-desc-row' });
+
+      // 状态放在左侧
+      if (this.details.status) {
+        const statusConfig = {
+          pending: { text: '待办', cls: 'bullet-journal-modal-tag-status-pending' },
+          completed: { text: '已完成', cls: 'bullet-journal-modal-tag-status-completed' },
+          abandoned: { text: '已放弃', cls: 'bullet-journal-modal-tag-status-abandoned' }
+        }[this.details.status];
+        descRow.createEl('span', {
+          text: statusConfig.text,
+          cls: statusConfig.cls
+        });
+      }
+
       descRow.createEl('span', { text: this.details.item, cls: 'bullet-journal-modal-card-value' });
       createCopyButton(descRow, this.details.item);
     }
@@ -204,6 +219,7 @@ export class EventDetailsModal extends Modal {
     // 事项链接
     if (this.details.itemLinks && this.details.itemLinks.length > 0) {
       const itemLinksRow = itemContent.createEl('div', { cls: 'bullet-journal-modal-card-row' });
+
       this.details.itemLinks.forEach(link => {
         const tag = itemLinksRow.createEl('a', {
           text: link.name,

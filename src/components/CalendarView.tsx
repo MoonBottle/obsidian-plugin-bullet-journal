@@ -112,7 +112,8 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
       itemLinks: info.event.extendedProps.itemLinks,
       hasItems: info.event.extendedProps.hasItems,
       filePath: info.event.extendedProps.filePath,
-      lineNumber: info.event.extendedProps.lineNumber
+      lineNumber: info.event.extendedProps.lineNumber,
+      status: info.event.extendedProps.status,
     };
 
     new EventDetailsModal(app, details, plugin).open();
@@ -382,7 +383,8 @@ export const CalendarViewComponent = forwardRef((_, ref) => {
           itemLinks: extendedProps.itemLinks,
           hasItems: extendedProps.hasItems,
           filePath: extendedProps.filePath,
-          lineNumber: extendedProps.lineNumber
+          lineNumber: extendedProps.lineNumber,
+          status: extendedProps.status,
         };
         new EventDetailsModal(app, details, plugin).open();
       }

@@ -144,6 +144,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
         hasItems: true,
         filePath: item.project?.filePath,
         lineNumber: item.lineNumber,
+        status: item.status,
       }, plugin);
       modal.open();
     }
@@ -289,6 +290,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
             hasItems: true,
             filePath: item.project?.filePath,
             lineNumber: item.lineNumber,
+            status: item.status,
           }, plugin);
           modal.open();
         }

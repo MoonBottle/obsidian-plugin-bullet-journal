@@ -81,7 +81,8 @@ class TaskButtonWidget extends WidgetType {
       hasItems: !isTaskLine,
       filePath: file.path,
       lineNumber: item.lineNumber,
-      fromEditor: true
+      fromEditor: true,
+      status: item.status,
     }, plugin).open();
   }
 
