@@ -387,65 +387,90 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
     }
   }, [setSelectedGroup]);
 
-  const renderItem = (item: Item, showActions: boolean = true) => (
-    <div
-      key={item.id}
-      className={`bullet-journal-todo-item ${item.status === 'completed' ? 'status-completed' : ''} ${item.status === 'abandoned' ? 'status-abandoned' : ''}`}
-      onClick={() => handleItemClick(item)}
-      onContextMenu={(e) => handleContextMenu(e, item)}
-    >
-      <div className="bullet-journal-todo-item-content">
-        <div className="bullet-journal-todo-item-header">
-          <span className="bullet-journal-todo-item-time">
-            {formatTimeRange(item.startDateTime, item.endDateTime) || todoTexts.allDay}
-          </span>
-          <span className="bullet-journal-todo-item-project">
-            {item.project?.name}
-          </span>
-          {getGroupName(item.project?.groupId ?? '') ? (
-            <span className="bullet-journal-todo-item-group">
-              {getGroupName(item.project?.groupId ?? '')}
+  type GroupType = 'expired' | 'today' | 'tomorrow' | 'future' | 'completed' | 'abandoned';
+
+  const renderItem = (item: Item, groupType: GroupType) => {
+    // 根据分组类型决定显示哪些操作按钮
+    const showActions = groupType !== 'completed' && groupType !== 'abandoned';
+    const showMigrateToday = groupType === 'expired';
+    const showMigrateTomorrow = groupType === 'today' || groupType === 'tomorrow' || groupType === 'future';
+
+    return (
+      <div
+        key={item.id}
+        className={`bullet-journal-todo-item ${item.status === 'completed' ? 'status-completed' : ''} ${item.status === 'abandoned' ? 'status-abandoned' : ''}`}
+        onClick={() => handleItemClick(item)}
+        onContextMenu={(e) => handleContextMenu(e, item)}
+      >
+        <div className="bullet-journal-todo-item-content">
+          <div className="bullet-journal-todo-item-header">
+            <span className="bullet-journal-todo-item-time">
+              {formatTimeRange(item.startDateTime, item.endDateTime) || todoTexts.allDay}
             </span>
-          ) : null}
+            <span className="bullet-journal-todo-item-project">
+              {item.project?.name}
+            </span>
+            {getGroupName(item.project?.groupId ?? '') ? (
+              <span className="bullet-journal-todo-item-group">
+                {getGroupName(item.project?.groupId ?? '')}
+              </span>
+            ) : null}
+          </div>
+          <div className="bullet-journal-todo-item-task">
+            {item.task?.name}
+          </div>
+          <div className="bullet-journal-todo-item-text">
+            {item.content}
+          </div>
         </div>
-        <div className="bullet-journal-todo-item-task">
-          {item.task?.name}
-        </div>
-        <div className="bullet-journal-todo-item-text">
-          {item.content}
-        </div>
-      </div>
-      {showActions && item.status !== 'completed' && item.status !== 'abandoned' && (
         <div className="bullet-journal-todo-item-actions">
-          <button
-            className="bullet-journal-todo-action-btn"
-            onClick={(e) => handleDone(item, e)}
-            title={todoTexts.done}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-          </button>
-          <button
-            className="bullet-journal-todo-action-btn"
-            onClick={(e) => handleMigrate(item, e)}
-            title={todoTexts.migrate}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </button>
-          <button
-            className="bullet-journal-todo-action-btn"
-            onClick={(e) => handleAbandon(item, e)}
-            title={todoTexts.abandon}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+          {showActions && (
+            <>
+              <button
+                className="bullet-journal-todo-action-btn"
+                onClick={(e) => handleDone(item, e)}
+                title={todoTexts.done}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              {showMigrateToday && (
+                <button
+                  className="bullet-journal-todo-action-btn"
+                  onClick={(e) => handleMigrateToday(item, e)}
+                  title={todoTexts.migrateToday}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                  </svg>
+                </button>
+              )}
+              {showMigrateTomorrow && (
+                <button
+                  className="bullet-journal-todo-action-btn"
+                  onClick={(e) => handleMigrate(item, e)}
+                  title={todoTexts.migrate}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </button>
+              )}
+              <button
+                className="bullet-journal-todo-action-btn"
+                onClick={(e) => handleAbandon(item, e)}
+                title={todoTexts.abandon}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </>
+          )}
           <button
             className="bullet-journal-todo-action-btn"
             onClick={(e) => handleOpenModal(item, e)}
@@ -470,11 +495,11 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
             </svg>
           </button>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    );
+  };
 
-  const renderSection = (title: string, items: Item[], sectionKey: keyof typeof collapsedSections, showActions: boolean = true) => {
+  const renderSection = (title: string, items: Item[], sectionKey: keyof typeof collapsedSections, groupType: GroupType) => {
     if (items.length === 0) return null;
 
     return (
@@ -495,7 +520,7 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
         </div>
         {!collapsedSections[sectionKey] && (
           <div className="bullet-journal-todo-items">
-            {items.map(item => renderItem(item, showActions))}
+            {items.map(item => renderItem(item, groupType))}
           </div>
         )}
       </div>
@@ -574,19 +599,19 @@ export const TodoSidebar: React.FC<TodoSidebarProps> = ({ onItemClick }) => {
           </div>
         ) : null}
         <div className="bullet-journal-todo-content">
-          {renderSection(todoTexts.expired || '已过期', expiredItems, 'expired')}
-          
-          {renderSection(todoTexts.today || '今天', todayItems, 'today')}
-          
-          {renderSection(todoTexts.tomorrow || '明天', tomorrowItems, 'tomorrow')}
-          
-          {sortedDates.filter(d => d !== getTodayISO() && d !== getTomorrowDate()).map(date => 
-            renderSection(formatDateLabel(date, todoTexts.today, todoTexts.tomorrow), groupedItems[date], date as any, true)
+          {renderSection(todoTexts.expired || '已过期', expiredItems, 'expired', 'expired')}
+
+          {renderSection(todoTexts.today || '今天', todayItems, 'today', 'today')}
+
+          {renderSection(todoTexts.tomorrow || '明天', tomorrowItems, 'tomorrow', 'tomorrow')}
+
+          {sortedDates.filter(d => d !== getTodayISO() && d !== getTomorrowDate()).map(date =>
+            renderSection(formatDateLabel(date, todoTexts.today, todoTexts.tomorrow), groupedItems[date], date as any, 'future')
           )}
-          
-          {!hideCompleted && renderSection(todoTexts.completed || '已完成', completedItems, 'completed', false)}
-          
-          {!hideAbandoned && renderSection(todoTexts.abandoned || '已放弃', abandonedItems, 'abandoned', false)}
+
+          {!hideCompleted && renderSection(todoTexts.completed || '已完成', completedItems, 'completed', 'completed')}
+
+          {!hideAbandoned && renderSection(todoTexts.abandoned || '已放弃', abandonedItems, 'abandoned', 'abandoned')}
         </div>
       </div>
     </div>

@@ -51471,89 +51471,108 @@ var TodoSidebar = ({ onItemClick }) => {
       setSelectedGroup(e3.target.value);
     }
   }, [setSelectedGroup]);
-  const renderItem = (item, showActions = true) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(
-    "div",
-    {
-      className: `bullet-journal-todo-item ${item.status === "completed" ? "status-completed" : ""} ${item.status === "abandoned" ? "status-abandoned" : ""}`,
-      onClick: () => handleItemClick(item),
-      onContextMenu: (e3) => handleContextMenu(e3, item),
-      children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-item-content", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-item-header", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-item-time", children: formatTimeRange(item.startDateTime, item.endDateTime) || todoTexts.allDay }),
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-item-project", children: item.project?.name }),
-            getGroupName(item.project?.groupId ?? "") ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-item-group", children: getGroupName(item.project?.groupId ?? "") }) : null
+  const renderItem = (item, groupType) => {
+    const showActions = groupType !== "completed" && groupType !== "abandoned";
+    const showMigrateToday = groupType === "expired";
+    const showMigrateTomorrow = groupType === "today" || groupType === "tomorrow" || groupType === "future";
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(
+      "div",
+      {
+        className: `bullet-journal-todo-item ${item.status === "completed" ? "status-completed" : ""} ${item.status === "abandoned" ? "status-abandoned" : ""}`,
+        onClick: () => handleItemClick(item),
+        onContextMenu: (e3) => handleContextMenu(e3, item),
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-item-content", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-item-header", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-item-time", children: formatTimeRange(item.startDateTime, item.endDateTime) || todoTexts.allDay }),
+              /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-item-project", children: item.project?.name }),
+              getGroupName(item.project?.groupId ?? "") ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "bullet-journal-todo-item-group", children: getGroupName(item.project?.groupId ?? "") }) : null
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-item-task", children: item.task?.name }),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-item-text", children: item.content })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-item-task", children: item.task?.name }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-item-text", children: item.content })
-        ] }),
-        showActions && item.status !== "completed" && item.status !== "abandoned" && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-item-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
-            "button",
-            {
-              className: "bullet-journal-todo-action-btn",
-              onClick: (e3) => handleDone(item, e3),
-              title: todoTexts.done,
-              children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "20 6 9 17 4 12" }) })
-            }
-          ),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
-            "button",
-            {
-              className: "bullet-journal-todo-action-btn",
-              onClick: (e3) => handleMigrate(item, e3),
-              title: todoTexts.migrate,
-              children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "5", y1: "12", x2: "19", y2: "12" }),
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "12 5 19 12 12 19" })
-              ] })
-            }
-          ),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
-            "button",
-            {
-              className: "bullet-journal-todo-action-btn",
-              onClick: (e3) => handleAbandon(item, e3),
-              title: todoTexts.abandon,
-              children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
-              ] })
-            }
-          ),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
-            "button",
-            {
-              className: "bullet-journal-todo-action-btn",
-              onClick: (e3) => handleOpenModal(item, e3),
-              title: "\u67E5\u770B\u8BE6\u60C5",
-              children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("circle", { cx: "12", cy: "12", r: "10" }),
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "12", y1: "16", x2: "12", y2: "12" }),
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "12", y1: "8", x2: "12.01", y2: "8" })
-              ] })
-            }
-          ),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
-            "button",
-            {
-              className: "bullet-journal-todo-action-btn",
-              onClick: (e3) => handleOpenCalendar(item, e3),
-              title: "\u67E5\u770B\u65E5\u5386",
-              children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("rect", { x: "3", y: "4", width: "18", height: "18", rx: "2", ry: "2" }),
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "16", y1: "2", x2: "16", y2: "6" }),
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "8", y1: "2", x2: "8", y2: "6" }),
-                /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "3", y1: "10", x2: "21", y2: "10" })
-              ] })
-            }
-          )
-        ] })
-      ]
-    },
-    item.id
-  );
-  const renderSection = (title, items, sectionKey, showActions = true) => {
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-item-actions", children: [
+            showActions && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+                "button",
+                {
+                  className: "bullet-journal-todo-action-btn",
+                  onClick: (e3) => handleDone(item, e3),
+                  title: todoTexts.done,
+                  children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "20 6 9 17 4 12" }) })
+                }
+              ),
+              showMigrateToday && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+                "button",
+                {
+                  className: "bullet-journal-todo-action-btn",
+                  onClick: (e3) => handleMigrateToday(item, e3),
+                  title: todoTexts.migrateToday,
+                  children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "19", y1: "12", x2: "5", y2: "12" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "12 19 5 12 12 5" })
+                  ] })
+                }
+              ),
+              showMigrateTomorrow && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+                "button",
+                {
+                  className: "bullet-journal-todo-action-btn",
+                  onClick: (e3) => handleMigrate(item, e3),
+                  title: todoTexts.migrate,
+                  children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "5", y1: "12", x2: "19", y2: "12" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polyline", { points: "12 5 19 12 12 19" })
+                  ] })
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+                "button",
+                {
+                  className: "bullet-journal-todo-action-btn",
+                  onClick: (e3) => handleAbandon(item, e3),
+                  title: todoTexts.abandon,
+                  children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
+                  ] })
+                }
+              )
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+              "button",
+              {
+                className: "bullet-journal-todo-action-btn",
+                onClick: (e3) => handleOpenModal(item, e3),
+                title: "\u67E5\u770B\u8BE6\u60C5",
+                children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("circle", { cx: "12", cy: "12", r: "10" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "12", y1: "16", x2: "12", y2: "12" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "12", y1: "8", x2: "12.01", y2: "8" })
+                ] })
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+              "button",
+              {
+                className: "bullet-journal-todo-action-btn",
+                onClick: (e3) => handleOpenCalendar(item, e3),
+                title: "\u67E5\u770B\u65E5\u5386",
+                children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { xmlns: "http://www.w3.org/2000/svg", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("rect", { x: "3", y: "4", width: "18", height: "18", rx: "2", ry: "2" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "16", y1: "2", x2: "16", y2: "6" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "8", y1: "2", x2: "8", y2: "6" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "3", y1: "10", x2: "21", y2: "10" })
+                ] })
+              }
+            )
+          ] })
+        ]
+      },
+      item.id
+    );
+  };
+  const renderSection = (title, items, sectionKey, groupType) => {
     if (items.length === 0) return null;
     return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-section", children: [
       /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-section-label clickable", onClick: () => toggleSection(sectionKey), children: [
@@ -51565,7 +51584,7 @@ var TodoSidebar = ({ onItemClick }) => {
           ")"
         ] })
       ] }),
-      !collapsedSections[sectionKey] && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-items", children: items.map((item) => renderItem(item, showActions)) })
+      !collapsedSections[sectionKey] && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "bullet-journal-todo-items", children: items.map((item) => renderItem(item, groupType)) })
     ] }, sectionKey);
   };
   if (loading) {
@@ -51632,14 +51651,14 @@ var TodoSidebar = ({ onItemClick }) => {
         }
       ) }) : null,
       /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "bullet-journal-todo-content", children: [
-        renderSection(todoTexts.expired || "\u5DF2\u8FC7\u671F", expiredItems, "expired"),
-        renderSection(todoTexts.today || "\u4ECA\u5929", todayItems, "today"),
-        renderSection(todoTexts.tomorrow || "\u660E\u5929", tomorrowItems, "tomorrow"),
+        renderSection(todoTexts.expired || "\u5DF2\u8FC7\u671F", expiredItems, "expired", "expired"),
+        renderSection(todoTexts.today || "\u4ECA\u5929", todayItems, "today", "today"),
+        renderSection(todoTexts.tomorrow || "\u660E\u5929", tomorrowItems, "tomorrow", "tomorrow"),
         sortedDates.filter((d2) => d2 !== getTodayISO() && d2 !== getTomorrowDate()).map(
-          (date) => renderSection(formatDateLabel(date, todoTexts.today, todoTexts.tomorrow), groupedItems[date], date, true)
+          (date) => renderSection(formatDateLabel(date, todoTexts.today, todoTexts.tomorrow), groupedItems[date], date, "future")
         ),
-        !hideCompleted && renderSection(todoTexts.completed || "\u5DF2\u5B8C\u6210", completedItems, "completed", false),
-        !hideAbandoned && renderSection(todoTexts.abandoned || "\u5DF2\u653E\u5F03", abandonedItems, "abandoned", false)
+        !hideCompleted && renderSection(todoTexts.completed || "\u5DF2\u5B8C\u6210", completedItems, "completed", "completed"),
+        !hideAbandoned && renderSection(todoTexts.abandoned || "\u5DF2\u653E\u5F03", abandonedItems, "abandoned", "abandoned")
       ] })
     ] })
   ] });
