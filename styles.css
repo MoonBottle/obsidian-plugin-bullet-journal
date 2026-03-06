@@ -782,69 +782,15 @@
   color: var(--tag-color);
 }
 
-/* Status Tag Styles */
-.bullet-journal-modal-tag-status-pending {
+/* Status Text Style (simple, no tag styling) */
+.bullet-journal-modal-status-text {
   display: inline-flex;
   align-items: center;
-  color: var(--tag-color);
-  background-color: var(--tag-background);
-  border: var(--tag-border-width) solid var(--tag-border-color);
-  font-size: var(--tag-size);
-  font-weight: var(--tag-weight);
-  padding: var(--tag-padding-y) var(--tag-padding-x);
-  border-radius: var(--tag-radius);
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+  font-weight: 500;
+  margin-right: 8px;
   white-space: nowrap;
-  margin-right: 2px;
-  cursor: default;
-}
-
-.bullet-journal-modal-tag-status-pending:hover {
-  background-color: var(--tag-background);
-  border-color: var(--tag-border-color);
-  color: var(--tag-color);
-}
-
-.bullet-journal-modal-tag-status-completed {
-  display: inline-flex;
-  align-items: center;
-  color: var(--tag-color);
-  background-color: var(--tag-background);
-  border: var(--tag-border-width) solid var(--tag-border-color);
-  font-size: var(--tag-size);
-  font-weight: var(--tag-weight);
-  padding: var(--tag-padding-y) var(--tag-padding-x);
-  border-radius: var(--tag-radius);
-  white-space: nowrap;
-  margin-right: 2px;
-  cursor: default;
-}
-
-.bullet-journal-modal-tag-status-completed:hover {
-  background-color: var(--tag-background);
-  border-color: var(--tag-border-color);
-  color: var(--tag-color);
-}
-
-.bullet-journal-modal-tag-status-abandoned {
-  display: inline-flex;
-  align-items: center;
-  color: var(--text-muted);
-  background-color: var(--background-modifier-form-field);
-  border: var(--tag-border-width) solid var(--background-modifier-border);
-  font-size: var(--tag-size);
-  font-weight: var(--tag-weight);
-  padding: var(--tag-padding-y) var(--tag-padding-x);
-  border-radius: var(--tag-radius);
-  white-space: nowrap;
-  margin-right: 2px;
-  cursor: default;
-  text-decoration: line-through;
-}
-
-.bullet-journal-modal-tag-status-abandoned:hover {
-  background-color: var(--background-modifier-form-field);
-  border-color: var(--background-modifier-border);
-  color: var(--text-muted);
 }
 
 /* Time Row with Icons */

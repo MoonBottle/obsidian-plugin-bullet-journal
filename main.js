@@ -36714,14 +36714,14 @@ var init_EventDetailsModal = __esm({
         if (this.details.hasItems && this.details.item) {
           const descRow = itemContent.createEl("div", { cls: "bullet-journal-modal-desc-row" });
           if (this.details.status) {
-            const statusConfig = {
-              pending: { text: "\u5F85\u529E", cls: "bullet-journal-modal-tag-status-pending" },
-              completed: { text: "\u5DF2\u5B8C\u6210", cls: "bullet-journal-modal-tag-status-completed" },
-              abandoned: { text: "\u5DF2\u653E\u5F03", cls: "bullet-journal-modal-tag-status-abandoned" }
+            const statusText = {
+              pending: "\u23F3 \u5F85\u529E",
+              completed: "\u2705 \u5DF2\u5B8C\u6210",
+              abandoned: "\u274C \u5DF2\u653E\u5F03"
             }[this.details.status];
             descRow.createEl("span", {
-              text: statusConfig.text,
-              cls: statusConfig.cls
+              text: statusText,
+              cls: "bullet-journal-modal-status-text"
             });
           }
           descRow.createEl("span", { text: this.details.item, cls: "bullet-journal-modal-card-value" });

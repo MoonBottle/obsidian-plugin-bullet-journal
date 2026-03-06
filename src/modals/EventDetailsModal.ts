@@ -201,14 +201,14 @@ export class EventDetailsModal extends Modal {
 
       // 状态放在左侧
       if (this.details.status) {
-        const statusConfig = {
-          pending: { text: '待办', cls: 'bullet-journal-modal-tag-status-pending' },
-          completed: { text: '已完成', cls: 'bullet-journal-modal-tag-status-completed' },
-          abandoned: { text: '已放弃', cls: 'bullet-journal-modal-tag-status-abandoned' }
+        const statusText = {
+          pending: '⏳ 待办',
+          completed: '✅ 已完成',
+          abandoned: '❌ 已放弃'
         }[this.details.status];
         descRow.createEl('span', {
-          text: statusConfig.text,
-          cls: statusConfig.cls
+          text: statusText,
+          cls: 'bullet-journal-modal-status-text'
         });
       }
 
